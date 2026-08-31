@@ -1,0 +1,3 @@
+[submodule "Assets/_Modules/UCExtension"]
+	path = Assets/_Modules/UCExtension
+	url = https://gitlab.com/luongnd28200/unitycommonextension.git
