@@ -1,0 +1,94 @@
+﻿/* container hàng */
+.grid-row {
+   /*  flex-direction: row; */
+    margin-bottom: 2px;
+}
+
+/* offset cho hàng chẵn/lẻ để tạo tổ ong */
+.row-offset {
+    margin-left: 20px;
+}
+
+/* cell mặc định */
+.grid-cell {
+    width: 40px;
+    height: 40px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+
+    background-color: #222;
+
+    border-width: 1px;
+    border-color: #666;
+    border-radius: 6px; /* dùng radius giả hex nếu cần */
+}
+
+/* cell bật */
+.grid-cell.active {
+    background-color: #4caf50;
+}
+
+/* cell tắt */
+.grid-cell.inactive {
+    background-color: #333;
+}
+
+#title {
+    font-size: 18px;
+    margin-bottom: 10px;
+    -unity-font-style: bold;
+}
+
+#nav-container {
+    flex-direction: row;
+    margin-bottom: 10px;
+    width: 320px;
+}
+
+#index-field {
+    width: 30px;
+}
+
+#action-container {
+    flex-direction: row;
+    margin-bottom: 10px;
+    width: 320px;
+}
+
+#grid-container {
+    width: 320px;
+}
+
+Button {
+    background-color: rgb(51, 51, 51);
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-width: 1px ;
+}
+
+Button:hover {
+    background-color: rgb(77, 77, 77);
+}
+
+.classic-mode-box {
+    border-width: 1px;
+    border-color: #ccc;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #2d2d2d;
+    width: 325px;
+}
+
+.classic-mode-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+}
+
+.classic-mode-field {
+    margin-top: 5px;
+}
