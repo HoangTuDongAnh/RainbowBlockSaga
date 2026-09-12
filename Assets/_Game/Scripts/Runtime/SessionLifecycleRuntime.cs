@@ -1,31 +1,45 @@
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.System;
+using System;
 using RainbowBlockSaga.Gameplay.Session;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Runtime session lifecycle controller.
-    /// GameSession is authoritative for Classic NoValidMoves. SessionEnded plus a runtime safety check guarantees the end flow is presented.
+    /// Owns the Classic no-valid-moves lifecycle.
+    /// Popup/end presentation is delegated through IGameEndPresentation.
     /// </summary>
     public class SessionLifecycleRuntime : MonoBehaviour
     {
         [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
-        [SerializeField] LevelManager levelManager;
+
+        [FormerlySerializedAs("levelManager")]
+        [SerializeField] MonoBehaviour endPresentationSource;
+
+        IGameEndPresentation endPresentation;
 
         GameSession observedSession;
         GameSessionResult pendingResult;
         bool losePresented;
 
+        void Awake()
+        {
+            endPresentation =
+                endPresentationSource as IGameEndPresentation;
+
+            if (endPresentation == null)
+                throw new InvalidOperationException(
+                    "SessionLifecycleRuntime requires an IGameEndPresentation source.");
+        }
+
         void OnEnable()
         {
             sessionRuntime.SessionCreated += OnSessionCreated;
             sessionRuntime.SessionEnded += OnSessionEnded;
-            LevelManager.ExternalClassicLifecycleEnabled = true;
+
+            endPresentation?.SetRuntimeLifecycleOwnership(true);
 
             BindResolveRuntime();
 
@@ -37,7 +51,8 @@ namespace RainbowBlockSaga.Runtime
         {
             sessionRuntime.SessionCreated -= OnSessionCreated;
             sessionRuntime.SessionEnded -= OnSessionEnded;
-            LevelManager.ExternalClassicLifecycleEnabled = false;
+
+            endPresentation?.SetRuntimeLifecycleOwnership(false);
 
             var resolveRuntime = ResolveScoreRuntime.Current;
             if (resolveRuntime != null)
@@ -59,11 +74,12 @@ namespace RainbowBlockSaga.Runtime
             if (observedSession != session)
                 OnSessionCreated(session);
 
-            // Keep Session.Queue aligned with the visible tray, then re-evaluate.
-            // This also guarantees the no-valid-moves flow after the final placement.
+            var state =
+                sessionRuntime.CurrentPresentationState;
+
             if (!session.IsEnded &&
-                (EventManager.GameStatus == EGameState.Playing ||
-                 EventManager.GameStatus == EGameState.Tutorial))
+                (state == GameplaySessionState.Playing ||
+                 state == GameplaySessionState.Tutorial))
             {
                 sessionRuntime.SynchronizeQueueFromVisualDecks();
                 session.EvaluateEndState();
@@ -71,7 +87,8 @@ namespace RainbowBlockSaga.Runtime
 
             if (session.IsEnded &&
                 session.Result != null &&
-                session.Result.Reason == GameSessionEndReason.NoValidMoves &&
+                session.Result.Reason ==
+                    GameSessionEndReason.NoValidMoves &&
                 !losePresented)
             {
                 QueueOrPresent(session.Result);
@@ -97,7 +114,8 @@ namespace RainbowBlockSaga.Runtime
 
         void OnSessionEnded(GameSessionResult result)
         {
-            if (result.Reason != GameSessionEndReason.NoValidMoves)
+            if (result.Reason !=
+                GameSessionEndReason.NoValidMoves)
                 return;
 
             QueueOrPresent(result);
@@ -105,16 +123,15 @@ namespace RainbowBlockSaga.Runtime
 
         void QueueOrPresent(GameSessionResult result)
         {
-            if (losePresented)
-                return;
-
-            // Runtime currently owns the Classic no-valid-moves lifecycle.
-            // Other modes keep their own target/timer lifecycle for now.
-            if (levelManager.GetGameMode() != EGameMode.Classic)
+            if (losePresented ||
+                endPresentation == null ||
+                !endPresentation.IsClassicMode)
                 return;
 
             var resolveRuntime = ResolveScoreRuntime.Current;
-            if (resolveRuntime != null && resolveRuntime.IsPresenting)
+
+            if (resolveRuntime != null &&
+                resolveRuntime.IsPresenting)
             {
                 pendingResult = result;
                 return;
@@ -125,11 +142,13 @@ namespace RainbowBlockSaga.Runtime
 
         void OnPresentationCompleted()
         {
-            if (pendingResult == null || losePresented)
+            if (pendingResult == null ||
+                losePresented)
                 return;
 
             var result = pendingResult;
             pendingResult = null;
+
             PresentLose(result);
         }
 
@@ -141,9 +160,11 @@ namespace RainbowBlockSaga.Runtime
             losePresented = true;
 
             Debug.Log(
-                $"Rainbow Block Saga no-valid-moves: presenting original end flow, score={result.Score}");
+                "Rainbow Blocks Saga no-valid-moves: " +
+                "presenting end flow, score=" +
+                result.Score);
 
-            levelManager.PresentExternalLose();
+            endPresentation.PresentNoValidMoves();
         }
     }
 }

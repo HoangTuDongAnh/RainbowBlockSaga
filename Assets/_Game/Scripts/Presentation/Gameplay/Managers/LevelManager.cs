@@ -30,10 +30,11 @@ using UnityEngine.Events;
 using UnityEngine.Pool;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
+using RainbowBlockSaga.Presentation.Contracts;
 
 namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 {
-    public partial class LevelManager : MonoBehaviour
+    public partial class LevelManager : MonoBehaviour, IResolvePresentation, IGameEndPresentation
     {
         public int currentLevel;
         public LineExplosion lineExplosionPrefab;
@@ -400,6 +401,67 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
         }
 
 
+        public bool IsClassicMode =>
+            gameMode == EGameMode.Classic;
+
+        public void SetRuntimeResolveOwnership(bool enabled)
+        {
+            ExternalResolveEnabled = enabled;
+        }
+
+        public void SetRuntimeLifecycleOwnership(bool enabled)
+        {
+            ExternalClassicLifecycleEnabled = enabled;
+        }
+
+        public void PresentResolve(
+            UnityEngine.Object shapeHandle,
+            IReadOnlyList<IReadOnlyList<UnityEngine.Object>> lineHandles,
+            int scoreGain,
+            int combo,
+            global::System.Action completed)
+        {
+            if (shapeHandle is not Shape shape)
+            {
+                completed?.Invoke();
+                return;
+            }
+
+            var lines = new List<List<Cell>>();
+
+            if (lineHandles != null)
+            {
+                foreach (var sourceLine in lineHandles)
+                {
+                    var line = new List<Cell>();
+
+                    if (sourceLine != null)
+                    {
+                        foreach (var handle in sourceLine)
+                        {
+                            if (handle is Cell cell)
+                                line.Add(cell);
+                        }
+                    }
+
+                    if (line.Count > 0)
+                        lines.Add(line);
+                }
+            }
+
+            PresentExternalResolve(
+                shape,
+                lines,
+                scoreGain,
+                combo,
+                completed);
+        }
+
+        public void PresentNoValidMoves()
+        {
+            PresentExternalLose();
+        }
+
         public void PresentExternalResolve(
             Shape shape,
             List<List<Cell>> lines,
@@ -597,8 +659,8 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 
         private IEnumerator CheckLose()
         {
-            // In migrated Classic mode GameSession is authoritative for NoValidMoves.
-            // Other toolkit modes keep their original target/timer lifecycle for now.
+            // GameSession is authoritative for Classic NoValidMoves.
+            // Other modes keep their target/timer lifecycle.
             if (gameMode == EGameMode.Classic && ExternalClassicLifecycleEnabled)
                 yield break;
 

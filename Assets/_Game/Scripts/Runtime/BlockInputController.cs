@@ -299,6 +299,7 @@ namespace RainbowBlockSaga.Runtime
             var resolveRuntime = ResolveScoreRuntime.Current;
             bool resolved = resolveRuntime != null &&
                             resolveRuntime.TryResolvePlacement(
+                                blockView.Data,
                                 legacyShape,
                                 currentCoords);
 

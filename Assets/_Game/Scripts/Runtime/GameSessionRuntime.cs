@@ -39,6 +39,10 @@ namespace RainbowBlockSaga.Runtime
         public GameSession Session { get; private set; }
         public IBlockTrayPresentation TrayPresentation => trayPresentation;
         public IShapeCatalog ShapeCatalog => shapeCatalog;
+        public GameplaySessionState CurrentPresentationState =>
+            sessionPresentation != null
+                ? sessionPresentation.CurrentState
+                : GameplaySessionState.Unknown;
 
         public event Action<GameSession> SessionCreated;
         public event Action<GameSessionResult> SessionEnded;

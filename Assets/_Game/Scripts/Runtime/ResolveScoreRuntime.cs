@@ -1,25 +1,30 @@
 using System;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
 using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Session;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Runtime resolve/score presentation controller.
-    /// GameSession owns queue consumption, resolve, scoring and end-state evaluation. LevelManager presents FX and UI.
+    /// Owns the resolve/score runtime flow.
+    /// Visual effects are delegated through IResolvePresentation.
     /// </summary>
     public class ResolveScoreRuntime : MonoBehaviour
     {
-        [SerializeField] LevelManager levelManager;
+        [FormerlySerializedAs("levelManager")]
+        [SerializeField] MonoBehaviour resolvePresentationSource;
+
         [FormerlySerializedAs("boardBridge")]
         [SerializeField] BoardRuntime boardRuntime;
+
         [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
+
+        IResolvePresentation resolvePresentation;
 
         public static ResolveScoreRuntime Current { get; private set; }
 
@@ -35,16 +40,23 @@ namespace RainbowBlockSaga.Runtime
         void Awake()
         {
             Current = this;
+
+            resolvePresentation =
+                resolvePresentationSource as IResolvePresentation;
+
+            if (resolvePresentation == null)
+                throw new InvalidOperationException(
+                    "ResolveScoreRuntime requires an IResolvePresentation source.");
         }
 
         void OnEnable()
         {
-            LevelManager.ExternalResolveEnabled = true;
+            resolvePresentation?.SetRuntimeResolveOwnership(true);
         }
 
         void OnDisable()
         {
-            LevelManager.ExternalResolveEnabled = false;
+            resolvePresentation?.SetRuntimeResolveOwnership(false);
         }
 
         void OnDestroy()
@@ -52,28 +64,24 @@ namespace RainbowBlockSaga.Runtime
             if (Current == this)
                 Current = null;
 
-            LevelManager.ExternalResolveEnabled = false;
+            resolvePresentation?.SetRuntimeResolveOwnership(false);
         }
 
         public bool TryResolvePlacement(
-            Shape legacyShape,
+            RainbowBlockSaga.Gameplay.Block.BlockShapeData shapeData,
+            UnityEngine.Object presentationShapeHandle,
             IReadOnlyList<BoardCoord> placedCoords)
         {
             var session = Session;
 
-            if (legacyShape == null ||
+            if (shapeData == null ||
+                presentationShapeHandle == null ||
                 session == null ||
                 session.IsEnded)
                 return false;
 
-            // CellDeck visuals can be populated before GameSession is lazily created.
-            // Reconcile the new queue from the actual visible slots before consuming this shape.
+            // Visible tray is presentation truth immediately before consumption.
             sessionRuntime.SynchronizeQueueFromVisualDecks();
-
-            var shapeData =
-                ShapeDataAdapter.GetOrCreate(
-                    legacyShape.shapeTemplate,
-                    sessionRuntime.ShapeCatalog);
 
             var outcome =
                 session.ResolveExternalPlacement(
@@ -83,17 +91,17 @@ namespace RainbowBlockSaga.Runtime
             if (outcome == null)
                 return false;
 
-            var legacyLines =
-                BuildLegacyLines(outcome.Resolve);
+            var presentationLines =
+                BuildPresentationLines(outcome.Resolve);
 
             if (outcome.Resolve.ClearedLines > 0)
                 boardRuntime.SuspendPresentationSync();
 
             IsPresenting = true;
 
-            levelManager.PresentExternalResolve(
-                legacyShape,
-                legacyLines,
+            resolvePresentation.PresentResolve(
+                presentationShapeHandle,
+                presentationLines,
                 outcome.ScoreGain,
                 session.Score.Combo,
                 () => OnPresentationCompleted(
@@ -102,14 +110,15 @@ namespace RainbowBlockSaga.Runtime
             return true;
         }
 
-        List<List<Cell>> BuildLegacyLines(
+        List<IReadOnlyList<UnityEngine.Object>> BuildPresentationLines(
             BoardResolveResult resolve)
         {
-            var lines = new List<List<Cell>>();
+            var lines =
+                new List<IReadOnlyList<UnityEngine.Object>>();
 
             foreach (int y in resolve.Rows)
             {
-                var line = new List<Cell>();
+                var line = new List<UnityEngine.Object>();
 
                 for (int x = 0;
                      x < boardRuntime.Model.Width;
@@ -123,9 +132,9 @@ namespace RainbowBlockSaga.Runtime
                     if (boardRuntime.TryGetCellHandle(
                             coord,
                             out var handle) &&
-                        handle is Cell cell)
+                        handle != null)
                     {
-                        line.Add(cell);
+                        line.Add(handle);
                     }
                 }
 
@@ -135,7 +144,7 @@ namespace RainbowBlockSaga.Runtime
 
             foreach (int x in resolve.Columns)
             {
-                var line = new List<Cell>();
+                var line = new List<UnityEngine.Object>();
 
                 for (int y = 0;
                      y < boardRuntime.Model.Height;
@@ -149,9 +158,9 @@ namespace RainbowBlockSaga.Runtime
                     if (boardRuntime.TryGetCellHandle(
                             coord,
                             out var handle) &&
-                        handle is Cell cell)
+                        handle != null)
                     {
-                        line.Add(cell);
+                        line.Add(handle);
                     }
                 }
 
