@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Orientation
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Orientation
 {
     [global::System.Serializable]
     public class ObjectConfiguration

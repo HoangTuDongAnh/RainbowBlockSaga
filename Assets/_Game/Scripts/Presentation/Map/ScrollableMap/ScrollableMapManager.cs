@@ -13,16 +13,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.Popups;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Popups;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace BlockPuzzleGameToolkit.Scripts.Map.ScrollableMap
+namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 {
     public class ScrollableMapManager : SingletonBehaviour<ScrollableMapManager>
     {

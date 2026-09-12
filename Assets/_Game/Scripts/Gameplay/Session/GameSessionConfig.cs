@@ -1,7 +1,7 @@
 using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Score;
 using RainbowBlockSaga.Gameplay.Spawn;
-using RainbowBlockSaga.Modes.Objectives;
+using RainbowBlockSaga.Gameplay.Objectives;
 
 namespace RainbowBlockSaga.Gameplay.Session
 {

@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups.Reward
+namespace RainbowBlockSaga.Presentation.Scripts.Popups.Reward
 {
     public class RewardVisual : MonoBehaviour
     {

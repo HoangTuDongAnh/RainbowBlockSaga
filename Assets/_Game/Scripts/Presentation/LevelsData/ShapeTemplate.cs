@@ -13,7 +13,7 @@
 using System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
     [Serializable]
     public class ShapeRow
@@ -21,7 +21,7 @@ namespace BlockPuzzleGameToolkit.Scripts.LevelsData
         public bool[] cells = new bool[5];
     }
 
-    [CreateAssetMenu(fileName = "Shape", menuName = "BlockPuzzleGameToolkit/Items/Shape", order = 1)]
+    [CreateAssetMenu(fileName = "Shape", menuName = "Rainbow Blocks Saga/Items/Shape", order = 1)]
     public class ShapeTemplate : ScriptableObject
     {
         public ShapeRow[] rows = new ShapeRow[5];

@@ -10,11 +10,11 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace BlockPuzzleGameToolkit.Scripts.Audio
+namespace RainbowBlockSaga.Presentation.Scripts.Audio
 {
     [RequireComponent(typeof(AudioSource))]
     public class MusicBase : SingletonBehaviour<MusicBase>

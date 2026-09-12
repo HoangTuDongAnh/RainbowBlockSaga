@@ -12,7 +12,7 @@
 
 using System;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public class Event<T>
     {

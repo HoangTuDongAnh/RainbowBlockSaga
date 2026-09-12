@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Utils.CommonUI
+namespace RainbowBlockSaga.Presentation.Scripts.Utils.CommonUI
 {
     public class BezierGridLayout : GridLayoutGroup
     {

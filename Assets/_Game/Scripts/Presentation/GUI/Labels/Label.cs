@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Labels
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 {
     public class Label : MonoBehaviour
     {

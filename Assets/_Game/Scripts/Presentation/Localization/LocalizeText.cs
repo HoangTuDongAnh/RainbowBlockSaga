@@ -13,13 +13,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Settings;
-using BlockPuzzleGameToolkit.Scripts.Unity_Reorderable_List_master.List;
-using BlockPuzzleGameToolkit.Scripts.Unity_Reorderable_List_master.List.Attributes;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.Unity_Reorderable_List_master.List;
+using RainbowBlockSaga.Presentation.Scripts.Unity_Reorderable_List_master.List.Attributes;
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     public class LocalizeText : MonoBehaviour
     {

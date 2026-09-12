@@ -10,12 +10,12 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
-    [CreateAssetMenu(fileName = "ItemTemplate", menuName = "BlockPuzzleGameToolkit/Items/ItemTemplate", order = 1)]
+    [CreateAssetMenu(fileName = "ItemTemplate", menuName = "Rainbow Blocks Saga/Items/ItemTemplate", order = 1)]
     public class ItemTemplate : ScriptableData
     {
         public Color backgroundColor;

@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class ComboText : MonoBehaviour
     {

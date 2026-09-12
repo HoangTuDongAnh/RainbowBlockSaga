@@ -11,14 +11,14 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.Managers
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 {
     public class TimerManager : MonoBehaviour
     {

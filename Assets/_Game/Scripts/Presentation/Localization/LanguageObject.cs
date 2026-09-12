@@ -13,7 +13,7 @@
 using System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     [Serializable]
     public class LanguageObject

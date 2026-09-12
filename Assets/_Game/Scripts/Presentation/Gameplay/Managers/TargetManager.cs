@@ -13,16 +13,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.FX;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.FX;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 using UnityEngine;
 using UnityEngine.Pool;
 using DG.Tweening;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class TargetManager : MonoBehaviour
     {

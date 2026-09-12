@@ -15,7 +15,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class Fader : MonoBehaviour
     {

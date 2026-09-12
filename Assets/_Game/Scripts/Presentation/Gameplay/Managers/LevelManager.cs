@@ -14,15 +14,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.FX;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Managers;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Utils;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.FX;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Utils;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -32,7 +32,7 @@ using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
 using RainbowBlockSaga.Presentation.Contracts;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public partial class LevelManager : MonoBehaviour, IResolvePresentation, IGameEndPresentation
     {
@@ -221,44 +221,6 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
             Load();
         }
 
-        private void SaveGameState()
-        {
-            if (gameMode == EGameMode.Classic)
-            {
-                classicModeHandler = FindObjectOfType<ClassicModeHandler>();
-
-                // The migration scene can shut down after the legacy ClassicModeHandler
-                // has already been disabled/destroyed. There is nothing useful to save then.
-                if (classicModeHandler == null)
-                    return;
-
-                var state = new ClassicGameState
-                {
-                    score = classicModeHandler.score,
-                    bestScore = classicModeHandler.bestScore,
-                    gameMode = EGameMode.Classic,
-                    gameStatus = EventManager.GameStatus
-                };
-                GameState.Save(state, field);
-            }
-            else if (gameMode == EGameMode.Timed)
-            {
-                timedModeHandler = FindObjectOfType<TimedModeHandler>();
-                if (timedModeHandler != null)
-                {
-                    var state = new TimedGameState
-                    {
-                        score = timedModeHandler.score,
-                        bestScore = timedModeHandler.bestScore,
-                        remainingTime = timedModeHandler.GetRemainingTime(),
-                        gameMode = EGameMode.Timed,
-                        gameStatus = EventManager.GameStatus
-                    };
-                    GameState.Save(state, field);
-                }
-            }
-        }
-
         private void OnDisable()
         {
             EventManager.GetEvent(EGameEvent.RestartLevel).Unsubscribe(RestartLevel);
@@ -289,16 +251,8 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            if ((gameMode == EGameMode.Classic || gameMode == EGameMode.Timed) && EventManager.GameStatus == EGameState.Playing)
-                SaveGameState();
-
+            // Saving is owned by BaseModeHandler. LevelManager only controls presentation timing.
             PauseTimer(pauseStatus);
-        }
-
-        private void OnApplicationQuit()
-        {
-            if ((gameMode == EGameMode.Classic || gameMode == EGameMode.Timed) && EventManager.GameStatus == EGameState.Playing)
-                SaveGameState();
         }
 
         private void Load()

@@ -10,12 +10,12 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Localization;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Managers;
+using RainbowBlockSaga.Presentation.Scripts.Localization;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class PreFailedTitleManager : MonoBehaviour
     {

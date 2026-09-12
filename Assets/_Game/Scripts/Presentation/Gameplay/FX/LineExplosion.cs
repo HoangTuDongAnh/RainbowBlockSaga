@@ -11,12 +11,12 @@
 // // THE SOFTWARE.
 
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.FX
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
 {
     public class LineExplosion : MonoBehaviour
     {

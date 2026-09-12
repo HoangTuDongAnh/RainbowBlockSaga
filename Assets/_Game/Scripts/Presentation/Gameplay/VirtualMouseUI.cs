@@ -17,7 +17,7 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class VirtualMouse : MonoBehaviour
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Orientation
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Orientation
 {
     [RequireComponent(typeof(Transform)), ExecuteInEditMode]
     public class OrientationTransformableObject : MonoBehaviour, IOrientationTransformable

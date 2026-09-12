@@ -13,7 +13,7 @@
 using System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
     public class TargetScriptable : ScriptableObject
     {

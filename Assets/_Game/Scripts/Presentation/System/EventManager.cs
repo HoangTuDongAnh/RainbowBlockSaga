@@ -12,9 +12,9 @@
 
 using System;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public static class EventManager
     {

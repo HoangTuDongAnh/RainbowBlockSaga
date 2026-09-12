@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public class SerializeTypePropertyAttribute : PropertyAttribute
     {

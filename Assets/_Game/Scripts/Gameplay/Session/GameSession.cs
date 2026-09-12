@@ -6,7 +6,7 @@ using RainbowBlockSaga.Gameplay.Placement;
 using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Score;
 using RainbowBlockSaga.Gameplay.Spawn;
-using RainbowBlockSaga.Modes.Objectives;
+using RainbowBlockSaga.Gameplay.Objectives;
 
 namespace RainbowBlockSaga.Gameplay.Session
 {
@@ -33,7 +33,7 @@ namespace RainbowBlockSaga.Gameplay.Session
         public event Action<GameSessionResult> Ended;
 
         /// <summary>
-        /// Clean-session constructor used by the final Adventure / Endless runtime.
+        /// Config-based constructor for sessions that own their board and optional objective.
         /// </summary>
         public GameSession(GameSessionConfig config)
             : this(
@@ -49,9 +49,8 @@ namespace RainbowBlockSaga.Gameplay.Session
         }
 
         /// <summary>
-        /// Migration constructor.
-        /// Allows the toolkit presentation bridge to compose one GameSession around the
-        /// already-migrated BoardModel while the original scene is still providing visuals.
+        /// Composition constructor used by the current runtime when board and presentation state
+        /// already exist.
         /// </summary>
         public GameSession(
             BoardModel board,
@@ -97,7 +96,7 @@ namespace RainbowBlockSaga.Gameplay.Session
 
         /// <summary>
         /// Starts ownership without resetting the current board.
-        /// Used only while migrating the original BlockBlast scene.
+        /// Used when starting from an already-presented board state.
         /// </summary>
         public void StartFromCurrentState()
         {
@@ -127,8 +126,8 @@ namespace RainbowBlockSaga.Gameplay.Session
         }
 
         /// <summary>
-        /// Migration entry point. The toolkit drag presentation has already filled the
-        /// BoardModel cells; this method performs the remaining session transaction.
+        /// External placement entry point. Presentation has already updated the placed cells;
+        /// this method performs the remaining session transaction.
         /// </summary>
         public GameSessionPlacementOutcome ResolveExternalPlacement(
             BlockShapeData shape,

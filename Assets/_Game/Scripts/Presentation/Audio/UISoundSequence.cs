@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Audio
+namespace RainbowBlockSaga.Presentation.Scripts.Audio
 {
     public class UISoundSequence : MonoBehaviour
     {

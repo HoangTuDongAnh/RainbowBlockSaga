@@ -11,14 +11,14 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class Settings : PopupWithCurrencyLabel
     {
@@ -50,50 +50,6 @@ namespace BlockPuzzleGameToolkit.Scripts.Popups
 
         private void OnEnable()
         {
-            var fieldManager = FindObjectOfType<FieldManager>();
-            // Save current game state when settings is opened
-            if (StateManager.instance.CurrentState == EScreenStates.Game)
-            {
-                var currentMode = GameDataManager.GetGameMode();
-                GameState currentState = null;
-
-                // Create appropriate state based on game mode
-                if (currentMode == EGameMode.Classic)
-                {
-                    var classicHandler = FindObjectOfType<ClassicModeHandler>();
-                    if (classicHandler != null)
-                    {
-                        currentState = new ClassicGameState
-                        {
-                            score = classicHandler.score,
-                            bestScore = classicHandler.bestScore,
-                            gameMode = EGameMode.Classic,
-                            gameStatus = EventManager.GameStatus
-                        };
-                    }
-                }
-                else if (currentMode == EGameMode.Timed)
-                {
-                    var timedHandler = FindObjectOfType<TimedModeHandler>();
-                    if (timedHandler != null)
-                    {
-                        currentState = new TimedGameState
-                        {
-                            score = timedHandler.score,
-                            bestScore = timedHandler.bestScore,
-                            remainingTime = timedHandler.GetRemainingTime(),
-                            gameMode = EGameMode.Timed,
-                            gameStatus = EventManager.GameStatus
-                        };
-                    }
-                }
-
-                if (currentState != null && fieldManager != null)
-                {
-                    GameState.Save(currentState, fieldManager);
-                }
-            }
-
             back.onClick.AddListener(BackToMain);
           //  store.onClick.AddListener(Store);
             retryButton.onClick.AddListener(Retry);
@@ -149,14 +105,6 @@ namespace BlockPuzzleGameToolkit.Scripts.Popups
             MenuManager.instance.FadeOut();
         }
 
-        private void Store()
-        {
-            StopInteration();
-
-            DisablePause();
-            MenuManager.instance.ShowPopup<BooterShop>();
-            Close();
-        }
 
 
         private void DisablePause()

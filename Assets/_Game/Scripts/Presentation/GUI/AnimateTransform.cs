@@ -14,7 +14,7 @@ using System;
 using DG.Tweening;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     [RequireComponent(typeof(RectTransform))]
     public class AnimateTransform : MonoBehaviour

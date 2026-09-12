@@ -14,7 +14,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     public class OutlineField : MonoBehaviour
     {

@@ -13,7 +13,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace BlockPuzzleGameToolkit.Scripts.AnimationBehaviours
+namespace RainbowBlockSaga.Presentation.Scripts.AnimationBehaviours
 {
     public class DelayBeforeStart : StateMachineBehaviour
     {

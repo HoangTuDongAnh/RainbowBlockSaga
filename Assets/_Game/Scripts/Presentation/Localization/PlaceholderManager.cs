@@ -11,12 +11,12 @@
 // // THE SOFTWARE.
 
 using System.Text.RegularExpressions;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Managers;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     // This class is used to replace placeholders in localized strings with actual values.
     public static class PlaceholderManager

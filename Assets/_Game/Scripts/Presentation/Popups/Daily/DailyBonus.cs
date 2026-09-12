@@ -12,12 +12,12 @@
 
 using System;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.GUI.Labels;
-using BlockPuzzleGameToolkit.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.GUI.Labels;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups.Daily
+namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
 {
     public class DailyBonus : PopupWithCurrencyLabel
     {

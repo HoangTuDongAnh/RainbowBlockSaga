@@ -1,7 +1,7 @@
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "BonusItemTemplateCounter", menuName = "BlockPuzzleGameToolkit/Items/BonusItemTemplateCounter", order = 2)]
+[CreateAssetMenu(fileName = "BonusItemTemplateCounter", menuName = "Rainbow Blocks Saga/Items/BonusItemTemplateCounter", order = 2)]
 public class BonusItemTemplateCounter : BonusItemTemplate
 {
     [Header("Counter Bonus Settings")]

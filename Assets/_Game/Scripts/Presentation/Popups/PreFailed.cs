@@ -10,15 +10,15 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using DG.Tweening;
 using TMPro;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class PreFailed : PopupWithCurrencyLabel
     {

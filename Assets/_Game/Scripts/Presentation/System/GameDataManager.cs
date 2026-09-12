@@ -11,14 +11,14 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEditor;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public static class GameDataManager
     {

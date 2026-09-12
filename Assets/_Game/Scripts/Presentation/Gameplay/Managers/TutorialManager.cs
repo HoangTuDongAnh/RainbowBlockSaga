@@ -12,15 +12,15 @@
 
 using System.Collections;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.FX;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.Settings;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Utils;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.FX;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Utils;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.Managers
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 {
     public class TutorialManager : MonoBehaviour
     {

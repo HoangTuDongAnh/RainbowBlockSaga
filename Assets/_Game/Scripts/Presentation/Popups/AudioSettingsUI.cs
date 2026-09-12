@@ -10,12 +10,12 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class AudioSettingsUI : MonoBehaviour
     {

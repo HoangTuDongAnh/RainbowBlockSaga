@@ -12,16 +12,16 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.System.Haptic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Managers;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.System.Haptic;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class ShapeDraggable : MonoBehaviour
     {

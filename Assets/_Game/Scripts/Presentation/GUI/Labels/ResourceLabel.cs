@@ -10,11 +10,11 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Data;
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Labels
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 {
     public class ResourceLabel : MonoBehaviour
     {

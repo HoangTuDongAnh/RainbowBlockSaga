@@ -10,11 +10,11 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class Item : FillAndPreview

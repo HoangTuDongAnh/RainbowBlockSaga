@@ -1,5 +1,5 @@
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.Popups;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.Popups;
 using TMPro;
 using UnityEditor;
 using UnityEngine;

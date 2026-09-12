@@ -14,7 +14,7 @@ using TMPro;
 using UnityEngine;
 using DG.Tweening;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class PreWin : Banner
     {

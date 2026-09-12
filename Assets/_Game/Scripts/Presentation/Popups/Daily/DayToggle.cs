@@ -13,7 +13,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups.Daily
+namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
 {
     public class DayToggle : MonoBehaviour
     {

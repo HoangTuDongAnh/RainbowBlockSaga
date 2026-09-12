@@ -10,12 +10,12 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Map.ScrollableMap
+namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 {
     public class LevelPin : MonoBehaviour
     {

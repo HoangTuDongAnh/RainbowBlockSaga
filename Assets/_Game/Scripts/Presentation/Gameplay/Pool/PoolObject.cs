@@ -11,10 +11,10 @@
 // // THE SOFTWARE.
 
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.Pool
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool
 {
     public class PoolObject : MonoBehaviour
     {

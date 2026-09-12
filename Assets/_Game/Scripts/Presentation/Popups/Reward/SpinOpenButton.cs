@@ -10,10 +10,10 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups.Reward
+namespace RainbowBlockSaga.Presentation.Scripts.Popups.Reward
 {
     public class SpinOpenButton : MonoBehaviour
     {

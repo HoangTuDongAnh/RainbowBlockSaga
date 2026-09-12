@@ -10,13 +10,13 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.GUI.Labels;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.GUI.Labels;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEngine;
 using System.Collections;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class PreWinScore : PreWin
     {

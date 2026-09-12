@@ -10,10 +10,10 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     public abstract class TargetPanelBase : MonoBehaviour
     {

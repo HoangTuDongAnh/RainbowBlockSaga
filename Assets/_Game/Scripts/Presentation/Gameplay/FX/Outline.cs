@@ -14,7 +14,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.FX
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
 {
     public class Outline : MonoBehaviour
     {

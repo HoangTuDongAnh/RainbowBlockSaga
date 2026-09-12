@@ -10,10 +10,10 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.AnimationBehaviours
+namespace RainbowBlockSaga.Presentation.Scripts.AnimationBehaviours
 {
     public class CallButtonMethod : StateMachineBehaviour
     {

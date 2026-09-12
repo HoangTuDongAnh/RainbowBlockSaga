@@ -10,11 +10,11 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
 using DG.Tweening;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class CellDeck : MonoBehaviour
     {

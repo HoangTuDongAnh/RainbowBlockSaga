@@ -15,7 +15,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Utils
+namespace RainbowBlockSaga.Presentation.Scripts.Utils
 {
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : IEnumerable

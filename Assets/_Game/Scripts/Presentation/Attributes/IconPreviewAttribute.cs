@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Attributes
+namespace RainbowBlockSaga.Presentation.Scripts.Attributes
 {
     public class IconPreviewAttribute : PropertyAttribute
     {

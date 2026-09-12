@@ -10,7 +10,7 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-namespace BlockPuzzleGameToolkit.Scripts.Enums
+namespace RainbowBlockSaga.Presentation.Scripts.Enums
 {
     public enum EMapType
     {

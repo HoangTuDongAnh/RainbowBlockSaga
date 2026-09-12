@@ -10,11 +10,11 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups.Daily
+namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
 {
     public class DayHandle : MonoBehaviour
     {

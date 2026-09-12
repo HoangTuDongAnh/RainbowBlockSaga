@@ -1,12 +1,12 @@
 using UnityEngine;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Popups;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Popups;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
-    // [CreateAssetMenu(fileName = "ClassicStateHandler", menuName = "BlockPuzzleGameToolkit/Levels/ClassicStateHandler")]
+    // [CreateAssetMenu(fileName = "ClassicStateHandler", menuName = "Rainbow Blocks Saga/Levels/ClassicStateHandler")]
     public class ClassicLevelStateHandler : LevelStateHandler
     {
         private protected override void HandlePreFailed(LevelManager levelManager)

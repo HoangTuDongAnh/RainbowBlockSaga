@@ -11,9 +11,9 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Data;
 
-namespace BlockPuzzleGameToolkit.Scripts.Settings
+namespace RainbowBlockSaga.Presentation.Scripts.Settings
 {
     public class DailyBonusSettings : SettingsBase
     {

@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     public class LocalizedTextMeshProUGUI : TextMeshProUGUI
     {

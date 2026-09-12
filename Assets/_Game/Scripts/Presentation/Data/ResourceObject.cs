@@ -14,7 +14,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Data
+namespace RainbowBlockSaga.Presentation.Scripts.Data
 {
     public abstract class ResourceObject : ScriptableObject
     {

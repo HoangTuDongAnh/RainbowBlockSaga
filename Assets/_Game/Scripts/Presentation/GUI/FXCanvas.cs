@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     public class FXCanvas : MonoBehaviour
     {

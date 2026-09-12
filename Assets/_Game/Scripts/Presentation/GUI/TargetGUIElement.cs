@@ -13,7 +13,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     public class TargetGUIElement : MonoBehaviour
     {

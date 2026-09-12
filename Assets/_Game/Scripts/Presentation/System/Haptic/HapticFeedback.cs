@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Android;
 
-namespace BlockPuzzleGameToolkit.Scripts.System.Haptic
+namespace RainbowBlockSaga.Presentation.Scripts.System.Haptic
 {
     public class HapticFeedback : MonoBehaviour
     {

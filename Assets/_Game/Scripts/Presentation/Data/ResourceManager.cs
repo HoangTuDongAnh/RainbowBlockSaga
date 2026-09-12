@@ -10,10 +10,10 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Data
+namespace RainbowBlockSaga.Presentation.Scripts.Data
 {
     public class ResourceManager : SingletonBehaviour<ResourceManager>
     {

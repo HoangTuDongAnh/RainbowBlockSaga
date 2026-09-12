@@ -12,11 +12,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace BlockPuzzleGameToolkit.Scripts.Audio
+namespace RainbowBlockSaga.Presentation.Scripts.Audio
 {
     [RequireComponent(typeof(AudioSource))]
     public class SoundBase : SingletonBehaviour<SoundBase>

@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
     [Serializable]
     public class LevelRow
@@ -34,7 +34,7 @@ namespace BlockPuzzleGameToolkit.Scripts.LevelsData
         }
     }
 
-    [CreateAssetMenu(fileName = "Level", menuName = "BlockPuzzleGameToolkit/Levels/Level", order = 1)]
+    [CreateAssetMenu(fileName = "Level", menuName = "Rainbow Blocks Saga/Levels/Level", order = 1)]
     public class Level : ScriptableObject
     {
         public int rows = 8;

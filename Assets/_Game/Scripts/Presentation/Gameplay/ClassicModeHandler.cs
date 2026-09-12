@@ -1,10 +1,10 @@
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class ClassicModeHandler : BaseModeHandler
     {

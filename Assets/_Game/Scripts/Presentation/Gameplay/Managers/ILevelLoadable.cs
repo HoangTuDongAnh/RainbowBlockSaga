@@ -10,9 +10,9 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.Managers
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 {
     public interface ILevelLoadable
     {

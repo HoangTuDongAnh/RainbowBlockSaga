@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.System.Haptic
+namespace RainbowBlockSaga.Presentation.Scripts.System.Haptic
 {
     public static class Vibration
     {

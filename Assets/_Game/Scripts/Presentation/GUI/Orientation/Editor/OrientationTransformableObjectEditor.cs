@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Orientation.Editor
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Orientation.Editor
 {
     [CustomEditor(typeof(OrientationTransformableObject))]
     public class OrientationTransformableObjectEditor : UnityEditor.Editor

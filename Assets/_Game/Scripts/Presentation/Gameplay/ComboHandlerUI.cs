@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using DG.Tweening;
 using System.Collections;
 using System.Threading.Tasks;
-using BlockPuzzleGameToolkit.Scripts.System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class ComboHandlerUI : MonoBehaviour
     {

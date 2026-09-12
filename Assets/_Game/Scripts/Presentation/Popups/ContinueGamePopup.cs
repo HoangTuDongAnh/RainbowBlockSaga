@@ -1,11 +1,10 @@
-using BlockPuzzleGameToolkit.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     /// <summary>
-    /// Presentation-only popup scaffold.
-    /// The actual save/continue decision flow will be wired after Phase B is complete.
+    /// Lets the player continue an unfinished run or discard it and start fresh.
     /// </summary>
     public class ContinueGamePopup : Popup
     {

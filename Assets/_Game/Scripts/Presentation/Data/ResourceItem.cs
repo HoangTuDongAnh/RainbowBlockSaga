@@ -12,9 +12,9 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Data
+namespace RainbowBlockSaga.Presentation.Scripts.Data
 {
-    [CreateAssetMenu(fileName = "Resource", menuName = "BlockPuzzleGameToolkit/Data/ResourceItem", order = 1)]
+    [CreateAssetMenu(fileName = "Resource", menuName = "Rainbow Blocks Saga/Data/ResourceItem", order = 1)]
     public class ResourceItem : ResourceObject
     {
         public int defaultValue;

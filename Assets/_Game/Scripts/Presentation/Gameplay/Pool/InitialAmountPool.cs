@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.Pool
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool
 {
     internal class InitialAmountPool : PoolObject
     {

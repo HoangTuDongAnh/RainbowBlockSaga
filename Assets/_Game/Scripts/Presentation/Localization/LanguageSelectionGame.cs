@@ -17,7 +17,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     public class LanguageSelectionGame : MonoBehaviour
     {

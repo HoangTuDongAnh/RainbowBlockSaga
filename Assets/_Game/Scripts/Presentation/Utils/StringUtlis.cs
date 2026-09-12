@@ -12,7 +12,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace BlockPuzzleGameToolkit.Scripts.Utils
+namespace RainbowBlockSaga.Presentation.Scripts.Utils
 {
     public static class StringUtlis
     {

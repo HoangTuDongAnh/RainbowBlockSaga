@@ -11,13 +11,13 @@
 // // THE SOFTWARE.
 
 using System.Collections;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.System.Haptic;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.System.Haptic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     [RequireComponent(typeof(Animator))]
     public class CustomButton : Button

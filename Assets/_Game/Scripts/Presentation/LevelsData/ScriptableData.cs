@@ -11,10 +11,10 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Attributes;
+using RainbowBlockSaga.Presentation.Scripts.Attributes;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
     public abstract class ScriptableData : ScriptableObject
     {

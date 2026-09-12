@@ -12,9 +12,9 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
-    [CreateAssetMenu(fileName = "BonusItemTemplate", menuName = "BlockPuzzleGameToolkit/Items/BonusItemTemplate", order = 1)]
+    [CreateAssetMenu(fileName = "BonusItemTemplate", menuName = "Rainbow Blocks Saga/Items/BonusItemTemplate", order = 1)]
     public class BonusItemTemplate : ScriptableData
     {
         public Sprite sprite;

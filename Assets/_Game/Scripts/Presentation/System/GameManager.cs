@@ -12,17 +12,17 @@
 
 using System;
 using System.Globalization;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.Popups;
-using BlockPuzzleGameToolkit.Scripts.Popups.Daily;
-using BlockPuzzleGameToolkit.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.Popups;
+using RainbowBlockSaga.Presentation.Scripts.Popups.Daily;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
 using DG.Tweening;
 using UnityEngine;
-using ResourceManager = BlockPuzzleGameToolkit.Scripts.Data.ResourceManager;
+using ResourceManager = RainbowBlockSaga.Presentation.Scripts.Data.ResourceManager;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public class GameManager : SingletonBehaviour<GameManager>
     {

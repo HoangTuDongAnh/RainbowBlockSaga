@@ -5,14 +5,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class CellDeckManager : MonoBehaviour, IBlockTrayPresentation
     {

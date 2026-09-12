@@ -11,10 +11,10 @@
 // // THE SOFTWARE.
 
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Utils
+namespace RainbowBlockSaga.Presentation.Scripts.Utils
 {
     public static class RectTransformUtils
     {

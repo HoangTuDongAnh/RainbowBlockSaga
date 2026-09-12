@@ -11,11 +11,11 @@
 // // THE SOFTWARE.
 
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI
+namespace RainbowBlockSaga.Presentation.Scripts.GUI
 {
     public class TargetPanel : TargetPanelBase
     {

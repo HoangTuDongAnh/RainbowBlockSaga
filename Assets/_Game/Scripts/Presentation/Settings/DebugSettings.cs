@@ -13,7 +13,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace BlockPuzzleGameToolkit.Scripts.Settings
+namespace RainbowBlockSaga.Presentation.Scripts.Settings
 {
     public class DebugSettings : SettingsBase
     {

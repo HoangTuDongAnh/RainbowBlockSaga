@@ -10,10 +10,10 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Settings
+namespace RainbowBlockSaga.Presentation.Scripts.Settings
 {
 
     public class GameSettings : SettingsBase

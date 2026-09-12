@@ -12,9 +12,9 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.LevelsData
+namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
-    [CreateAssetMenu(fileName = "ScoreTarget", menuName = "BlockPuzzleGameToolkit/Targets/ScoreTarget", order = 1)]
+    [CreateAssetMenu(fileName = "ScoreTarget", menuName = "Rainbow Blocks Saga/Targets/ScoreTarget", order = 1)]
     public class ScoreTargetScriptable : TargetScriptable
     {
     }

@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     public abstract class SingletonScriptableSettings<T> : ScriptableObject where T : ScriptableObject
     {

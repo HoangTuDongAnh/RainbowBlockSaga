@@ -11,12 +11,12 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
 using DG.Tweening;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     [RequireComponent(typeof(Animator), typeof(CanvasGroup))]
     public class Popup : MonoBehaviour

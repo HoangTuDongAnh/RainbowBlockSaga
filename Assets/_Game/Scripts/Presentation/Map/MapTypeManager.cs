@@ -12,11 +12,11 @@
 
 using System;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Map
+namespace RainbowBlockSaga.Presentation.Scripts.Map
 {
     [Serializable]
     public struct MapTypeBinding

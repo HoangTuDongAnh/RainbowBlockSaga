@@ -1,10 +1,10 @@
 using System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.System
+namespace RainbowBlockSaga.Presentation.Scripts.System
 {
     [Serializable]
     public abstract class GameState
@@ -50,6 +50,34 @@ namespace BlockPuzzleGameToolkit.Scripts.System
             // Also save the current game mode
             PlayerPrefs.SetString("LastPlayedMode", state.gameMode.ToString());
             PlayerPrefs.Save();
+        }
+
+
+        public static bool HasMeaningfulState(EGameMode gameMode)
+        {
+            var state = Load(gameMode);
+            if (state == null)
+                return false;
+
+            if (state.score > 0)
+                return true;
+
+            if (state.levelRows == null)
+                return false;
+
+            foreach (var row in state.levelRows)
+            {
+                if (row?.cells == null)
+                    continue;
+
+                foreach (var cell in row.cells)
+                {
+                    if (cell != null)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public static GameState Load(EGameMode gameMode)

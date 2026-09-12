@@ -13,7 +13,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Map.ScrollableMap
+namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 {
     public class PatrollingParticle : MonoBehaviour
     {

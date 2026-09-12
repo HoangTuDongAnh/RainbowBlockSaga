@@ -11,14 +11,14 @@
 // // THE SOFTWARE.
 
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Labels
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 {
     public class TargetScoreGUIElement : TargetGUIElement
     {
@@ -34,7 +34,7 @@ namespace BlockPuzzleGameToolkit.Scripts.GUI.Labels
             scoreSlider.onValueChanged.AddListener(UpdateScoreText);
             
             // Check if this element is in a popup by looking for PreWinScore component in parent hierarchy
-            var preWinScore = GetComponentInParent<BlockPuzzleGameToolkit.Scripts.Popups.PreWinScore>();
+            var preWinScore = GetComponentInParent<RainbowBlockSaga.Presentation.Scripts.Popups.PreWinScore>();
             if (preWinScore != null)
             {
                 return;

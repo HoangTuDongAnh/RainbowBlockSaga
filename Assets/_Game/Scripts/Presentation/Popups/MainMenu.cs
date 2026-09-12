@@ -11,14 +11,14 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.GUI;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Enums;
+using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace BlockPuzzleGameToolkit.Scripts.Popups
+namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class MainMenu : Popup
     {
@@ -73,8 +73,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Popups
 
         private void PlayClassicMode()
         {
-            GameManager.instance.SetGameMode(EGameMode.Classic);
-            GameManager.instance.OpenMap();
+            PlayModeWithResumeCheck(EGameMode.Classic);
         }
 
         private void PlayAdventureMode()
@@ -85,8 +84,28 @@ namespace BlockPuzzleGameToolkit.Scripts.Popups
 
         private void PlayTimedMode()
         {
-            GameManager.instance.SetGameMode(EGameMode.Timed);
-            GameManager.instance.OpenMap();
+            PlayModeWithResumeCheck(EGameMode.Timed);
+        }
+
+        private void PlayModeWithResumeCheck(EGameMode mode)
+        {
+            GameManager.instance.SetGameMode(mode);
+
+            if (!GameState.HasMeaningfulState(mode))
+            {
+                GameManager.instance.OpenMap();
+                return;
+            }
+
+            MenuManager.instance.ShowPopup<ContinueGamePopup>(
+                null,
+                result =>
+                {
+                    if (result == EPopupResult.Restart)
+                        GameState.Delete(mode);
+
+                    GameManager.instance.OpenMap();
+                });
         }
 
         private void SettingsButtonClicked()

@@ -13,7 +13,7 @@
 using UnityEngine;
 using UnityEngine.Playables;
 
-namespace BlockPuzzleGameToolkit.Scripts.Settings
+namespace RainbowBlockSaga.Presentation.Scripts.Settings
 {
     public class ClearDirectorBindingsAfterStop : MonoBehaviour
     {

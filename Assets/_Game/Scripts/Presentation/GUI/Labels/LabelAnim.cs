@@ -11,16 +11,16 @@
 // // THE SOFTWARE.
 
 using System;
-using BlockPuzzleGameToolkit.Scripts.Audio;
-using BlockPuzzleGameToolkit.Scripts.Data;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using RainbowBlockSaga.Presentation.Scripts.Data;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-namespace BlockPuzzleGameToolkit.Scripts.GUI.Labels
+namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 {
     public class LabelAnim : MonoBehaviour
     {

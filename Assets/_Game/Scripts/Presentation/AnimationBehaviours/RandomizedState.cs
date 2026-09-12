@@ -12,7 +12,7 @@
 
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.AnimationBehaviours
+namespace RainbowBlockSaga.Presentation.Scripts.AnimationBehaviours
 {
     public class RandomizedState : StateMachineBehaviour
     {

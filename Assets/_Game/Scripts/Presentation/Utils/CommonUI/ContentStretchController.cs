@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using BlockPuzzleGameToolkit.Scripts.Map.ScrollableMap;
+using RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap;
 using UnityEngine.UI;
 using System.Threading.Tasks;
 

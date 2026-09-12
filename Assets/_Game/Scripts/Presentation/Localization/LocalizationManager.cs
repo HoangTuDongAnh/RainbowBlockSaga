@@ -12,11 +12,11 @@
 
 using System;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Settings;
-using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Settings;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Localization
+namespace RainbowBlockSaga.Presentation.Scripts.Localization
 {
     public class LocalizationManager : SingletonBehaviour<LocalizationManager>
     {

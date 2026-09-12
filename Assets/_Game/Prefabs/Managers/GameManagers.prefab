@@ -43,7 +43,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -6167490150026026163, guid: e4017410999f44635baa4cb3bb8320b4, type: 2}
-  m_audioClip: {fileID: 8300000, guid: 2448b55b4a2958e428685e50f5411d10, type: 3}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 2448b55b4a2958e428685e50f5411d10, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -187,6 +188,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -1475199377158533630, guid: e4017410999f44635baa4cb3bb8320b4, type: 2}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -305,6 +307,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: d3a99d3816cb44d3baa308f67ffc7aa3, type: 3}
   - {fileID: 8300000, guid: 3d2241a03137f491c8bef24e80d146bc, type: 3}
   - {fileID: 8300000, guid: 2e2c268fcc7b245a39a6f7073f3d77a0, type: 3}
+  selected: {fileID: 0}
+  dropItem: {fileID: 0}
 --- !u!1 &2778641311476664895
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,8 +406,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7895572528670207041}
-  - component: {fileID: 8920133543277398658}
-  - component: {fileID: 8230691521684001276}
   m_Layer: 0
   m_Name: IAPManager
   m_TagString: Untagged
@@ -426,30 +428,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6366849181247117937}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8920133543277398658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5800290290321421959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ff980a1000879c44b057af715d834ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &8230691521684001276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5800290290321421959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d070cf48df2d4d3db819987c544aa328, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6397767507954108941
 GameObject:
   m_ObjectHideFlags: 0
@@ -547,7 +525,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7388954445890117029}
-  - component: {fileID: 1382428796729892656}
   m_Layer: 0
   m_Name: AdsManager
   m_TagString: Untagged
@@ -570,18 +547,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6366849181247117937}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1382428796729892656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8273287943513606797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 637f18f981c24474860234607bd24517, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8811864150634610548
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,5 +603,3 @@ MonoBehaviour:
   dailyBonusSettings: {fileID: 11400000, guid: ee2d92ce0c2f04d7ba280f992816fc29, type: 2}
   GameSettings: {fileID: 11400000, guid: fccb9214296f742de99ef9748d0cd759, type: 2}
   luckySpinSettings: {fileID: 11400000, guid: b94eebd2223ea448e937ce061c024d08, type: 2}
-  coinsShopSettings: {fileID: 11400000, guid: 2ef89a4073b76484595f5426e60cb9b9, type: 2}
-  noAdsProduct: {fileID: 11400000, guid: 5a976435f08ad439db8305e3de645368, type: 2}

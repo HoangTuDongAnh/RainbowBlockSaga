@@ -10,12 +10,12 @@
 // // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // // THE SOFTWARE.
 
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay.Pool;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using DG.Tweening;
 using UnityEngine;
 
-namespace BlockPuzzleGameToolkit.Scripts.Gameplay.FX
+namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
 {
     public class BonusAnimation : MonoBehaviour
     {
