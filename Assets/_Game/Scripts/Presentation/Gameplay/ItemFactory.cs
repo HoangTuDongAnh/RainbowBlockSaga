@@ -15,12 +15,13 @@ using System.Linq;
 using BlockPuzzleGameToolkit.Scripts.Enums;
 using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
 using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using BlockPuzzleGameToolkit.Scripts.System;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 
 namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 {
-    public class ItemFactory : MonoBehaviour, IShapeCatalog
+    public class ItemFactory : MonoBehaviour, IShapeCatalog, IGameplaySessionPresentation
     {
         private static ClassicModeHandler classicModeHandlerCached;
         private static TimedModeHandler timeModeHandlerCached;
@@ -49,6 +50,77 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
             shapes = Resources.LoadAll<ShapeTemplate>("Shapes");
             // load items from resources
             items = Resources.LoadAll<ItemTemplate>("Items");
+        }
+
+        public event global::System.Action RestartRequested;
+        public event global::System.Action<GameplaySessionState> StateChanged;
+
+        public GameplaySessionState CurrentState =>
+            ToSessionState(EventManager.GameStatus);
+
+        public int CurrentScore => GetClassicScore();
+
+        public int ScorePerLine =>
+            GameManager.instance.GameSettings.ScorePerLine;
+
+        public int ResetComboAfterMoves =>
+            GameManager.instance.GameSettings.ResetComboAfterMoves;
+
+        private void OnEnable()
+        {
+            EventManager.GetEvent(EGameEvent.RestartLevel)
+                .Subscribe(HandleRestartRequested);
+            EventManager.OnGameStateChanged += HandleGameStateChanged;
+        }
+
+        private void OnDisable()
+        {
+            EventManager.GetEvent(EGameEvent.RestartLevel)
+                .Unsubscribe(HandleRestartRequested);
+            EventManager.OnGameStateChanged -= HandleGameStateChanged;
+        }
+
+        public void ResetCurrentScore()
+        {
+            var classic = FindObjectOfType<ClassicModeHandler>(true);
+            if (classic != null)
+            {
+                classic.ResetScore();
+                return;
+            }
+
+            var timed = FindObjectOfType<TimedModeHandler>(true);
+            if (timed != null)
+                timed.ResetScore();
+        }
+
+        private void HandleRestartRequested()
+        {
+            RestartRequested?.Invoke();
+        }
+
+        private void HandleGameStateChanged(EGameState state)
+        {
+            StateChanged?.Invoke(ToSessionState(state));
+        }
+
+        private static GameplaySessionState ToSessionState(EGameState state)
+        {
+            return state switch
+            {
+                EGameState.PrepareGame => GameplaySessionState.Prepare,
+                EGameState.Tutorial => GameplaySessionState.Tutorial,
+                EGameState.Pause => GameplaySessionState.Paused,
+                EGameState.Paused => GameplaySessionState.Paused,
+                EGameState.Playing => GameplaySessionState.Playing,
+                EGameState.PreFailed => GameplaySessionState.PreFailed,
+                EGameState.Failed => GameplaySessionState.Failed,
+                EGameState.PreWin => GameplaySessionState.PreWin,
+                EGameState.Win => GameplaySessionState.Win,
+                EGameState.WinWaiting => GameplaySessionState.WinWaiting,
+                EGameState.Loaded => GameplaySessionState.Loaded,
+                _ => GameplaySessionState.Unknown
+            };
         }
 
         private ShapeTemplate GetNonRepeatedShapeTemplate(HashSet<ShapeTemplate> usedShapeTemplates)
@@ -175,12 +247,16 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 
         private static int GetClassicScore()
         {
-            classicModeHandlerCached ??= FindObjectOfType<ClassicModeHandler>();
+            if (classicModeHandlerCached == null)
+                classicModeHandlerCached = FindObjectOfType<ClassicModeHandler>(true);
+
             var classicHandler = classicModeHandlerCached;
             if (classicHandler != null)
                 return classicHandler.score;
 
-            timeModeHandlerCached ??= FindObjectOfType<TimedModeHandler>();
+            if (timeModeHandlerCached == null)
+                timeModeHandlerCached = FindObjectOfType<TimedModeHandler>(true);
+
             var timedHandler = timeModeHandlerCached;
             if (timedHandler != null)
                 return timedHandler.score;

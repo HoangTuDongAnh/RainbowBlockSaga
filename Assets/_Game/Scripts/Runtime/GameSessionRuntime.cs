@@ -1,7 +1,4 @@
 using System;
-using BlockPuzzleGameToolkit.Scripts.Enums;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.System;
 using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Placement;
 using RainbowBlockSaga.Gameplay.Resolve;
@@ -30,6 +27,7 @@ namespace RainbowBlockSaga.Runtime
 
         IBlockTrayPresentation trayPresentation;
         IShapeCatalog shapeCatalog;
+        IGameplaySessionPresentation sessionPresentation;
 
         SpawnProfileData runtimeSpawnProfile;
         ScoreRuleData runtimeScoreRule;
@@ -47,9 +45,11 @@ namespace RainbowBlockSaga.Runtime
 
         void OnEnable()
         {
-            EventManager.GetEvent(EGameEvent.RestartLevel)
-                .Subscribe(OnRestartLevel);
-            EventManager.OnGameStateChanged += OnGameStateChanged;
+            if (sessionPresentation != null)
+            {
+                sessionPresentation.RestartRequested += OnRestartLevel;
+                sessionPresentation.StateChanged += OnGameStateChanged;
+            }
 
             if (boardRuntime != null)
                 boardRuntime.ModelReplaced += OnBoardModelReplaced;
@@ -57,9 +57,11 @@ namespace RainbowBlockSaga.Runtime
 
         void OnDisable()
         {
-            EventManager.GetEvent(EGameEvent.RestartLevel)
-                .Unsubscribe(OnRestartLevel);
-            EventManager.OnGameStateChanged -= OnGameStateChanged;
+            if (sessionPresentation != null)
+            {
+                sessionPresentation.RestartRequested -= OnRestartLevel;
+                sessionPresentation.StateChanged -= OnGameStateChanged;
+            }
 
             if (boardRuntime != null)
                 boardRuntime.ModelReplaced -= OnBoardModelReplaced;
@@ -73,6 +75,8 @@ namespace RainbowBlockSaga.Runtime
                 trayPresentationSource as IBlockTrayPresentation;
             shapeCatalog =
                 shapeCatalogSource as IShapeCatalog;
+            sessionPresentation =
+                shapeCatalogSource as IGameplaySessionPresentation;
 
             if (trayPresentation == null)
                 throw new InvalidOperationException(
@@ -81,6 +85,10 @@ namespace RainbowBlockSaga.Runtime
             if (shapeCatalog == null)
                 throw new InvalidOperationException(
                     "GameSessionRuntime requires an IShapeCatalog source.");
+
+            if (sessionPresentation == null)
+                throw new InvalidOperationException(
+                    "GameSessionRuntime requires the shape catalog source to also implement IGameplaySessionPresentation.");
 
             runtimeSpawnProfile =
                 ScriptableObject.CreateInstance<SpawnProfileData>();
@@ -99,10 +107,10 @@ namespace RainbowBlockSaga.Runtime
                 "Runtime_SessionScoreRule";
             runtimeScoreRule.PlacementScorePerCell = 0;
             runtimeScoreRule.BaseLineScore =
-                GameManager.instance.GameSettings.ScorePerLine;
+                sessionPresentation.ScorePerLine;
             runtimeScoreRule.UseComboStreak = true;
             runtimeScoreRule.ResetComboAfterMisses =
-                GameManager.instance.GameSettings.ResetComboAfterMoves;
+                sessionPresentation.ResetComboAfterMoves;
         }
 
         public GameSession GetOrCreateSession()
@@ -136,7 +144,7 @@ namespace RainbowBlockSaga.Runtime
 
             freshRestartPending = false;
 
-            ApplyPresentationGameState(EventManager.GameStatus);
+            ApplyPresentationGameState(sessionPresentation.CurrentState);
 
             SessionCreated?.Invoke(Session);
             return Session;
@@ -157,22 +165,7 @@ namespace RainbowBlockSaga.Runtime
 
         void ResetPresentationScore()
         {
-            var classic =
-                FindFirstObjectByType<ClassicModeHandler>(
-                    FindObjectsInactive.Include);
-
-            if (classic != null)
-            {
-                classic.ResetScore();
-                return;
-            }
-
-            var timed =
-                FindFirstObjectByType<TimedModeHandler>(
-                    FindObjectsInactive.Include);
-
-            if (timed != null)
-                timed.ResetScore();
+            sessionPresentation.ResetCurrentScore();
         }
 
         void OnBoardModelReplaced()
@@ -182,30 +175,29 @@ namespace RainbowBlockSaga.Runtime
             ResetSession();
         }
 
-        void OnGameStateChanged(EGameState state)
+        void OnGameStateChanged(GameplaySessionState state)
         {
             ApplyPresentationGameState(state);
         }
 
-        void ApplyPresentationGameState(EGameState state)
+        void ApplyPresentationGameState(GameplaySessionState state)
         {
             if (Session == null)
                 return;
 
-            if (state == EGameState.Pause ||
-                state == EGameState.Paused ||
-                state == EGameState.PreFailed ||
-                state == EGameState.Failed ||
-                state == EGameState.PreWin ||
-                state == EGameState.Win ||
-                state == EGameState.WinWaiting)
+            if (state == GameplaySessionState.Paused ||
+                state == GameplaySessionState.PreFailed ||
+                state == GameplaySessionState.Failed ||
+                state == GameplaySessionState.PreWin ||
+                state == GameplaySessionState.Win ||
+                state == GameplaySessionState.WinWaiting)
             {
                 Session.Pause();
                 return;
             }
 
-            if (state == EGameState.Playing ||
-                state == EGameState.Tutorial)
+            if (state == GameplaySessionState.Playing ||
+                state == GameplaySessionState.Tutorial)
             {
                 Session.Resume();
             }
@@ -280,23 +272,7 @@ namespace RainbowBlockSaga.Runtime
                 return;
 
             presentationScoreInitialized = true;
-
-            var classic =
-                FindFirstObjectByType<ClassicModeHandler>(
-                    FindObjectsInactive.Include);
-
-            if (classic != null)
-            {
-                Session.Score.SetScore(classic.score);
-                return;
-            }
-
-            var timed =
-                FindFirstObjectByType<TimedModeHandler>(
-                    FindObjectsInactive.Include);
-
-            if (timed != null)
-                Session.Score.SetScore(timed.score);
+            Session.Score.SetScore(sessionPresentation.CurrentScore);
         }
 
         public void RefreshSpawnProfile()
