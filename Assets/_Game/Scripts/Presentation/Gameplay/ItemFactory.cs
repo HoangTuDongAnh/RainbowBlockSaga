@@ -15,11 +15,12 @@ using System.Linq;
 using BlockPuzzleGameToolkit.Scripts.Enums;
 using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
 using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 
 namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 {
-    public class ItemFactory : MonoBehaviour
+    public class ItemFactory : MonoBehaviour, IShapeCatalog
     {
         private static ClassicModeHandler classicModeHandlerCached;
         private static TimedModeHandler timeModeHandlerCached;
@@ -72,6 +73,80 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
             return levelManager.GetGameMode() == EGameMode.Adventure
                 ? shapes.Where(shape => shape.spawnFromLevel <= levelManager.currentLevel).ToArray()
                 : shapes.Where(shape => shape.scoreForSpawn <= GetClassicScore()).ToArray();
+        }
+
+        public IReadOnlyList<ShapeDescriptor> GetEligibleShapes()
+        {
+            var eligible = GetEligibleShapeTemplates();
+            var result = new List<ShapeDescriptor>(eligible.Length);
+
+            foreach (var template in eligible)
+                result.Add(CreateDescriptor(template));
+
+            return result;
+        }
+
+        public bool TryGetDescriptor(
+            UnityEngine.Object handle,
+            out ShapeDescriptor descriptor)
+        {
+            descriptor = null;
+
+            if (handle is not ShapeTemplate template)
+                return false;
+
+            descriptor = CreateDescriptor(template);
+            return true;
+        }
+
+        ShapeDescriptor CreateDescriptor(ShapeTemplate template)
+        {
+            var cells = new List<Vector2Int>();
+
+            int minColumn = int.MaxValue;
+            int maxRow = int.MinValue;
+
+            for (int row = 0; row < template.rows.Length; row++)
+            {
+                var rowCells = template.rows[row].cells;
+
+                for (int column = 0; column < rowCells.Length; column++)
+                {
+                    if (!rowCells[column])
+                        continue;
+
+                    minColumn = Mathf.Min(minColumn, column);
+                    maxRow = Mathf.Max(maxRow, row);
+                }
+            }
+
+            if (minColumn != int.MaxValue)
+            {
+                for (int row = 0; row < template.rows.Length; row++)
+                {
+                    var rowCells = template.rows[row].cells;
+
+                    for (int column = 0; column < rowCells.Length; column++)
+                    {
+                        if (!rowCells[column])
+                            continue;
+
+                        cells.Add(new Vector2Int(
+                            column - minColumn,
+                            maxRow - row));
+                    }
+                }
+            }
+
+            return new ShapeDescriptor
+            {
+                Handle = template,
+                Name = template.name,
+                Cells = cells,
+                SpawnWeight = Mathf.Max(0.0001f, template.chanceForSpawn),
+                MinAdventureLevel = Mathf.Max(1, template.spawnFromLevel),
+                MinScore = Mathf.Max(0, template.scoreForSpawn)
+            };
         }
 
         private ShapeTemplate GetRandomShape()

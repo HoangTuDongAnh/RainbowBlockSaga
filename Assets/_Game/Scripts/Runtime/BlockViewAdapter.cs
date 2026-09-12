@@ -29,7 +29,10 @@ namespace RainbowBlockSaga.Runtime
 
         public void Refresh()
         {
-            Data = ShapeDataAdapter.GetOrCreate(LegacyShape.shapeTemplate);
+            var catalog = GameSessionRuntime.Current?.ShapeCatalog;
+            Data = ShapeDataAdapter.GetOrCreate(
+                LegacyShape.shapeTemplate,
+                catalog);
         }
     }
 }

@@ -14,13 +14,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BlockPuzzleGameToolkit.Scripts.LevelsData;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 {
-    public class FieldManager : MonoBehaviour
+    public class FieldManager : MonoBehaviour, IBoardPresentation
     {
+        public event global::System.Action BoardChanged;
+
+        public bool IsReady => cells != null;
+        public int RowCount => cells?.GetLength(0) ?? 0;
+        public int ColumnCount => cells?.GetLength(1) ?? 0;
+        public float CellSize => _cellSize;
+
         public RectTransform field;
         public Cell prefab;
 
@@ -84,6 +92,8 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
                     }
                 }
             }
+
+            BoardChanged?.Invoke();
         }
 
         private void GenerateField(int rows, int columns)
@@ -168,6 +178,8 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
                     }
                 }
             }
+
+            BoardChanged?.Invoke();
         }
 
         public List<List<Cell>> GetFilledLines(bool preview = false, bool merge = true)
@@ -336,6 +348,67 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
         public Cell[] GetEmptyCells()
         {
             return cells.Cast<Cell>().Where(cell => !cell.busy).ToArray();
+        }
+
+        public bool IsPlayable(int row, int column)
+        {
+            return IsValidCell(row, column) && !cells[row, column].IsDisabled();
+        }
+
+        public bool IsOccupied(int row, int column)
+        {
+            return IsValidCell(row, column) && cells[row, column].busy;
+        }
+
+        public bool TryGetCellHandle(
+            int row,
+            int column,
+            out UnityEngine.Object handle)
+        {
+            handle = null;
+
+            if (!IsValidCell(row, column))
+                return false;
+
+            handle = cells[row, column];
+            return handle != null;
+        }
+
+        public bool TryGetCellPosition(
+            UnityEngine.Object handle,
+            out int row,
+            out int column)
+        {
+            row = -1;
+            column = -1;
+
+            if (cells == null || handle is not Cell target)
+                return false;
+
+            for (int r = 0; r < cells.GetLength(0); r++)
+            {
+                for (int c = 0; c < cells.GetLength(1); c++)
+                {
+                    if (cells[r, c] != target)
+                        continue;
+
+                    row = r;
+                    column = c;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool IsValidCell(int row, int column)
+        {
+            return cells != null &&
+                   row >= 0 &&
+                   row < cells.GetLength(0) &&
+                   column >= 0 &&
+                   column < cells.GetLength(1) &&
+                   cells[row, column] != null;
         }
 
         public float GetCellSize()

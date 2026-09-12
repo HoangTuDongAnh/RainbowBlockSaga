@@ -1,75 +1,154 @@
+using System;
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.Gameplay.Managers;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Placement;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Runtime board owner for the current gameplay scene.
-    /// FieldManager provides board presentation while BoardModel + PlacementService own gameplay state.
+    /// Owns the gameplay board state for the active scene.
+    /// It depends only on IBoardPresentation, never on presentation implementation types.
     /// </summary>
-    public class BoardRuntime : MonoBehaviour, ILevelLoadable
+    public class BoardRuntime : MonoBehaviour
     {
         [FormerlySerializedAs("legacyField")]
-        [SerializeField] FieldManager fieldManager;
+        [SerializeField] MonoBehaviour fieldManager;
 
+        IBoardPresentation presentation;
         BoardData runtimeData;
         bool presentationSyncSuspended;
 
         public static BoardRuntime Current { get; private set; }
+
+        public event Action ModelReplaced;
+
         public BoardModel Model { get; private set; }
         public BoardData Data => runtimeData;
-        public FieldManager Field => fieldManager;
         public PlacementService Placement { get; } = new();
+
+        /// <summary>
+        /// Exposed only for presentation-side controllers that still need their concrete
+        /// component during the next migration phases.
+        /// BoardRuntime itself never casts this back to a toolkit type.
+        /// </summary>
+        public MonoBehaviour PresentationSource => fieldManager;
+        public IBoardPresentation Presentation => presentation;
 
         void Awake()
         {
             Current = this;
-        }
 
-        public void OnLevelLoaded(Level level)
-        {
-            Build(level);
+            presentation = fieldManager as IBoardPresentation;
+            if (presentation == null)
+                throw new InvalidOperationException(
+                    "BoardRuntime requires a component implementing IBoardPresentation.");
+
+            presentation.BoardChanged += OnBoardChanged;
+
+            if (presentation.IsReady)
+                RebuildFromPresentation();
         }
 
         void LateUpdate()
         {
-            if (presentationSyncSuspended || Model == null || fieldManager.cells == null)
+            if (!presentation.IsReady)
                 return;
 
-            SyncStateFromPresentation();
+            if (Model == null ||
+                Model.Width != presentation.ColumnCount ||
+                Model.Height != presentation.RowCount)
+            {
+                RebuildFromPresentation();
+                return;
+            }
+
+            if (!presentationSyncSuspended)
+                SyncStateFromPresentation();
         }
 
-        void Build(Level level)
+        void OnBoardChanged()
         {
+            RebuildFromPresentation();
+        }
+
+        void RebuildFromPresentation()
+        {
+            if (!presentation.IsReady ||
+                presentation.RowCount <= 0 ||
+                presentation.ColumnCount <= 0)
+                return;
+
+            // A normal Classic restart / restore recreates the presentation Cells,
+            // but it is still the same logical board layout. Keep the same BoardModel
+            // instance so an active GameSession never becomes detached from the board
+            // that is currently visible.
+            if (CanReuseCurrentModel())
+            {
+                SyncStateFromPresentation();
+                return;
+            }
+
             if (runtimeData)
                 Destroy(runtimeData);
 
             runtimeData = ScriptableObject.CreateInstance<BoardData>();
-            runtimeData.name = $"RuntimeBoard_{level.rows}x{level.columns}";
-            runtimeData.Width = level.columns;
-            runtimeData.Height = level.rows;
-            runtimeData.PlayableCells = BuildPlayableCells(level);
+            runtimeData.name =
+                "RuntimeBoard_" +
+                presentation.RowCount +
+                "x" +
+                presentation.ColumnCount;
+
+            runtimeData.Width = presentation.ColumnCount;
+            runtimeData.Height = presentation.RowCount;
+            runtimeData.PlayableCells = BuildPlayableCells();
 
             Model = new BoardModel(runtimeData);
             SyncStateFromPresentation();
+            ModelReplaced?.Invoke();
         }
 
-        List<BoardCoord> BuildPlayableCells(Level level)
+        bool CanReuseCurrentModel()
         {
-            var playable = new List<BoardCoord>(level.rows * level.columns);
+            if (Model == null ||
+                Model.Width != presentation.ColumnCount ||
+                Model.Height != presentation.RowCount)
+                return false;
 
-            for (int row = 0; row < level.rows; row++)
+            for (int row = 0; row < presentation.RowCount; row++)
             {
-                for (int column = 0; column < level.columns; column++)
+                for (int column = 0;
+                     column < presentation.ColumnCount;
+                     column++)
                 {
-                    if (!level.IsDisabled(row, column))
-                        playable.Add(ToBoardCoord(row, column, level.rows));
+                    var coord = ToBoardCoord(row, column);
+
+                    if (Model.IsPlayable(coord) !=
+                        presentation.IsPlayable(row, column))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        List<BoardCoord> BuildPlayableCells()
+        {
+            var playable = new List<BoardCoord>(
+                presentation.RowCount * presentation.ColumnCount);
+
+            for (int row = 0; row < presentation.RowCount; row++)
+            {
+                for (int column = 0;
+                     column < presentation.ColumnCount;
+                     column++)
+                {
+                    if (presentation.IsPlayable(row, column))
+                        playable.Add(ToBoardCoord(row, column));
                 }
             }
 
@@ -78,8 +157,12 @@ namespace RainbowBlockSaga.Runtime
 
         public void SyncNow()
         {
-            if (!presentationSyncSuspended && Model != null && fieldManager.cells != null)
+            if (!presentationSyncSuspended &&
+                Model != null &&
+                presentation.IsReady)
+            {
                 SyncStateFromPresentation();
+            }
         }
 
         public void SuspendPresentationSync()
@@ -90,69 +173,63 @@ namespace RainbowBlockSaga.Runtime
         public void ResumePresentationSync()
         {
             presentationSyncSuspended = false;
-
-            if (Model != null && fieldManager.cells != null)
-                SyncStateFromPresentation();
+            SyncNow();
         }
 
-        public bool TryGetCoord(Cell cell, out BoardCoord coord)
+        public bool TryGetCoord(
+            UnityEngine.Object cellHandle,
+            out BoardCoord coord)
         {
-            if (fieldManager.cells != null)
+            if (presentation.TryGetCellPosition(
+                    cellHandle,
+                    out int row,
+                    out int column))
             {
-                int rows = fieldManager.cells.GetLength(0);
-                int columns = fieldManager.cells.GetLength(1);
-                for (int row = 0; row < rows; row++)
-                {
-                    for (int column = 0; column < columns; column++)
-                    {
-                        if (fieldManager.cells[row, column] != cell)
-                            continue;
-
-                        coord = ToBoardCoord(row, column, rows);
-                        return true;
-                    }
-                }
+                coord = ToBoardCoord(row, column);
+                return true;
             }
 
             coord = default;
             return false;
         }
 
-        public bool TryGetCell(BoardCoord coord, out Cell cell)
+        public bool TryGetCellHandle(
+            BoardCoord coord,
+            out UnityEngine.Object cellHandle)
         {
-            cell = null;
-            if (fieldManager.cells == null || Model == null || !Model.Contains(coord))
+            cellHandle = null;
+
+            if (Model == null || !Model.Contains(coord))
                 return false;
 
             int row = Model.Height - 1 - coord.Y;
             int column = coord.X;
-            if (row < 0 || row >= fieldManager.cells.GetLength(0) ||
-                column < 0 || column >= fieldManager.cells.GetLength(1))
-                return false;
 
-            cell = fieldManager.cells[row, column];
-            return cell != null;
+            return presentation.TryGetCellHandle(
+                row,
+                column,
+                out cellHandle);
         }
 
         void SyncStateFromPresentation()
         {
-            int rows = fieldManager.cells.GetLength(0);
-            int columns = fieldManager.cells.GetLength(1);
-
-            if (Model.Width != columns || Model.Height != rows)
+            if (Model == null ||
+                Model.Width != presentation.ColumnCount ||
+                Model.Height != presentation.RowCount)
                 return;
 
-            for (int row = 0; row < rows; row++)
+            for (int row = 0; row < presentation.RowCount; row++)
             {
-                for (int column = 0; column < columns; column++)
+                for (int column = 0;
+                     column < presentation.ColumnCount;
+                     column++)
                 {
-                    var cell = fieldManager.cells[row, column];
-                    var coord = ToBoardCoord(row, column, rows);
+                    var coord = ToBoardCoord(row, column);
 
                     if (!Model.IsPlayable(coord))
                         continue;
 
-                    if (cell.busy)
+                    if (presentation.IsOccupied(row, column))
                         Model.SetOccupied(coord);
                     else
                         Model.SetEmpty(coord);
@@ -160,13 +237,18 @@ namespace RainbowBlockSaga.Runtime
             }
         }
 
-        static BoardCoord ToBoardCoord(int row, int column, int rowCount)
+        BoardCoord ToBoardCoord(int row, int column)
         {
-            return new BoardCoord(column, rowCount - 1 - row);
+            return new BoardCoord(
+                column,
+                presentation.RowCount - 1 - row);
         }
 
         void OnDestroy()
         {
+            if (presentation != null)
+                presentation.BoardChanged -= OnBoardChanged;
+
             if (Current == this)
                 Current = null;
 

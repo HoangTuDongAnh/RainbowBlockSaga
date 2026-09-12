@@ -9,22 +9,20 @@ using BlockPuzzleGameToolkit.Scripts.Enums;
 using BlockPuzzleGameToolkit.Scripts.Gameplay.Pool;
 using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using BlockPuzzleGameToolkit.Scripts.System;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 
 namespace BlockPuzzleGameToolkit.Scripts.Gameplay
 {
-    public class CellDeckManager : MonoBehaviour
+    public class CellDeckManager : MonoBehaviour, IBlockTrayPresentation
     {
-        /// <summary>
-        /// Optional migration hooks.
-        /// They deliberately use toolkit types only so CandySmith.BlockPuzzle.Main never depends
-        /// on Assembly-CSharp / RainbowBlockSaga.
-        /// </summary>
-        public static Func<ShapeTemplate[]> BatchProvider;
-        public static Action<ShapeTemplate[]> BatchPresented;
-        public static Action<Shape> ShapeConsumed;
-        public static Action<ShapeTemplate> ShapeAdded;
-        public static Action RecoveryRequested;
+        public int SlotCount => cellDecks != null ? cellDecks.Length : 0;
+
+        public global::System.Func<UnityEngine.Object[]> BatchProvider { get; set; }
+
+        public event global::System.Action<UnityEngine.Object[]> BatchPresented;
+        public event global::System.Action<UnityEngine.Object> ShapeAdded;
+        public event global::System.Action RecoveryRequested;
 
         public CellDeck[] cellDecks;
 
@@ -49,29 +47,31 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
         {
             RemoveUsedShapes(shape);
 
-            if (shape != null)
-                ShapeConsumed?.Invoke(shape);
-
             if (GameManager.instance.IsTutorialMode())
                 return;
 
             if (cellDecks.Any(x => !x.IsEmpty))
                 return;
 
-            if (TryFillFromMigrationProvider())
+            if (TryFillFromRuntimeProvider())
                 return;
 
             FillLegacyBatch();
         }
 
-        bool TryFillFromMigrationProvider()
+        bool TryFillFromRuntimeProvider()
         {
             if (BatchProvider == null)
                 return false;
 
-            var batch = BatchProvider.Invoke();
-            if (batch == null || batch.Length == 0)
+            var handles = BatchProvider.Invoke();
+            if (handles == null || handles.Length == 0)
                 return false;
+
+            var batch = new ShapeTemplate[handles.Length];
+
+            for (int i = 0; i < handles.Length; i++)
+                batch[i] = handles[i] as ShapeTemplate;
 
             FillCellDecksWithShapes(batch);
             return true;
@@ -129,7 +129,11 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
                 presented[index] = shapeTemplate;
             }
 
-            BatchPresented?.Invoke(presented);
+            var presentedHandles = new UnityEngine.Object[presented.Length];
+            for (int i = 0; i < presented.Length; i++)
+                presentedHandles[i] = presented[i];
+
+            BatchPresented?.Invoke(presentedHandles);
         }
 
         private void RemoveUsedShapes(Shape shape)
@@ -165,7 +169,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
             RecoveryRequested?.Invoke();
             ClearCellDecks();
 
-            if (TryFillFromMigrationProvider())
+            if (TryFillFromRuntimeProvider())
                 return;
 
             foreach (var cellDeck in cellDecks)
@@ -185,7 +189,7 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
         {
             yield return new WaitForSeconds(0.2f);
 
-            if (TryFillFromMigrationProvider())
+            if (TryFillFromRuntimeProvider())
                 yield break;
 
             FillFitShapesOnlyLegacy();
@@ -220,6 +224,22 @@ namespace BlockPuzzleGameToolkit.Scripts.Gameplay
                         usedShapes.Add(shape.shapeTemplate);
                 }
             }
+        }
+
+        public UnityEngine.Object[] GetVisibleShapeHandles()
+        {
+            var shapes = GetShapes();
+            var handles = new UnityEngine.Object[shapes.Length];
+
+            for (int i = 0; i < shapes.Length; i++)
+                handles[i] = shapes[i].shapeTemplate;
+
+            return handles;
+        }
+
+        public void Clear()
+        {
+            ClearCellDecks();
         }
 
         public void AddShapeToFreeCell(ShapeTemplate shapeTemplate)

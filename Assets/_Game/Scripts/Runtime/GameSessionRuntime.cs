@@ -8,6 +8,7 @@ using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Score;
 using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Gameplay.Spawn;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -21,18 +22,25 @@ namespace RainbowBlockSaga.Runtime
     {
         [FormerlySerializedAs("boardBridge")]
         [SerializeField] BoardRuntime boardRuntime;
-        [SerializeField] CellDeckManager deckManager;
-        [SerializeField] ItemFactory itemFactory;
+        [FormerlySerializedAs("deckManager")]
+        [SerializeField] MonoBehaviour trayPresentationSource;
+
+        [FormerlySerializedAs("itemFactory")]
+        [SerializeField] MonoBehaviour shapeCatalogSource;
+
+        IBlockTrayPresentation trayPresentation;
+        IShapeCatalog shapeCatalog;
 
         SpawnProfileData runtimeSpawnProfile;
         ScoreRuleData runtimeScoreRule;
-        bool legacyScoreInitialized;
+        bool presentationScoreInitialized;
+        bool freshRestartPending;
 
         public static GameSessionRuntime Current { get; private set; }
 
         public GameSession Session { get; private set; }
-        public ItemFactory ItemFactory => itemFactory;
-        public CellDeckManager DeckManager => deckManager;
+        public IBlockTrayPresentation TrayPresentation => trayPresentation;
+        public IShapeCatalog ShapeCatalog => shapeCatalog;
 
         public event Action<GameSession> SessionCreated;
         public event Action<GameSessionResult> SessionEnded;
@@ -42,6 +50,9 @@ namespace RainbowBlockSaga.Runtime
             EventManager.GetEvent(EGameEvent.RestartLevel)
                 .Subscribe(OnRestartLevel);
             EventManager.OnGameStateChanged += OnGameStateChanged;
+
+            if (boardRuntime != null)
+                boardRuntime.ModelReplaced += OnBoardModelReplaced;
         }
 
         void OnDisable()
@@ -49,21 +60,37 @@ namespace RainbowBlockSaga.Runtime
             EventManager.GetEvent(EGameEvent.RestartLevel)
                 .Unsubscribe(OnRestartLevel);
             EventManager.OnGameStateChanged -= OnGameStateChanged;
+
+            if (boardRuntime != null)
+                boardRuntime.ModelReplaced -= OnBoardModelReplaced;
         }
 
         void Awake()
         {
             Current = this;
 
+            trayPresentation =
+                trayPresentationSource as IBlockTrayPresentation;
+            shapeCatalog =
+                shapeCatalogSource as IShapeCatalog;
+
+            if (trayPresentation == null)
+                throw new InvalidOperationException(
+                    "GameSessionRuntime requires an IBlockTrayPresentation source.");
+
+            if (shapeCatalog == null)
+                throw new InvalidOperationException(
+                    "GameSessionRuntime requires an IShapeCatalog source.");
+
             runtimeSpawnProfile =
                 ScriptableObject.CreateInstance<SpawnProfileData>();
             runtimeSpawnProfile.name =
                 "Runtime_SessionSpawnProfile";
             runtimeSpawnProfile.BatchSize =
-                deckManager.cellDecks.Length;
+                trayPresentation.SlotCount;
             runtimeSpawnProfile.EnsureAtLeastOnePlayable = true;
             runtimeSpawnProfile.MinPlayablePerBatch =
-                Mathf.Min(2, deckManager.cellDecks.Length);
+                Mathf.Min(2, trayPresentation.SlotCount);
             runtimeSpawnProfile.PreferDistinctShapes = true;
 
             runtimeScoreRule =
@@ -102,9 +129,14 @@ namespace RainbowBlockSaga.Runtime
             Session.Ended += OnSessionEnded;
             Session.StartFromCurrentState();
 
-            InitializeLegacyScore();
-            SynchronizeQueueFromVisualDecks();
-            ApplyLegacyGameState(EventManager.GameStatus);
+            InitializePresentationScore();
+
+            if (!freshRestartPending)
+                SynchronizeQueueFromVisualDecks();
+
+            freshRestartPending = false;
+
+            ApplyPresentationGameState(EventManager.GameStatus);
 
             SessionCreated?.Invoke(Session);
             return Session;
@@ -112,15 +144,50 @@ namespace RainbowBlockSaga.Runtime
 
         void OnRestartLevel()
         {
+            // Restart means a brand-new Classic/Timed run.
+            // Do not let stale visual deck contents become the new Session.Queue.
+            freshRestartPending = true;
+
+            ResetSession();
+
+            trayPresentation?.Clear();
+
+            ResetPresentationScore();
+        }
+
+        void ResetPresentationScore()
+        {
+            var classic =
+                FindFirstObjectByType<ClassicModeHandler>(
+                    FindObjectsInactive.Include);
+
+            if (classic != null)
+            {
+                classic.ResetScore();
+                return;
+            }
+
+            var timed =
+                FindFirstObjectByType<TimedModeHandler>(
+                    FindObjectsInactive.Include);
+
+            if (timed != null)
+                timed.ResetScore();
+        }
+
+        void OnBoardModelReplaced()
+        {
+            // A different board layout invalidates the board reference owned by
+            // the current session. Recreate the session around the new model.
             ResetSession();
         }
 
         void OnGameStateChanged(EGameState state)
         {
-            ApplyLegacyGameState(state);
+            ApplyPresentationGameState(state);
         }
 
-        void ApplyLegacyGameState(EGameState state)
+        void ApplyPresentationGameState(EGameState state)
         {
             if (Session == null)
                 return;
@@ -148,7 +215,7 @@ namespace RainbowBlockSaga.Runtime
         {
             if (Session == null)
             {
-                legacyScoreInitialized = false;
+                presentationScoreInitialized = false;
                 return;
             }
 
@@ -158,7 +225,7 @@ namespace RainbowBlockSaga.Runtime
                 Session.Cancel();
 
             Session = null;
-            legacyScoreInitialized = false;
+            presentationScoreInitialized = false;
         }
 
         public void RecoverFromNoMoves()
@@ -183,37 +250,36 @@ namespace RainbowBlockSaga.Runtime
             if (session == null || session.IsEnded)
                 return;
 
-            var visualShapes = deckManager.GetShapes();
+            var visibleHandles =
+                trayPresentation.GetVisibleShapeHandles();
+
             var batch = new System.Collections.Generic.List<BlockShapeData>(
-                visualShapes.Length);
+                visibleHandles.Length);
 
-            foreach (var visualShape in visualShapes)
+            foreach (var handle in visibleHandles)
             {
-                if (visualShape == null ||
-                    visualShape.shapeTemplate == null)
-                    continue;
-
                 var data =
                     ShapeDataAdapter.GetOrCreate(
-                        visualShape.shapeTemplate);
+                        handle,
+                        shapeCatalog);
 
                 if (data != null)
                     batch.Add(data);
             }
 
-            // If visual decks already contain shapes, they are the migration boundary's
-            // current truth. This prevents lifecycle ordering from leaving Session.Queue stale.
+            // Visible tray contents are presentation truth during normal play/resume.
+            // Fresh restart deliberately skips this path so stale shapes cannot seed the new queue.
             if (batch.Count > 0)
                 session.SetExternalBatch(batch);
         }
 
-        void InitializeLegacyScore()
+        void InitializePresentationScore()
         {
-            if (legacyScoreInitialized ||
+            if (presentationScoreInitialized ||
                 Session == null)
                 return;
 
-            legacyScoreInitialized = true;
+            presentationScoreInitialized = true;
 
             var classic =
                 FindFirstObjectByType<ClassicModeHandler>(
@@ -236,16 +302,18 @@ namespace RainbowBlockSaga.Runtime
         public void RefreshSpawnProfile()
         {
             runtimeSpawnProfile.BatchSize =
-                deckManager.cellDecks.Length;
+                trayPresentation.SlotCount;
+            runtimeSpawnProfile.MinPlayablePerBatch =
+                Mathf.Min(2, trayPresentation.SlotCount);
             runtimeSpawnProfile.Shapes.Clear();
 
             var eligible =
-                itemFactory.GetEligibleShapeTemplates();
+                shapeCatalog.GetEligibleShapes();
 
-            foreach (var template in eligible)
+            foreach (var descriptor in eligible)
             {
                 var data =
-                    ShapeDataAdapter.GetOrCreate(template);
+                    ShapeDataAdapter.GetOrCreate(descriptor);
 
                 if (data != null)
                     runtimeSpawnProfile.Shapes.Add(data);

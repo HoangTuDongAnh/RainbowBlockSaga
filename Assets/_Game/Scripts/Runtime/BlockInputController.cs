@@ -12,8 +12,8 @@ namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
     /// Runtime input controller.
-    /// Keeps the original toolkit Shape visuals/drag geometry while BoardModel is the
-    /// authoritative occupancy state for placement validation.
+    /// Uses the current Shape presentation while BoardModel remains the authoritative
+    /// occupancy state for placement validation.
     /// </summary>
     public class BlockInputController : MonoBehaviour
     {
@@ -30,6 +30,7 @@ namespace RainbowBlockSaga.Runtime
         Canvas canvas;
         Camera eventCamera;
         BoardRuntime boardRuntime;
+        FieldManager fieldPresentation;
         HighlightManager highlightManager;
 
         Vector2 originalPosition;
@@ -169,7 +170,9 @@ namespace RainbowBlockSaga.Runtime
                 return;
 
             highlightManager = context.HighlightManager;
-            if (highlightManager == null)
+            fieldPresentation = boardRuntime.PresentationSource as FieldManager;
+
+            if (highlightManager == null || fieldPresentation == null)
                 return;
 
             isDragging = true;
@@ -183,7 +186,7 @@ namespace RainbowBlockSaga.Runtime
 
         void HandleDrag(Vector2 pointerPosition)
         {
-            float cellSize = boardRuntime.Field.GetCellSize();
+            float cellSize = fieldPresentation.GetCellSize();
             float scale = cellSize / PresentationCellSize;
             transform.localScale = new Vector3(scale, scale, 1f);
 
@@ -215,10 +218,10 @@ namespace RainbowBlockSaga.Runtime
             foreach (var pair in currentHits)
                 highlightManager.HighlightCell(pair.Key.transform, pair.Value);
 
-            // Let the toolkit calculate the line-preview FX after the temporary cell highlights exist.
+            // Calculate line-preview FX after temporary cell highlights exist.
             if (items.Count > 0)
                 highlightManager.HighlightFill(
-                    boardRuntime.Field.GetFilledLines(true),
+                    fieldPresentation.GetFilledLines(true),
                     items[0].itemTemplate);
 
             hasValidPlacement = true;
@@ -291,8 +294,8 @@ namespace RainbowBlockSaga.Runtime
                     pair.Key.SetBonus(pair.Value.bonusItemTemplate);
             }
 
-            // Step 5: resolve and score on the new backend before publishing the
-            // compatibility event. Queue/Spawn then observes the post-resolve BoardModel.
+            // Resolve and score before publishing the presentation ShapePlaced event.
+            // Queue/Spawn then observes the post-resolve BoardModel.
             var resolveRuntime = ResolveScoreRuntime.Current;
             bool resolved = resolveRuntime != null &&
                             resolveRuntime.TryResolvePlacement(

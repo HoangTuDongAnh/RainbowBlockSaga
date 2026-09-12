@@ -1,0 +1,14 @@
+{
+    "name": "RainbowBlockSaga.Presentation.Contracts",
+    "rootNamespace": "RainbowBlockSaga.Presentation.Contracts",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

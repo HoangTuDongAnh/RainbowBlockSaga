@@ -1,79 +1,69 @@
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Board;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 
 namespace RainbowBlockSaga.Runtime
 {
-    /// <summary>
-    /// Maps ShapeTemplate presentation assets to runtime BlockShapeData and back.
-    /// </summary>
     public static class ShapeDataAdapter
     {
-        static readonly Dictionary<ShapeTemplate, BlockShapeData> Cache = new();
-        static readonly Dictionary<BlockShapeData, ShapeTemplate> ReverseCache = new();
+        static readonly Dictionary<UnityEngine.Object, BlockShapeData> Cache = new();
+        static readonly Dictionary<BlockShapeData, UnityEngine.Object> ReverseCache = new();
 
-        public static BlockShapeData GetOrCreate(ShapeTemplate template)
+        public static BlockShapeData GetOrCreate(ShapeDescriptor descriptor)
         {
-            if (template == null)
+            if (descriptor == null || descriptor.Handle == null)
                 return null;
 
-            if (Cache.TryGetValue(template, out var data) && data)
+            if (Cache.TryGetValue(descriptor.Handle, out var data) && data)
                 return data;
 
             data = ScriptableObject.CreateInstance<BlockShapeData>();
-            data.name = $"Runtime_{template.name}";
-            data.Cells = BuildCells(template);
-            data.SpawnWeight = Mathf.Max(0.0001f, template.chanceForSpawn);
-            data.MinAdventureLevel = Mathf.Max(1, template.spawnFromLevel);
+            data.name = "Runtime_" + descriptor.Name;
+            data.Cells = BuildCells(descriptor);
+            data.SpawnWeight = Mathf.Max(0.0001f, descriptor.SpawnWeight);
+            data.MinAdventureLevel = Mathf.Max(1, descriptor.MinAdventureLevel);
 
-            Cache[template] = data;
-            ReverseCache[data] = template;
+            Cache[descriptor.Handle] = data;
+            ReverseCache[data] = descriptor.Handle;
             return data;
         }
 
-        public static ShapeTemplate GetTemplate(BlockShapeData data)
+        public static BlockShapeData GetOrCreate(
+            UnityEngine.Object handle,
+            IShapeCatalog catalog)
         {
-            if (data != null && ReverseCache.TryGetValue(data, out var template))
-                return template;
+            if (handle == null ||
+                catalog == null ||
+                !catalog.TryGetDescriptor(handle, out var descriptor))
+            {
+                return null;
+            }
+
+            return GetOrCreate(descriptor);
+        }
+
+        public static UnityEngine.Object GetPresentationHandle(BlockShapeData data)
+        {
+            if (data != null &&
+                ReverseCache.TryGetValue(data, out var handle))
+            {
+                return handle;
+            }
 
             return null;
         }
 
-        static List<BoardCoord> BuildCells(ShapeTemplate template)
+        static List<BoardCoord> BuildCells(ShapeDescriptor descriptor)
         {
-            int minColumn = int.MaxValue;
-            int maxRow = int.MinValue;
-
-            for (int row = 0; row < template.rows.Length; row++)
-            {
-                var cells = template.rows[row].cells;
-                for (int column = 0; column < cells.Length; column++)
-                {
-                    if (!cells[column])
-                        continue;
-
-                    minColumn = Mathf.Min(minColumn, column);
-                    maxRow = Mathf.Max(maxRow, row);
-                }
-            }
-
             var result = new List<BoardCoord>();
-            if (minColumn == int.MaxValue)
+
+            if (descriptor.Cells == null)
                 return result;
 
-            for (int row = 0; row < template.rows.Length; row++)
-            {
-                var cells = template.rows[row].cells;
-                for (int column = 0; column < cells.Length; column++)
-                {
-                    if (!cells[column])
-                        continue;
-
-                    result.Add(new BoardCoord(column - minColumn, maxRow - row));
-                }
-            }
+            foreach (var cell in descriptor.Cells)
+                result.Add(new BoardCoord(cell.x, cell.y));
 
             return result;
         }

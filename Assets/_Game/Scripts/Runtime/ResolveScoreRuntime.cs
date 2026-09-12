@@ -72,7 +72,8 @@ namespace RainbowBlockSaga.Runtime
 
             var shapeData =
                 ShapeDataAdapter.GetOrCreate(
-                    legacyShape.shapeTemplate);
+                    legacyShape.shapeTemplate,
+                    sessionRuntime.ShapeCatalog);
 
             var outcome =
                 session.ResolveExternalPlacement(
@@ -119,10 +120,13 @@ namespace RainbowBlockSaga.Runtime
                     if (!boardRuntime.Model.IsPlayable(coord))
                         continue;
 
-                    if (boardRuntime.TryGetCell(
+                    if (boardRuntime.TryGetCellHandle(
                             coord,
-                            out var cell))
+                            out var handle) &&
+                        handle is Cell cell)
+                    {
                         line.Add(cell);
+                    }
                 }
 
                 if (line.Count > 0)
@@ -142,10 +146,13 @@ namespace RainbowBlockSaga.Runtime
                     if (!boardRuntime.Model.IsPlayable(coord))
                         continue;
 
-                    if (boardRuntime.TryGetCell(
+                    if (boardRuntime.TryGetCellHandle(
                             coord,
-                            out var cell))
+                            out var handle) &&
+                        handle is Cell cell)
+                    {
                         line.Add(cell);
+                    }
                 }
 
                 if (line.Count > 0)

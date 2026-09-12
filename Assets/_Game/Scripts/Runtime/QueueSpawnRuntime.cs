@@ -1,102 +1,110 @@
 using System.Collections.Generic;
-using BlockPuzzleGameToolkit.Scripts.Gameplay;
-using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Session;
+using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
-    /// <summary>
-    /// Runtime queue/spawn presentation controller.
-    /// GameSession owns BlockQueue + SpawnStrategy; this component maps runtime shape data to the current ShapeTemplate / CellDeck presentation.
-    /// </summary>
     public class QueueSpawnRuntime : MonoBehaviour
     {
         [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
 
-        public BlockPuzzleGameToolkit.Scripts.Gameplay.CellDeckManager DeckManager =>
-            sessionRuntime.DeckManager;
+        IBlockTrayPresentation tray;
+        IShapeCatalog catalog;
 
         public GameSession Session => sessionRuntime.GetOrCreateSession();
 
+        void Start()
+        {
+            BindPresentation();
+        }
+
         void OnEnable()
         {
-            CellDeckManager.BatchProvider = ProvideBatch;
-            CellDeckManager.BatchPresented = OnBatchPresented;
-            CellDeckManager.ShapeConsumed = OnShapeConsumed;
-            CellDeckManager.ShapeAdded = OnShapeAdded;
-            CellDeckManager.RecoveryRequested = OnRecoveryRequested;
+            BindPresentation();
+        }
+
+        void BindPresentation()
+        {
+            if (sessionRuntime == null)
+                return;
+
+            tray = sessionRuntime.TrayPresentation;
+            catalog = sessionRuntime.ShapeCatalog;
+
+            if (tray == null || catalog == null)
+                return;
+
+            tray.BatchProvider = ProvideBatch;
+
+            tray.BatchPresented -= OnBatchPresented;
+            tray.BatchPresented += OnBatchPresented;
+
+            tray.ShapeAdded -= OnShapeAdded;
+            tray.ShapeAdded += OnShapeAdded;
+
+            tray.RecoveryRequested -= OnRecoveryRequested;
+            tray.RecoveryRequested += OnRecoveryRequested;
         }
 
         void OnDisable()
         {
-            if (CellDeckManager.BatchProvider == ProvideBatch)
-                CellDeckManager.BatchProvider = null;
+            if (tray == null)
+                return;
 
-            if (CellDeckManager.BatchPresented == OnBatchPresented)
-                CellDeckManager.BatchPresented = null;
+            if (tray.BatchProvider == ProvideBatch)
+                tray.BatchProvider = null;
 
-            if (CellDeckManager.ShapeConsumed == OnShapeConsumed)
-                CellDeckManager.ShapeConsumed = null;
-
-            if (CellDeckManager.ShapeAdded == OnShapeAdded)
-                CellDeckManager.ShapeAdded = null;
-
-            if (CellDeckManager.RecoveryRequested == OnRecoveryRequested)
-                CellDeckManager.RecoveryRequested = null;
+            tray.BatchPresented -= OnBatchPresented;
+            tray.ShapeAdded -= OnShapeAdded;
+            tray.RecoveryRequested -= OnRecoveryRequested;
         }
 
-        ShapeTemplate[] ProvideBatch()
+        UnityEngine.Object[] ProvideBatch()
         {
             var session = Session;
             if (session == null)
                 return null;
 
-            // A non-empty null batch means "the new owner intentionally has no next batch".
-            // This prevents CellDeckManager from falling back to its presentation random generator
-            // after GameSession has already decided NoValidMoves.
             if (session.IsEnded)
-                return new ShapeTemplate[sessionRuntime.DeckManager.cellDecks.Length];
+                return new UnityEngine.Object[tray.SlotCount];
 
             sessionRuntime.RefreshSpawnProfile();
             session.EnsureBatch();
 
             var result =
-                new ShapeTemplate[session.Queue.Shapes.Count];
+                new UnityEngine.Object[session.Queue.Shapes.Count];
 
             for (int i = 0; i < session.Queue.Shapes.Count; i++)
             {
                 result[i] =
-                    ShapeDataAdapter.GetTemplate(
+                    ShapeDataAdapter.GetPresentationHandle(
                         session.Queue.Shapes[i]);
             }
 
             return result;
         }
 
-        void OnBatchPresented(ShapeTemplate[] templates)
+        void OnBatchPresented(UnityEngine.Object[] handles)
         {
             var session = Session;
             if (session == null || session.IsEnded)
                 return;
 
-            // Normal provider batches are already owned by Session.Queue.
-            // This method also supports tutorial / externally forced batches.
-            if (MatchesCurrentQueue(session, templates))
+            if (MatchesCurrentQueue(session, handles))
                 return;
 
             var batch = new List<BlockShapeData>();
 
-            foreach (var template in templates)
+            foreach (var handle in handles)
             {
-                if (template == null)
-                    continue;
-
                 var data =
-                    ShapeDataAdapter.GetOrCreate(template);
+                    ShapeDataAdapter.GetOrCreate(
+                        handle,
+                        catalog);
 
                 if (data != null)
                     batch.Add(data);
@@ -105,41 +113,40 @@ namespace RainbowBlockSaga.Runtime
             session.SetExternalBatch(batch);
         }
 
-        void OnShapeConsumed(Shape shape)
-        {
-            // Consumption now happens inside GameSession.ResolveExternalPlacement()
-            // before the presentation ShapePlaced compatibility event is published.
-        }
-
         void OnRecoveryRequested()
         {
             sessionRuntime.RecoverFromNoMoves();
         }
 
-        void OnShapeAdded(ShapeTemplate template)
+        void OnShapeAdded(UnityEngine.Object handle)
         {
             var session = Session;
             if (session == null ||
                 session.IsEnded ||
-                template == null)
+                handle == null)
                 return;
 
-            session.AddExternalShape(
-                ShapeDataAdapter.GetOrCreate(template));
+            var data =
+                ShapeDataAdapter.GetOrCreate(
+                    handle,
+                    catalog);
+
+            if (data != null)
+                session.AddExternalShape(data);
         }
 
         bool MatchesCurrentQueue(
             GameSession session,
-            ShapeTemplate[] templates)
+            UnityEngine.Object[] handles)
         {
-            if (templates == null ||
-                templates.Length != session.Queue.Shapes.Count)
+            if (handles == null ||
+                handles.Length != session.Queue.Shapes.Count)
                 return false;
 
-            for (int i = 0; i < templates.Length; i++)
+            for (int i = 0; i < handles.Length; i++)
             {
-                if (ShapeDataAdapter.GetTemplate(
-                        session.Queue.Shapes[i]) != templates[i])
+                if (ShapeDataAdapter.GetPresentationHandle(
+                        session.Queue.Shapes[i]) != handles[i])
                     return false;
             }
 

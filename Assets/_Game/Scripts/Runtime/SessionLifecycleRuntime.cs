@@ -52,16 +52,15 @@ namespace RainbowBlockSaga.Runtime
         {
             BindResolveRuntime();
 
-            var session = sessionRuntime.Session;
+            var session = sessionRuntime.GetOrCreateSession();
             if (session == null)
                 return;
 
             if (observedSession != session)
                 OnSessionCreated(session);
 
-            // Keep the new queue aligned with the visible toolkit slots, then re-evaluate.
-            // This is the safety net for cases where the final visual batch was populated
-            // before the session lifecycle event was observed.
+            // Keep Session.Queue aligned with the visible tray, then re-evaluate.
+            // This also guarantees the no-valid-moves flow after the final placement.
             if (!session.IsEnded &&
                 (EventManager.GameStatus == EGameState.Playing ||
                  EventManager.GameStatus == EGameState.Tutorial))
@@ -109,8 +108,8 @@ namespace RainbowBlockSaga.Runtime
             if (losePresented)
                 return;
 
-            // Step 7 migrates Classic lifecycle only. Other toolkit modes retain their
-            // original target/timer state handlers until those modes are migrated separately.
+            // Runtime currently owns the Classic no-valid-moves lifecycle.
+            // Other modes keep their own target/timer lifecycle for now.
             if (levelManager.GetGameMode() != EGameMode.Classic)
                 return;
 
