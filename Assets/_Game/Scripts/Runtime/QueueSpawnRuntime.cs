@@ -4,22 +4,23 @@ using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Session;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Step 6 queue presentation bridge.
-    /// GameSession owns BlockQueue + SpawnStrategy; this component only maps between
-    /// BlockShapeData and the preserved toolkit ShapeTemplate / CellDeck visuals.
+    /// Runtime queue/spawn presentation controller.
+    /// GameSession owns BlockQueue + SpawnStrategy; this component maps runtime shape data to the current ShapeTemplate / CellDeck presentation.
     /// </summary>
-    public class ToolkitQueueSpawnMigrationBridge : MonoBehaviour
+    public class QueueSpawnRuntime : MonoBehaviour
     {
-        [SerializeField] ToolkitGameSessionMigrationBridge sessionBridge;
+        [FormerlySerializedAs("sessionBridge")]
+        [SerializeField] GameSessionRuntime sessionRuntime;
 
         public BlockPuzzleGameToolkit.Scripts.Gameplay.CellDeckManager DeckManager =>
-            sessionBridge.DeckManager;
+            sessionRuntime.DeckManager;
 
-        public GameSession Session => sessionBridge.GetOrCreateSession();
+        public GameSession Session => sessionRuntime.GetOrCreateSession();
 
         void OnEnable()
         {
@@ -55,12 +56,12 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 return null;
 
             // A non-empty null batch means "the new owner intentionally has no next batch".
-            // This prevents CellDeckManager from falling back to its legacy random generator
+            // This prevents CellDeckManager from falling back to its presentation random generator
             // after GameSession has already decided NoValidMoves.
             if (session.IsEnded)
-                return new ShapeTemplate[sessionBridge.DeckManager.cellDecks.Length];
+                return new ShapeTemplate[sessionRuntime.DeckManager.cellDecks.Length];
 
-            sessionBridge.RefreshSpawnProfile();
+            sessionRuntime.RefreshSpawnProfile();
             session.EnsureBatch();
 
             var result =
@@ -69,7 +70,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             for (int i = 0; i < session.Queue.Shapes.Count; i++)
             {
                 result[i] =
-                    ToolkitShapeDataAdapter.GetTemplate(
+                    ShapeDataAdapter.GetTemplate(
                         session.Queue.Shapes[i]);
             }
 
@@ -95,7 +96,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                     continue;
 
                 var data =
-                    ToolkitShapeDataAdapter.GetOrCreate(template);
+                    ShapeDataAdapter.GetOrCreate(template);
 
                 if (data != null)
                     batch.Add(data);
@@ -107,12 +108,12 @@ namespace RainbowBlockSaga.Integration.Toolkit
         void OnShapeConsumed(Shape shape)
         {
             // Consumption now happens inside GameSession.ResolveExternalPlacement()
-            // before the legacy ShapePlaced compatibility event is published.
+            // before the presentation ShapePlaced compatibility event is published.
         }
 
         void OnRecoveryRequested()
         {
-            sessionBridge.RecoverFromNoMoves();
+            sessionRuntime.RecoverFromNoMoves();
         }
 
         void OnShapeAdded(ShapeTemplate template)
@@ -124,7 +125,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 return;
 
             session.AddExternalShape(
-                ToolkitShapeDataAdapter.GetOrCreate(template));
+                ShapeDataAdapter.GetOrCreate(template));
         }
 
         bool MatchesCurrentQueue(
@@ -137,7 +138,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
             for (int i = 0; i < templates.Length; i++)
             {
-                if (ToolkitShapeDataAdapter.GetTemplate(
+                if (ShapeDataAdapter.GetTemplate(
                         session.Queue.Shapes[i]) != templates[i])
                     return false;
             }

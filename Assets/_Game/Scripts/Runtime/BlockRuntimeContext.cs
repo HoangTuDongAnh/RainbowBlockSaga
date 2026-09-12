@@ -1,15 +1,15 @@
 using BlockPuzzleGameToolkit.Scripts.Gameplay;
 using UnityEngine;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Temporary scene-local bridge for toolkit presentation dependencies used by migrated block drag.
+    /// Scene-local runtime context for block presentation dependencies.
     /// Attach this to the same GameObject as HighlightManager.
     /// </summary>
-    public class ToolkitBlockMigrationContext : MonoBehaviour
+    public class BlockRuntimeContext : MonoBehaviour
     {
-        public static ToolkitBlockMigrationContext Current { get; private set; }
+        public static BlockRuntimeContext Current { get; private set; }
         public HighlightManager HighlightManager { get; private set; }
 
         void Awake()

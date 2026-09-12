@@ -8,20 +8,20 @@ using RainbowBlockSaga.Gameplay.Board;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Step 3 migration bridge.
+    /// Runtime input controller.
     /// Keeps the original toolkit Shape visuals/drag geometry while BoardModel is the
-    /// authoritative occupancy state for migrated placement validation.
+    /// authoritative occupancy state for placement validation.
     /// </summary>
-    public class ToolkitBlockDragHandler : MonoBehaviour
+    public class BlockInputController : MonoBehaviour
     {
         const float VerticalOffset = 300f;
-        const float ToolkitCellSize = 126f;
+        const float PresentationCellSize = 126f;
 
         RectTransform rectTransform;
-        ToolkitBlockViewAdapter blockView;
+        BlockViewAdapter blockView;
         Shape legacyShape;
         readonly List<Item> items = new();
         readonly Dictionary<Cell, Item> currentHits = new();
@@ -29,7 +29,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         Canvas canvas;
         Camera eventCamera;
-        ToolkitBoardMigrationBridge boardBridge;
+        BoardRuntime boardRuntime;
         HighlightManager highlightManager;
 
         Vector2 originalPosition;
@@ -41,7 +41,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
         void OnEnable()
         {
             rectTransform = (RectTransform)transform;
-            blockView = GetComponent<ToolkitBlockViewAdapter>();
+            blockView = GetComponent<BlockViewAdapter>();
             legacyShape = blockView.LegacyShape;
             legacyShape.OnShapeUpdated += UpdateItems;
             UpdateItems();
@@ -160,12 +160,12 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         void BeginDrag()
         {
-            var context = ToolkitBlockMigrationContext.Current;
-            boardBridge = ToolkitBoardMigrationBridge.Current;
+            var context = BlockRuntimeContext.Current;
+            boardRuntime = BoardRuntime.Current;
 
             // Shapes are pooled before the gameplay hierarchy is enabled.
             // Resolve scene-local references only when an actual drag starts.
-            if (context == null || boardBridge == null || boardBridge.Model == null)
+            if (context == null || boardRuntime == null || boardRuntime.Model == null)
                 return;
 
             highlightManager = context.HighlightManager;
@@ -183,8 +183,8 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         void HandleDrag(Vector2 pointerPosition)
         {
-            float cellSize = boardBridge.LegacyField.GetCellSize();
-            float scale = cellSize / ToolkitCellSize;
+            float cellSize = boardRuntime.Field.GetCellSize();
+            float scale = cellSize / PresentationCellSize;
             transform.localScale = new Vector3(scale, scale, 1f);
 
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -208,7 +208,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             highlightManager.ClearAllHighlights();
             ClearPlacementState();
 
-            boardBridge.SyncNow();
+            boardRuntime.SyncNow();
             if (!TryCollectPlacement())
                 return;
 
@@ -218,7 +218,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             // Let the toolkit calculate the line-preview FX after the temporary cell highlights exist.
             if (items.Count > 0)
                 highlightManager.HighlightFill(
-                    boardBridge.LegacyField.GetFilledLines(true),
+                    boardRuntime.Field.GetFilledLines(true),
                     items[0].itemTemplate);
 
             hasValidPlacement = true;
@@ -226,7 +226,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         bool TryCollectPlacement()
         {
-            if (boardBridge.Model == null || items.Count == 0)
+            if (boardRuntime.Model == null || items.Count == 0)
                 return false;
 
             var uniqueCells = new HashSet<Cell>();
@@ -240,11 +240,11 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 if (!uniqueCells.Add(cell))
                     return false;
 
-                if (!boardBridge.TryGetCoord(cell, out var coord))
+                if (!boardRuntime.TryGetCoord(cell, out var coord))
                     return false;
 
                 // BoardModel is the new occupancy authority.
-                if (!boardBridge.Model.IsEmpty(coord))
+                if (!boardRuntime.Model.IsEmpty(coord))
                     return false;
 
                 currentHits.Add(cell, item);
@@ -265,7 +265,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             // Re-evaluate at the final pointer position before committing.
             highlightManager.ClearAllHighlights();
             ClearPlacementState();
-            boardBridge.SyncNow();
+            boardRuntime.SyncNow();
 
             if (!TryCollectPlacement())
             {
@@ -277,7 +277,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 highlightManager.HighlightCell(pair.Key.transform, pair.Value);
 
             foreach (var coord in currentCoords)
-                boardBridge.Model.SetOccupied(coord);
+                boardRuntime.Model.SetOccupied(coord);
 
             HapticFeedback.TriggerHapticFeedback(HapticFeedback.HapticForce.Light);
             SoundBase.instance.PlaySound(SoundBase.instance.placeShape);
@@ -293,9 +293,9 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
             // Step 5: resolve and score on the new backend before publishing the
             // compatibility event. Queue/Spawn then observes the post-resolve BoardModel.
-            var resolveBridge = ToolkitResolveScoreMigrationBridge.Current;
-            bool resolved = resolveBridge != null &&
-                            resolveBridge.TryResolvePlacement(
+            var resolveRuntime = ResolveScoreRuntime.Current;
+            bool resolved = resolveRuntime != null &&
+                            resolveRuntime.TryResolvePlacement(
                                 legacyShape,
                                 currentCoords);
 

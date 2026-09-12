@@ -2,12 +2,12 @@ using BlockPuzzleGameToolkit.Scripts.Gameplay;
 using RainbowBlockSaga.Gameplay.Block;
 using UnityEngine;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Keeps the original toolkit Shape hierarchy/visuals while exposing the new BlockShapeData model.
+    /// Connects the current Shape presentation to BlockShapeData.
     /// </summary>
-    public class ToolkitBlockViewAdapter : MonoBehaviour
+    public class BlockViewAdapter : MonoBehaviour
     {
         Shape legacyShape;
 
@@ -29,7 +29,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         public void Refresh()
         {
-            Data = ToolkitShapeDataAdapter.GetOrCreate(LegacyShape.shapeTemplate);
+            Data = ShapeDataAdapter.GetOrCreate(LegacyShape.shapeTemplate);
         }
     }
 }

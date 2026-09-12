@@ -9,17 +9,18 @@ using RainbowBlockSaga.Gameplay.Score;
 using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Gameplay.Spawn;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Step 6 composition root.
-    /// Creates exactly one new-architecture GameSession for the original BlockBlast scene.
-    /// Toolkit managers remain presentation / navigation compatibility only.
+    /// Gameplay composition root.
+    /// Creates and owns the GameSession used by the gameplay scene. Presentation managers remain responsible for UI and visual flow.
     /// </summary>
-    public class ToolkitGameSessionMigrationBridge : MonoBehaviour
+    public class GameSessionRuntime : MonoBehaviour
     {
-        [SerializeField] ToolkitBoardMigrationBridge boardBridge;
+        [FormerlySerializedAs("boardBridge")]
+        [SerializeField] BoardRuntime boardRuntime;
         [SerializeField] CellDeckManager deckManager;
         [SerializeField] ItemFactory itemFactory;
 
@@ -27,7 +28,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
         ScoreRuleData runtimeScoreRule;
         bool legacyScoreInitialized;
 
-        public static ToolkitGameSessionMigrationBridge Current { get; private set; }
+        public static GameSessionRuntime Current { get; private set; }
 
         public GameSession Session { get; private set; }
         public ItemFactory ItemFactory => itemFactory;
@@ -57,7 +58,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             runtimeSpawnProfile =
                 ScriptableObject.CreateInstance<SpawnProfileData>();
             runtimeSpawnProfile.name =
-                "Runtime_ToolkitSessionSpawnProfile";
+                "Runtime_SessionSpawnProfile";
             runtimeSpawnProfile.BatchSize =
                 deckManager.cellDecks.Length;
             runtimeSpawnProfile.EnsureAtLeastOnePlayable = true;
@@ -68,7 +69,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             runtimeScoreRule =
                 ScriptableObject.CreateInstance<ScoreRuleData>();
             runtimeScoreRule.name =
-                "Runtime_ToolkitSessionScoreRule";
+                "Runtime_SessionScoreRule";
             runtimeScoreRule.PlacementScorePerCell = 0;
             runtimeScoreRule.BaseLineScore =
                 GameManager.instance.GameSettings.ScorePerLine;
@@ -82,15 +83,15 @@ namespace RainbowBlockSaga.Integration.Toolkit
             if (Session != null)
                 return Session;
 
-            if (boardBridge == null ||
-                boardBridge.Model == null)
+            if (boardRuntime == null ||
+                boardRuntime.Model == null)
                 return null;
 
             RefreshSpawnProfile();
 
             Session = new GameSession(
-                boardBridge.Model,
-                boardBridge.Placement,
+                boardRuntime.Model,
+                boardRuntime.Placement,
                 new BoardResolver(),
                 new ScoreSystem(runtimeScoreRule),
                 new BlockQueue(),
@@ -193,7 +194,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                     continue;
 
                 var data =
-                    ToolkitShapeDataAdapter.GetOrCreate(
+                    ShapeDataAdapter.GetOrCreate(
                         visualShape.shapeTemplate);
 
                 if (data != null)
@@ -244,7 +245,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             foreach (var template in eligible)
             {
                 var data =
-                    ToolkitShapeDataAdapter.GetOrCreate(template);
+                    ShapeDataAdapter.GetOrCreate(template);
 
                 if (data != null)
                     runtimeSpawnProfile.Shapes.Add(data);

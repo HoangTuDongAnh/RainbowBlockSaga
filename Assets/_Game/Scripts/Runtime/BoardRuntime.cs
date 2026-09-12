@@ -5,25 +5,26 @@ using BlockPuzzleGameToolkit.Scripts.LevelsData;
 using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Placement;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Temporary migration boundary for the original BlockBlast scene.
-    /// The toolkit FieldManager remains responsible for legacy visuals while
-    /// BoardModel + PlacementService are now the gameplay source used by migrated drag logic.
+    /// Runtime board owner for the current gameplay scene.
+    /// FieldManager provides board presentation while BoardModel + PlacementService own gameplay state.
     /// </summary>
-    public class ToolkitBoardMigrationBridge : MonoBehaviour, ILevelLoadable
+    public class BoardRuntime : MonoBehaviour, ILevelLoadable
     {
-        [SerializeField] FieldManager legacyField;
+        [FormerlySerializedAs("legacyField")]
+        [SerializeField] FieldManager fieldManager;
 
         BoardData runtimeData;
-        bool toolkitSyncSuspended;
+        bool presentationSyncSuspended;
 
-        public static ToolkitBoardMigrationBridge Current { get; private set; }
+        public static BoardRuntime Current { get; private set; }
         public BoardModel Model { get; private set; }
         public BoardData Data => runtimeData;
-        public FieldManager LegacyField => legacyField;
+        public FieldManager Field => fieldManager;
         public PlacementService Placement { get; } = new();
 
         void Awake()
@@ -38,10 +39,10 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         void LateUpdate()
         {
-            if (toolkitSyncSuspended || Model == null || legacyField.cells == null)
+            if (presentationSyncSuspended || Model == null || fieldManager.cells == null)
                 return;
 
-            SyncStateFromToolkit();
+            SyncStateFromPresentation();
         }
 
         void Build(Level level)
@@ -56,7 +57,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             runtimeData.PlayableCells = BuildPlayableCells(level);
 
             Model = new BoardModel(runtimeData);
-            SyncStateFromToolkit();
+            SyncStateFromPresentation();
         }
 
         List<BoardCoord> BuildPlayableCells(Level level)
@@ -77,34 +78,34 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         public void SyncNow()
         {
-            if (!toolkitSyncSuspended && Model != null && legacyField.cells != null)
-                SyncStateFromToolkit();
+            if (!presentationSyncSuspended && Model != null && fieldManager.cells != null)
+                SyncStateFromPresentation();
         }
 
-        public void SuspendToolkitSync()
+        public void SuspendPresentationSync()
         {
-            toolkitSyncSuspended = true;
+            presentationSyncSuspended = true;
         }
 
-        public void ResumeToolkitSync()
+        public void ResumePresentationSync()
         {
-            toolkitSyncSuspended = false;
+            presentationSyncSuspended = false;
 
-            if (Model != null && legacyField.cells != null)
-                SyncStateFromToolkit();
+            if (Model != null && fieldManager.cells != null)
+                SyncStateFromPresentation();
         }
 
         public bool TryGetCoord(Cell cell, out BoardCoord coord)
         {
-            if (legacyField.cells != null)
+            if (fieldManager.cells != null)
             {
-                int rows = legacyField.cells.GetLength(0);
-                int columns = legacyField.cells.GetLength(1);
+                int rows = fieldManager.cells.GetLength(0);
+                int columns = fieldManager.cells.GetLength(1);
                 for (int row = 0; row < rows; row++)
                 {
                     for (int column = 0; column < columns; column++)
                     {
-                        if (legacyField.cells[row, column] != cell)
+                        if (fieldManager.cells[row, column] != cell)
                             continue;
 
                         coord = ToBoardCoord(row, column, rows);
@@ -120,23 +121,23 @@ namespace RainbowBlockSaga.Integration.Toolkit
         public bool TryGetCell(BoardCoord coord, out Cell cell)
         {
             cell = null;
-            if (legacyField.cells == null || Model == null || !Model.Contains(coord))
+            if (fieldManager.cells == null || Model == null || !Model.Contains(coord))
                 return false;
 
             int row = Model.Height - 1 - coord.Y;
             int column = coord.X;
-            if (row < 0 || row >= legacyField.cells.GetLength(0) ||
-                column < 0 || column >= legacyField.cells.GetLength(1))
+            if (row < 0 || row >= fieldManager.cells.GetLength(0) ||
+                column < 0 || column >= fieldManager.cells.GetLength(1))
                 return false;
 
-            cell = legacyField.cells[row, column];
+            cell = fieldManager.cells[row, column];
             return cell != null;
         }
 
-        void SyncStateFromToolkit()
+        void SyncStateFromPresentation()
         {
-            int rows = legacyField.cells.GetLength(0);
-            int columns = legacyField.cells.GetLength(1);
+            int rows = fieldManager.cells.GetLength(0);
+            int columns = fieldManager.cells.GetLength(1);
 
             if (Model.Width != columns || Model.Height != rows)
                 return;
@@ -145,7 +146,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
             {
                 for (int column = 0; column < columns; column++)
                 {
-                    var cell = legacyField.cells[row, column];
+                    var cell = fieldManager.cells[row, column];
                     var coord = ToBoardCoord(row, column, rows);
 
                     if (!Model.IsPlayable(coord))

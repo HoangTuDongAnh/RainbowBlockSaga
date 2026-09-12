@@ -5,27 +5,29 @@ using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Session;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Step 6 resolve presentation bridge.
-    /// GameSession now owns queue consumption, resolve, scoring and end-state evaluation.
-    /// LevelManager is only used to reproduce the original toolkit FX / UI.
+    /// Runtime resolve/score presentation controller.
+    /// GameSession owns queue consumption, resolve, scoring and end-state evaluation. LevelManager presents FX and UI.
     /// </summary>
-    public class ToolkitResolveScoreMigrationBridge : MonoBehaviour
+    public class ResolveScoreRuntime : MonoBehaviour
     {
         [SerializeField] LevelManager levelManager;
-        [SerializeField] ToolkitBoardMigrationBridge boardBridge;
-        [SerializeField] ToolkitGameSessionMigrationBridge sessionBridge;
+        [FormerlySerializedAs("boardBridge")]
+        [SerializeField] BoardRuntime boardRuntime;
+        [FormerlySerializedAs("sessionBridge")]
+        [SerializeField] GameSessionRuntime sessionRuntime;
 
-        public static ToolkitResolveScoreMigrationBridge Current { get; private set; }
+        public static ResolveScoreRuntime Current { get; private set; }
 
         public bool IsPresenting { get; private set; }
         public event Action PresentationCompleted;
 
         public GameSession Session =>
-            sessionBridge.GetOrCreateSession();
+            sessionRuntime.GetOrCreateSession();
 
         public RainbowBlockSaga.Gameplay.Score.ScoreSystem Score =>
             Session?.Score;
@@ -66,10 +68,10 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
             // CellDeck visuals can be populated before GameSession is lazily created.
             // Reconcile the new queue from the actual visible slots before consuming this shape.
-            sessionBridge.SynchronizeQueueFromVisualDecks();
+            sessionRuntime.SynchronizeQueueFromVisualDecks();
 
             var shapeData =
-                ToolkitShapeDataAdapter.GetOrCreate(
+                ShapeDataAdapter.GetOrCreate(
                     legacyShape.shapeTemplate);
 
             var outcome =
@@ -84,7 +86,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 BuildLegacyLines(outcome.Resolve);
 
             if (outcome.Resolve.ClearedLines > 0)
-                boardBridge.SuspendToolkitSync();
+                boardRuntime.SuspendPresentationSync();
 
             IsPresenting = true;
 
@@ -109,15 +111,15 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 var line = new List<Cell>();
 
                 for (int x = 0;
-                     x < boardBridge.Model.Width;
+                     x < boardRuntime.Model.Width;
                      x++)
                 {
                     var coord = new BoardCoord(x, y);
 
-                    if (!boardBridge.Model.IsPlayable(coord))
+                    if (!boardRuntime.Model.IsPlayable(coord))
                         continue;
 
-                    if (boardBridge.TryGetCell(
+                    if (boardRuntime.TryGetCell(
                             coord,
                             out var cell))
                         line.Add(cell);
@@ -132,15 +134,15 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 var line = new List<Cell>();
 
                 for (int y = 0;
-                     y < boardBridge.Model.Height;
+                     y < boardRuntime.Model.Height;
                      y++)
                 {
                     var coord = new BoardCoord(x, y);
 
-                    if (!boardBridge.Model.IsPlayable(coord))
+                    if (!boardRuntime.Model.IsPlayable(coord))
                         continue;
 
-                    if (boardBridge.TryGetCell(
+                    if (boardRuntime.TryGetCell(
                             coord,
                             out var cell))
                         line.Add(cell);
@@ -156,7 +158,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
         void OnPresentationCompleted(bool hadClear)
         {
             if (hadClear)
-                boardBridge.ResumeToolkitSync();
+                boardRuntime.ResumePresentationSync();
 
             IsPresenting = false;
             PresentationCompleted?.Invoke();

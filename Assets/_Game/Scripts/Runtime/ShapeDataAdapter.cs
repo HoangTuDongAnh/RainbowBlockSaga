@@ -4,14 +4,12 @@ using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Board;
 using UnityEngine;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Temporary shape-data boundary used while toolkit ShapeTemplate assets still provide visuals/content.
-    /// Runtime selection is performed with BlockShapeData, then mapped back to ShapeTemplate only to build
-    /// the preserved toolkit Shape prefab.
+    /// Maps ShapeTemplate presentation assets to runtime BlockShapeData and back.
     /// </summary>
-    public static class ToolkitShapeDataAdapter
+    public static class ShapeDataAdapter
     {
         static readonly Dictionary<ShapeTemplate, BlockShapeData> Cache = new();
         static readonly Dictionary<BlockShapeData, ShapeTemplate> ReverseCache = new();

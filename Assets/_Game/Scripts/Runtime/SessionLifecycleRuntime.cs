@@ -3,18 +3,18 @@ using BlockPuzzleGameToolkit.Scripts.Gameplay;
 using BlockPuzzleGameToolkit.Scripts.System;
 using RainbowBlockSaga.Gameplay.Session;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace RainbowBlockSaga.Integration.Toolkit
+namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Final Step 7 compatibility boundary.
-    /// GameSession is authoritative for Classic NoValidMoves. Presentation is guaranteed by
-    /// both SessionEnded and a compatibility check, so a missed lifecycle event cannot leave
-    /// the player stuck on a dead board.
+    /// Runtime session lifecycle controller.
+    /// GameSession is authoritative for Classic NoValidMoves. SessionEnded plus a runtime safety check guarantees the end flow is presented.
     /// </summary>
-    public class ToolkitSessionLifecyclePresentationBridge : MonoBehaviour
+    public class SessionLifecycleRuntime : MonoBehaviour
     {
-        [SerializeField] ToolkitGameSessionMigrationBridge sessionBridge;
+        [FormerlySerializedAs("sessionBridge")]
+        [SerializeField] GameSessionRuntime sessionRuntime;
         [SerializeField] LevelManager levelManager;
 
         GameSession observedSession;
@@ -23,25 +23,25 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         void OnEnable()
         {
-            sessionBridge.SessionCreated += OnSessionCreated;
-            sessionBridge.SessionEnded += OnSessionEnded;
+            sessionRuntime.SessionCreated += OnSessionCreated;
+            sessionRuntime.SessionEnded += OnSessionEnded;
             LevelManager.ExternalClassicLifecycleEnabled = true;
 
-            BindResolveBridge();
+            BindResolveRuntime();
 
-            if (sessionBridge.Session != null)
-                OnSessionCreated(sessionBridge.Session);
+            if (sessionRuntime.Session != null)
+                OnSessionCreated(sessionRuntime.Session);
         }
 
         void OnDisable()
         {
-            sessionBridge.SessionCreated -= OnSessionCreated;
-            sessionBridge.SessionEnded -= OnSessionEnded;
+            sessionRuntime.SessionCreated -= OnSessionCreated;
+            sessionRuntime.SessionEnded -= OnSessionEnded;
             LevelManager.ExternalClassicLifecycleEnabled = false;
 
-            var resolveBridge = ToolkitResolveScoreMigrationBridge.Current;
-            if (resolveBridge != null)
-                resolveBridge.PresentationCompleted -= OnPresentationCompleted;
+            var resolveRuntime = ResolveScoreRuntime.Current;
+            if (resolveRuntime != null)
+                resolveRuntime.PresentationCompleted -= OnPresentationCompleted;
 
             observedSession = null;
             pendingResult = null;
@@ -50,9 +50,9 @@ namespace RainbowBlockSaga.Integration.Toolkit
 
         void Update()
         {
-            BindResolveBridge();
+            BindResolveRuntime();
 
-            var session = sessionBridge.Session;
+            var session = sessionRuntime.Session;
             if (session == null)
                 return;
 
@@ -66,7 +66,7 @@ namespace RainbowBlockSaga.Integration.Toolkit
                 (EventManager.GameStatus == EGameState.Playing ||
                  EventManager.GameStatus == EGameState.Tutorial))
             {
-                sessionBridge.SynchronizeQueueFromVisualDecks();
+                sessionRuntime.SynchronizeQueueFromVisualDecks();
                 session.EvaluateEndState();
             }
 
@@ -79,14 +79,14 @@ namespace RainbowBlockSaga.Integration.Toolkit
             }
         }
 
-        void BindResolveBridge()
+        void BindResolveRuntime()
         {
-            var resolveBridge = ToolkitResolveScoreMigrationBridge.Current;
-            if (resolveBridge == null)
+            var resolveRuntime = ResolveScoreRuntime.Current;
+            if (resolveRuntime == null)
                 return;
 
-            resolveBridge.PresentationCompleted -= OnPresentationCompleted;
-            resolveBridge.PresentationCompleted += OnPresentationCompleted;
+            resolveRuntime.PresentationCompleted -= OnPresentationCompleted;
+            resolveRuntime.PresentationCompleted += OnPresentationCompleted;
         }
 
         void OnSessionCreated(GameSession session)
@@ -114,8 +114,8 @@ namespace RainbowBlockSaga.Integration.Toolkit
             if (levelManager.GetGameMode() != EGameMode.Classic)
                 return;
 
-            var resolveBridge = ToolkitResolveScoreMigrationBridge.Current;
-            if (resolveBridge != null && resolveBridge.IsPresenting)
+            var resolveRuntime = ResolveScoreRuntime.Current;
+            if (resolveRuntime != null && resolveRuntime.IsPresenting)
             {
                 pendingResult = result;
                 return;
