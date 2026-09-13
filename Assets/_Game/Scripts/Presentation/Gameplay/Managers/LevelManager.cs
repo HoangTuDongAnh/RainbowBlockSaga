@@ -613,42 +613,72 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private IEnumerator CheckLose()
         {
-            // GameSession is authoritative for Classic NoValidMoves.
-            // Other modes keep their target/timer lifecycle.
-            if (gameMode == EGameMode.Classic && ExternalClassicLifecycleEnabled)
-                yield break;
+            // Runtime owns the Classic lifecycle, but the visible board/tray are
+            // the final presentation truth. Keep this as a safety net so a
+            // runtime/presentation mismatch can never leave Classic stuck.
+            if (gameMode == EGameMode.Classic &&
+                ExternalClassicLifecycleEnabled)
+            {
+                yield return new WaitForSeconds(0.5f);
 
-            if (gameMode != EGameMode.Classic && targetManager != null && targetManager.WillLevelBeComplete())
+                if (EventManager.GameStatus != EGameState.Playing)
+                    yield break;
+
+                if (!HasAnyPresentationMove())
+                    PresentExternalLose();
+
+                yield break;
+            }
+
+            if (gameMode != EGameMode.Classic &&
+                targetManager != null &&
+                targetManager.WillLevelBeComplete())
             {
                 EventManager.GameStatus = EGameState.WinWaiting;
             }
 
-            yield return new WaitForSeconds(0.5f); // Keep a small delay for game flow
-            var lose = true;
-            var availableShapes = cellDeck.GetShapes();
-            foreach (var shape in availableShapes)
-            {
-                if (field.CanPlaceShape(shape))
-                {
-                    lose = false;
-                    break;
-                }
-            }
-            
-            if (gameMode != EGameMode.Classic && targetManager != null && targetManager.WillLevelBeComplete())
+            yield return new WaitForSeconds(0.5f);
+
+            bool lose = !HasAnyPresentationMove();
+
+            if (gameMode != EGameMode.Classic &&
+                targetManager != null &&
+                targetManager.WillLevelBeComplete())
             {
                 yield return new WaitForSeconds(0.5f);
                 SetWin();
                 lose = false;
             }
 
-            if (lose)
+            if (lose &&
+                EventManager.GameStatus != EGameState.PreFailed &&
+                EventManager.GameStatus != EGameState.Failed)
             {
                 SetLose();
             }
-
-            yield return null;
         }
+
+        private bool HasAnyPresentationMove()
+        {
+            if (field == null || cellDeck == null)
+                return true;
+
+            var availableShapes = cellDeck.GetShapes();
+
+            // Empty tray means the next batch is still being prepared,
+            // not an immediate game over.
+            if (availableShapes == null || availableShapes.Length == 0)
+                return true;
+
+            foreach (var shape in availableShapes)
+            {
+                if (shape != null && field.CanPlaceShape(shape))
+                    return true;
+            }
+
+            return false;
+        }
+
 
         private void SetWin()
         {
