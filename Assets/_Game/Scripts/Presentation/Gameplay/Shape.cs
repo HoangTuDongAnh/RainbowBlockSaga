@@ -86,6 +86,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void UpdateShape(ShapeTemplate shapeTemplate)
         {
+            // Keep the logical template in sync with the visual shape.
+            // Shape instances are pooled and reused; without this assignment,
+            // GetVisibleShapeHandles() reads the stale prefab/default template.
+            this.shapeTemplate = shapeTemplate;
+
             //Debug.Log(shapeTemplate.name);
             activeItems.Clear();
             for (var i = 0; i < row.Length; i++)
