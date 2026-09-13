@@ -60,3 +60,6 @@ TIMED : TIEMPO
 CONTINUEWITHEXTRASECONDS : EXTRA <color=yellow>+{continueTimerBonus}</color> seg
 YOUHAVETIMELEFT : Te quedan <color=yellow>{timeLeft}</color> min
 CONTINUEORLOSEPROGRESS : ¿Nuevas formas o perder el progreso?
+ENDLESS : SIN FIN
+ARCADE : ARCADE
+SPIN : GIRAR

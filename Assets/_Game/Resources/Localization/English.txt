@@ -60,3 +60,6 @@ TIMED : TIMED
 CONTINUEWITHEXTRASECONDS : EXTRA <color=yellow>+{continueTimerBonus}</color> sec
 YOUHAVETIMELEFT : You have <color=yellow>{timeLeft}</color> min left
 CONTINUEORLOSEPROGRESS : New shapes or lose progress?
+ENDLESS : ENDLESS
+ARCADE : ARCADE
+SPIN : SPIN

@@ -73,9 +73,5 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             StateManager.instance.CurrentState = EScreenStates.Map;
         }
 
-        public void StartGameSceneTimeTrial()
-        {
-
-        }
     }
 }

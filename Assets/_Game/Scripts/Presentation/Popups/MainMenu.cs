@@ -13,18 +13,19 @@
 using System;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.GUI;
-using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class MainMenu : Popup
     {
-        public CustomButton timedMode;
-        public CustomButton classicMode;
-        public CustomButton adventureMode;
+        [FormerlySerializedAs("classicMode")]
+        public CustomButton endlessMode;
+        [FormerlySerializedAs("adventureMode")]
+        public CustomButton arcadeMode;
         public CustomButton settingsButton;
         public CustomButton luckySpin;
         public GameObject playObject;
@@ -41,17 +42,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void Start()
         {
-            timedMode.onClick.AddListener(PlayTimedMode);
-            classicMode.onClick.AddListener(PlayClassicMode);
-            adventureMode.onClick.AddListener(PlayAdventureMode);
+            endlessMode.onClick.AddListener(PlayEndlessMode);
+            arcadeMode.onClick.AddListener(PlayArcadeMode);
             settingsButton.onClick.AddListener(SettingsButtonClicked);
             luckySpin.onClick.AddListener(LuckySpinButtonClicked);
             UpdateFreeSpinMarker();
             GameDataManager.LevelNum = PlayerPrefs.GetInt("Level", 1);
-            var levelsCount = Resources.LoadAll<Level>("Levels").Length;
             luckySpin.gameObject.SetActive(GameManager.instance.GameSettings.enableLuckySpin);
-            if(!GameManager.instance.GameSettings.enableTimedMode)
-                timedMode.gameObject.SetActive(false);
         }
         private bool CanUseFreeSpinToday()
         {
@@ -71,20 +68,16 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             freeSpinMarker.SetActive(isFreeSpinAvailable);
         }
 
-        private void PlayClassicMode()
+        private void PlayEndlessMode()
         {
+            // Keep the existing mode ID so Endless resumes saved Classic games.
             PlayModeWithResumeCheck(EGameMode.Classic);
         }
 
-        private void PlayAdventureMode()
+        private void PlayArcadeMode()
         {
             GameManager.instance.SetGameMode(EGameMode.Adventure);
             GameManager.instance.OpenMap();
-        }
-
-        private void PlayTimedMode()
-        {
-            PlayModeWithResumeCheck(EGameMode.Timed);
         }
 
         private void PlayModeWithResumeCheck(EGameMode mode)
