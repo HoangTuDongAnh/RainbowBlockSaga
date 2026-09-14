@@ -109,9 +109,8 @@ namespace RainbowBlockSaga.Runtime
                 ScriptableObject.CreateInstance<ScoreRuleData>();
             runtimeScoreRule.name =
                 "Runtime_SessionScoreRule";
-            runtimeScoreRule.PlacementScorePerCell = 0;
-            runtimeScoreRule.BaseLineScore =
-                sessionPresentation.ScorePerLine;
+            runtimeScoreRule.PlacementScorePerCell = sessionPresentation.ScorePerCell;
+            runtimeScoreRule.ClearScorePerCell = sessionPresentation.ScorePerCell;
             runtimeScoreRule.UseComboStreak = true;
             runtimeScoreRule.ResetComboAfterMisses =
                 sessionPresentation.ResetComboAfterMoves;

@@ -43,6 +43,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private Action pendingOnShow;
         private Action<EPopupResult> pendingOnClose;
+        private bool closing;
+        private bool closed;
 
         protected virtual void Awake()
         {
@@ -130,13 +132,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public virtual void Close()
         {
-            if (this == null) return;
+            if (this == null || closing || closed) return;
 
             if (instantClose)
             {
                 CloseInstant();
                 return;
             }
+            closing = true;
 
             CancelInvoke();
             
@@ -158,6 +161,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public virtual void AfterHideAnimation()
         {
+            if (closed) return;
+            closed = true;
             OnClosePopup?.Invoke(this);
             OnCloseAction?.Invoke(result);
             Destroy(gameObject, .5f);
@@ -207,7 +212,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public virtual void CloseInstant()
         {
-            if (this == null) return;
+            if (this == null || closed) return;
+            closed = true;
 
             CancelInvoke();
             DOTween.Kill(gameObject);
@@ -223,7 +229,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 canvasGroup.alpha = 0;
             }
 
-            OnBeforeCloseAction?.Invoke(this);
+            if (!closing) OnBeforeCloseAction?.Invoke(this);
             OnClosePopup?.Invoke(this);
             OnCloseAction?.Invoke(result);
             Destroy(gameObject);

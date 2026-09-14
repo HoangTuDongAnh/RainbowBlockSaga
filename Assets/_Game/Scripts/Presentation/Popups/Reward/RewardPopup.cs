@@ -24,6 +24,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Reward
         private int _count;
         private ResourceObject _resource;
         private RewardSettingSpin rewardVisual;
+        private bool claiming;
 
         public TextMeshProUGUI countText;
 
@@ -37,6 +38,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Reward
 
         public override void Close()
         {
+            if (claiming || rewardVisual == null || _resource == null) return;
+            claiming = true;
             StopInteration();
 
             LabelAnim.AnimateForResource(_resource, iconPos.position, "+" + _count, _resource.sound, () =>

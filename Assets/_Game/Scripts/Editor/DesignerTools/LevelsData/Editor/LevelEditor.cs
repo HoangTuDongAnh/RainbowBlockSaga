@@ -77,8 +77,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             rowsField = new IntegerField("Rows") { value = level.rows };
             columnsField = new IntegerField("Columns") { value = level.columns };
             var resizeButton = CreateButton("Resize", Color.white, "", false, ResizeMatrix);
-            rowsField.RegisterValueChangedCallback(evt => level.rows = evt.newValue);
-            columnsField.RegisterValueChangedCallback(evt => level.columns = evt.newValue);
 
             dimensionContainer.Add(rowsField);
             dimensionContainer.Add(columnsField);
@@ -105,11 +103,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             timerContainer.Add(timerLabel);
 
 
-            var timerDurationField = new FloatField("Duration (seconds)") { value = level.timerDuration };
+            var timerDurationField = new IntegerField("Seconds (0 = default)") { value = level.timerDuration };
             timerDurationField.SetEnabled(level.enableTimer);
             timerDurationField.RegisterValueChangedCallback(evt =>
             {
-                level.timerDuration = (int)evt.newValue;
+                Undo.RecordObject(level, "Change level timer");
+                level.timerDuration = Mathf.Max(0, evt.newValue);
                 EditorUtility.SetDirty(target);
             });
             var enableTimerToggle = new Toggle("Enable Timer") { value = level.enableTimer };
@@ -125,7 +124,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             root.Add(timerContainer);
             root.Add(new Label(""));
 
-            var levelTypes = Resources.LoadAll<LevelTypeScriptable>("").Where(i => i.selectable);
+            var levelTypes = Resources.LoadAll<LevelTypeScriptable>("").Where(i => i.selectable).ToArray();
+            if (level.levelType == null)
+            {
+                root.Add(new HelpBox("Choose a Level Type to configure this level.", HelpBoxMessageType.Info));
+                var typeField = new ObjectField("Level Type") { objectType = typeof(LevelTypeScriptable), allowSceneObjects = false };
+                typeField.RegisterValueChangedCallback(evt => { Undo.RecordObject(level, "Set level type"); level.levelType = evt.newValue as LevelTypeScriptable; level.UpdateTargets(); Save(); Repaint(); InspectorWindowRefresh(); });
+                root.Add(typeField);
+                return root;
+            }
             var levelTypeNames = new List<string>();
             foreach (var levelType in levelTypes)
             {
@@ -150,8 +157,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
             root.Add(new Label(""));
 
-            var targetField = new PropertyField(serializedObject.FindProperty("target"));
-            root.Add(targetField);
 
             // Create bonus item color container
             targetParameters = new VisualElement { name = "bonus-item-color-container" };
@@ -178,7 +183,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             var randomButton = new Button(Randomize) { text = "Randomize" };
             randomButton.style.width = 150;
             randomButton.style.backgroundColor = new StyleColor(new Color(0.3f, 0.3f, 0.3f));
-            randomButton.RegisterCallback<ClickEvent>(evt => Randomize());
             root.Add(randomButton);
 
             // Add checkbox for symmetrical generation
@@ -219,6 +223,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             {
                 var targetInstance = level.targetInstance[index];
 
+                if (targetInstance.targetScriptable == null)
+                    continue;
                 if (targetInstance.targetScriptable.bonusItem == null)
                 {
                     var label = new Label("Score");
@@ -230,7 +236,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 amountField.value = targetInstance.amount;
                 amountField.RegisterValueChangedCallback(evt =>
                 {
-                    targetInstance.amount = evt.newValue;
+                    Undo.RecordObject(level, "Change level target");
+                    targetInstance.amount = Mathf.Max(0, evt.newValue);
                     EditorUtility.SetDirty(target);
                 });
 
@@ -278,6 +285,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void Randomize()
         {
+            if (level.levelType == null || availableTemplates.Count < 2)
+                return;
+            Undo.RecordObject(level, "Randomize level");
             var random = new Random();
             ItemTemplate randomTemplate = null;
 
@@ -306,36 +316,16 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
             EnsureNoFullRowsOrColumns(random);
 
-            // Check if the matrix is empty and regenerate if necessary
-            if (IsMatrixEmpty())
-            {
-                Randomize();
-            }
-
             UpdateMatrixUI();
 
             Save();
         }
 
-        private bool IsMatrixEmpty()
-        {
-            for (var i = 0; i < level.rows; i++)
-            {
-                for (var j = 0; j < level.columns; j++)
-                {
-                    if (level.GetItem(i, j) != null)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
         private void RandomizeCollectItemsLevel(Random random)
         {
-            var targetCount = random.Next(1, 6);
+            if (level.targetInstance.Count == 0)
+                return;
+            var targetCount = random.Next(1, Math.Min(5, level.targetInstance.Count) + 1);
             var selectedIndexes = new HashSet<int>();
 
             for (var i = 0; i < level.targetInstance.Count; i++)
@@ -397,9 +387,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void RandomizeSymmetricalMatrix(Random random, bool gameSettings, ItemTemplate randomTemplate)
         {
-            for (var i = 0; i < level.rows / 2; i++)
+            for (var i = 0; i < (level.rows + 1) / 2; i++)
             {
-                for (var j = 0; j < level.columns / 2; j++)
+                for (var j = 0; j < (level.columns + 1) / 2; j++)
                 {
                     SetRandomItem(random, gameSettings, randomTemplate, i, j);
                 }
@@ -410,7 +400,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void SetRandomItem(Random random, bool singleColorMode, ItemTemplate randomTemplate, int i, int j)
         {
-            if (random.Next(0, 100) > level.emptyCellPercentage)
+            if (random.Next(0, 100) < level.emptyCellPercentage)
             {
                 level.SetItem(i, j, null);
                 level.SetBonus(i, j, false);
@@ -420,7 +410,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 var template = singleColorMode ? randomTemplate : availableTemplates[random.Next(1, availableTemplates.Count)];
                 var bonus = random.Next(0, 2) == 0;
 
-                if (bonus && level.levelType.targets[0].bonusItem != null)
+                if (bonus && level.levelType.targets.Any(t => t != null && t.bonusItem != null))
                 {
                     level.SetItem(i, j, availableTemplates[1]);
                     level.SetBonus(i, j, true);
@@ -435,9 +425,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void MirrorMatrix()
         {
-            for (var i = 0; i < level.rows / 2; i++)
+            for (var i = 0; i < (level.rows + 1) / 2; i++)
             {
-                for (var j = 0; j < level.columns / 2; j++)
+                for (var j = 0; j < (level.columns + 1) / 2; j++)
                 {
                     level.SetItem(i, level.columns - j - 1, level.GetItem(i, j));
                     level.SetBonus(i, level.columns - j - 1, level.GetBonus(i, j));
@@ -509,6 +499,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
         {
             var newRows = Mathf.Max(1, rowsField.value);
             var newColumns = Mathf.Max(1, columnsField.value);
+            Undo.RecordObject(level, "Resize level");
             level.Resize(newRows, newColumns);
             UpdateMatrixUI();
             Save();
@@ -554,6 +545,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                     cell.clicked += () =>
 
                     {
+                        Undo.RecordObject(level, "Paint level cell");
                         if (brush == "X")
                         {
                             level.SetItem(x, y, availableTemplates[0]);
@@ -599,6 +591,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void HighlightCell(int x, int y, Button cell)
         {
+            Undo.RecordObject(level, "Highlight level cell");
             level.HighlightCellToggle(x, y);
             UpdateCellColor(cell, level.GetBonus(x, y), level.IsCellHighlighted(x, y) ? _highlightColor : null);
             Save();
@@ -606,6 +599,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void DisableCell(int x, int y, Button cell)
         {
+            Undo.RecordObject(level, "Disable level cell");
             level.DisableCellToggle(x, y);
             UpdateCellColor(cell, level.GetBonus(x, y), level.IsDisabled(x, y) ? _disableColor : null);
             Save();
@@ -689,6 +683,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void ClearAll()
         {
+            Undo.RecordObject(level, "Clear level");
             for (var i = 0; i < level.rows; i++)
             {
                 for (var j = 0; j < level.columns; j++)
@@ -706,7 +701,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
         public void Save()
         {
             EditorUtility.SetDirty(target);
-            // AssetDatabase.SaveAssetIfDirty(target);
+            AssetDatabase.SaveAssetIfDirty(target);
+        }
+
+        private void InspectorWindowRefresh()
+        {
+            var container = root;
+            container.schedule.Execute(() => { var rebuilt = CreateInspectorGUI(); container.Clear(); container.Add(rebuilt); });
         }
     }
 }

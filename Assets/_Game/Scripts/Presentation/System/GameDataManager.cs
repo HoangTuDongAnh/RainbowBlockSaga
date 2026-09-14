@@ -15,7 +15,9 @@ using RainbowBlockSaga.Presentation.Scripts.Data;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 
 using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace RainbowBlockSaga.Presentation.Scripts.System
@@ -46,13 +48,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
             AssetDatabase.SaveAssets();
 
             PlayerPrefs.DeleteAll();
-            PlayerPrefs.DeleteAll();
             PlayerPrefs.Save();
             #endif
         }
 
         public static void UnlockLevel(int currentLevel)
         {
+            if (isTestPlay) return;
             int savedLevel = PlayerPrefs.GetInt("Level", 1);
             if (savedLevel < currentLevel)
             {
@@ -79,7 +81,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                 return _level;
             }
 
-            _level = GetGameMode() == EGameMode.Classic ? Resources.Load<Level>("Misc/ClassicLevel") : Resources.Load<Level>("Levels/Level_" + GetLevelNum());
+            _level = GetGameMode() switch
+            {
+                EGameMode.Classic => Resources.Load<Level>("Misc/ClassicLevel"),
+                EGameMode.Timed => Resources.Load<Level>("Misc/TimeLevel"),
+                _ => ArcadeLevelCatalog.Find(GetLevelNum())
+            };
             return _level;
         }
 
@@ -97,6 +104,8 @@ public static EGameMode GetGameMode()
 
         public static void SetGameMode(EGameMode gameMode)
         {
+            if (GetGameMode() != gameMode)
+                _level = null;
             PlayerPrefs.SetInt("GameMode", (int)gameMode);
             PlayerPrefs.Save();
         }
@@ -110,9 +119,8 @@ public static EGameMode GetGameMode()
 
         internal static bool HasMoreLevels()
         {
-            int currentLevel = GetLevelNum();
-            int totalLevels = Resources.LoadAll<Level>("Levels").Length;
-            return currentLevel < totalLevels;
+            var playedLevel = GetLevel();
+            return playedLevel != null && ArcadeLevelCatalog.Next(playedLevel.Number) != null;
         }
 
         public static void SetLevelNum(int stateCurrentLevel)

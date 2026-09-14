@@ -1,12 +1,14 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Gameplay.Score
 {
     [CreateAssetMenu(fileName = "ScoreRule", menuName = "Rainbow Block Saga/Score/Rule")]
     public class ScoreRuleData : ScriptableObject
     {
-        [Min(0)] public int PlacementScorePerCell = 1;
-        [Min(0)] public int BaseLineScore = 10;
+        [Min(0)] public int PlacementScorePerCell = 10;
+        [FormerlySerializedAs("BaseLineScore")]
+        [Min(0)] public int ClearScorePerCell = 10;
         [Min(0f)] public float AdditionalLineMultiplier = .5f;
 
         [Header("Combo")]

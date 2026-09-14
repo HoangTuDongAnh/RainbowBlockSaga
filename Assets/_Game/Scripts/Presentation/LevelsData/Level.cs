@@ -62,13 +62,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 
         public void InitializeIfNeeded()
         {
-            if (levelRows == null || levelRows.Length != rows)
+            rows = Mathf.Max(1, rows);
+            columns = Mathf.Max(1, columns);
+            if (levelRows == null || levelRows.Length != rows || levelRows.Any(row =>
+                row == null || row.cells == null || row.cells.Length != columns ||
+                row.bonusItems == null || row.bonusItems.Length != columns ||
+                row.disabled == null || row.disabled.Length != columns ||
+                row.highlighted == null || row.highlighted.Length != columns))
             {
-                levelRows = new LevelRow[rows];
-                for (var i = 0; i < rows; i++)
-                {
-                    levelRows[i] = new LevelRow(columns);
-                }
+                Resize(rows, columns);
             }
         }
 
@@ -92,15 +94,29 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 
         public void Resize(int newRows, int newColumns)
         {
+            newRows = Mathf.Max(1, newRows);
+            newColumns = Mathf.Max(1, newColumns);
             var newLevelRows = new LevelRow[newRows];
             for (var i = 0; i < newRows; i++)
             {
                 newLevelRows[i] = new LevelRow(newColumns);
+                if (levelRows == null || i >= levelRows.Length || levelRows[i] == null)
+                    continue;
+                CopyRow(levelRows[i].cells, newLevelRows[i].cells);
+                CopyRow(levelRows[i].bonusItems, newLevelRows[i].bonusItems);
+                CopyRow(levelRows[i].disabled, newLevelRows[i].disabled);
+                CopyRow(levelRows[i].highlighted, newLevelRows[i].highlighted);
             }
 
             rows = newRows;
             columns = newColumns;
             levelRows = newLevelRows;
+        }
+
+        private static void CopyRow<T>(T[] source, T[] destination)
+        {
+            if (source != null)
+                Array.Copy(source, destination, Math.Min(source.Length, destination.Length));
         }
 
         private int GetLevelNum()
@@ -130,9 +146,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
         public void UpdateTargets()
         {
             targetInstance.Clear();
+            if (levelType == null || levelType.targets == null)
+                return;
             foreach (var targetScriptable in levelType.targets)
             {
-                targetInstance.Add(new Target(targetScriptable));
+                if (targetScriptable != null)
+                    targetInstance.Add(new Target(targetScriptable));
             }
         }
 

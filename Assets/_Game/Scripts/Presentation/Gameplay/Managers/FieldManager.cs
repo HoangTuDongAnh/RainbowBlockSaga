@@ -43,13 +43,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void Generate(Level level)
         {
-            var oneColorMode = level.levelType.singleColorMode;
-
-            if (level == null)
+            if (level == null || level.levelType == null)
             {
                 Debug.LogError("Attempted to generate field with null level");
                 return;
             }
+
+            level.InitializeIfNeeded();
+            var oneColorMode = level.levelType.singleColorMode;
 
             GenerateField(level.rows, level.columns);
 

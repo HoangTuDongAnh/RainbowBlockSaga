@@ -1,4 +1,4 @@
-﻿// // ©2015 - 2025 Candy Smith
+// // ©2015 - 2025 Candy Smith
 // // All rights reserved
 // // Redistribution of this software is strictly not allowed.
 // // Copy of this software can be obtained from unity asset store only.
@@ -37,7 +37,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
         [SerializeField] private ScrollMap scrollMap;
         [SerializeField] private CustomButton backButton;
         [SerializeField, Tooltip("Spacing between repeated level segments"), Range(0f, 100f)] private float levelSegmentGap = 0f;
-        [SerializeField, Tooltip("Number of times to repeat the level segment"), Range(1, 10)] private int levelSegmentRepetitions = 3;
         [SerializeField, Tooltip("Array of random decoration prefabs to replace originals")] private GameObject[] randomDecorationPrefabs;
         [SerializeField, Tooltip("Probability of replacing decoration with random one"), Range(0f, 1f)] private float replacementChance = 0.3f;
         private List<LevelPin> openedLevels = new List<LevelPin>();
@@ -53,8 +52,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 
         private void Start()
         {
-            backButton.onClick.AddListener(SceneLoader.instance.GoMain);
-            var lvls = FindObjectsOfType<LevelPin>().OrderBy(x => x.number).ToArray();
+            if (backButton != null) backButton.onClick.AddListener(SceneLoader.instance.GoMain);
+            var lvls = levelsGrid.GetComponentsInChildren<LevelPin>().OrderBy(x => x.number).ToArray();
             var lastLevel = GameDataManager.GetLevelNum();
             if (unlockAllLevelsInTest)
             {
@@ -62,16 +61,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             }
 
 
-                List<Vector3> fullPathPoints = new List<Vector3>();
             openedLevels.Clear();
             
-            HashSet<int> existingLevelNumbers = new HashSet<int>();
             
             foreach (var levelPin in lvls)
             {
                 levelPin.name = $"Level_{levelPin.number}";
-                fullPathPoints.Add(levelPin.transform.position);
-                existingLevelNumbers.Add(levelPin.number);
                 
                 if (levelPin.number > lastLevel)
                 {
@@ -86,14 +81,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             }
             
             // Get the total level count from Resources
-            int totalLevelsInResources = Resources.LoadAll<Level>("Levels").Length;
+            int totalLevelsInResources = ArcadeLevelCatalog.LoadAll().Length;
             int baseLevelCount = lvls.Length;
             
             // Calculate how many repetitions we need to cover all available levels
-            int requiredRepetitions = Mathf.CeilToInt((float)(totalLevelsInResources - baseLevelCount) / baseLevelCount);
-            requiredRepetitions = Mathf.Clamp(requiredRepetitions, 1, 20); // Reasonable limit
+            if (baseLevelCount == 0) return;
+            int requiredRepetitions = Mathf.Max(0, Mathf.CeilToInt((float)(totalLevelsInResources - baseLevelCount) / baseLevelCount));
             
-            Debug.Log($"Total levels in resources: {totalLevelsInResources}, Base levels: {baseLevelCount}, Required repetitions: {requiredRepetitions}");
             
             // Duplicate levels vertically
             if (lvls.Length > 0)
@@ -102,7 +96,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             }
             
             // Calculate the path with all level positions
-            LevelPin[] allLevels = FindObjectsOfType<LevelPin>().OrderBy(x => x.transform.position.y).ToArray();
+            LevelPin[] allLevels = levelsGrid.GetComponentsInChildren<LevelPin>().OrderBy(x => x.transform.position.y).ToArray();
             debugPath = allLevels.Select(l => l.transform.position).ToArray();
 
             contentStretchController.HandleLastLevelPositionUpdate((Vector2)debugPath[debugPath.Length - 1]);
@@ -113,7 +107,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 
             if (openedLevels.Count > 0)
             {
-                var existingMarker = levelsGrid.Find("CurrentLevelMarker(Clone)");
+                var existingMarker = levelsGrid.Find("CurrentLevelMarker");
                 
                 if (existingMarker == null)
                 {
@@ -137,9 +131,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             mapDecorator.SetMapBounds(_entireMapBounds);
             // We'll handle decoration placement in RepeatLevelsVertically
             // instead of calling PlaceDecorativeImages() here
-            Debug.Log($"Found Levels: {totalLevelsInResources}");
-            Debug.Log($"Base level pins: {baseLevelCount}");
-            Debug.Log($"Required repetitions: {requiredRepetitions}");
 
         }
 
@@ -160,7 +151,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 
             // Get total levels from Resources for level number validation
             //int totalLevelsInResources = Resources.LoadAll<LevelsData.Level>("Levels").Length;
-            int totalLevelsInResources = Resources.LoadAll<Level>("Levels").Length;
+            int totalLevelsInResources = ArcadeLevelCatalog.LoadAll().Length;
 
             int baseLevelCount = originalLevels.Length;
             var lastLevel = GameDataManager.GetLevelNum();
@@ -307,7 +298,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
         {
             var currentLevel = GameDataManager.GetLevelNum();
             var currentLevelPin = openedLevels.FirstOrDefault(pin => pin.number == currentLevel);
-            return currentLevelPin != null ? currentLevelPin.transform.position : openedLevels[^1].transform.position;
+            return currentLevelPin != null ? currentLevelPin.transform.position : openedLevels.Count > 0 ? openedLevels[^1].transform.position : levelsGrid.position;
         }
 
         public void OpenLevel(int number)

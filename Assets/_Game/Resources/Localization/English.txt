@@ -63,3 +63,6 @@ CONTINUEORLOSEPROGRESS : New shapes or lose progress?
 ENDLESS : ENDLESS
 ARCADE : ARCADE
 SPIN : SPIN
+
+CLAIM : Claim
+RESUMESAVEDGAME : Continue your saved game?

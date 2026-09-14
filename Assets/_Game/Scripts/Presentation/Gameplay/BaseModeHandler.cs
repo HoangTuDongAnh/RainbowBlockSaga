@@ -49,18 +49,19 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         protected virtual void OnApplicationPause(bool pauseStatus)
         {
-            if (pauseStatus && EventManager.GameStatus == EGameState.Playing)
-            {
-                SaveGameState();
-            }
+            if (pauseStatus) SaveCurrentRun();
         }
 
         protected virtual void OnApplicationQuit()
         {
-            if (EventManager.GameStatus == EGameState.Playing)
-            {
+            SaveCurrentRun();
+        }
+
+        public void SaveCurrentRun()
+        {
+            if (!GameDataManager.isTestPlay && isActiveAndEnabled &&
+                (EventManager.GameStatus == EGameState.Playing || EventManager.GameStatus == EGameState.Paused))
                 SaveGameState();
-            }
         }
 
         public virtual void OnScored(int scoreToAdd)

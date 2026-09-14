@@ -19,6 +19,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private void HandleGameStateChange(EGameState newState)
         {
             var currentLevel = GetCurrentLevel();
+            if (currentLevel == null || currentLevel.levelType == null)
+                return;
             var stateHandler = currentLevel.levelType.stateHandler;
             
             if (stateHandler != null)

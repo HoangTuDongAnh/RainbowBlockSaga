@@ -11,7 +11,9 @@
 // // THE SOFTWARE.
 
 using System.Collections;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace RainbowBlockSaga.Presentation.Scripts.Utils
 {

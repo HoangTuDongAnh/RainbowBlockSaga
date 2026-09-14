@@ -109,7 +109,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 timerManager = gameObject.AddComponent<TimerManager>();
             }
 
-            if (timerManager != null && timerPanel != null)
+            if (timerManager != null)
             {
                 timerManager.OnTimerExpired += OnTimerExpired;
             }
@@ -150,6 +150,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void RestoreGameState()
         {
+            if (GameDataManager.isTestPlay) return;
             var state = GameState.Load(EGameMode.Classic) as ClassicGameState;
             if (state != null)
             {
@@ -168,6 +169,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void RestoreTimedGameState()
         {
+            if (GameDataManager.isTestPlay) return;
             var state = GameState.Load(EGameMode.Timed) as TimedGameState;
             if (state != null)
             {
@@ -215,6 +217,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void RestartLevel()
         {
+            CancelInvoke(nameof(StartGame));
+            StopAllCoroutines();
             comboCounter = 0;
             missCounter = 0;
             field.ShowOutline(false);
@@ -223,6 +227,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnDisable()
         {
+            CancelInvoke();
+            StopAllCoroutines();
             EventManager.GetEvent(EGameEvent.RestartLevel).Unsubscribe(RestartLevel);
             EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Unsubscribe(CheckLines);
             EventManager.OnGameStateChanged -= HandleGameStateChange;
@@ -236,6 +242,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnTimerExpired()
         {
+            if (EventManager.GameStatus != EGameState.Playing)
+                return;
             // Check if level is complete before triggering a loss
             if (targetManager != null && targetManager.IsLevelComplete())
             {
@@ -265,20 +273,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             {
                 gameMode = GameDataManager.GetGameMode();
                 _levelData = GameDataManager.GetLevel();
-                currentLevel = _levelData.Number;
             }
-            if(_levelData == null)
+            if(_levelData == null || _levelData.levelType == null)
             {
                 Debug.LogError("Level data is null");
                 return;
             }
+            currentLevel = gameMode == EGameMode.Adventure ? _levelData.Number : 0;
 
             // Apply global time settings if timed mode is enabled
-            if (GameManager.instance.GameSettings.enableTimedMode && _levelData.enableTimer)
+            if (_levelData.enableTimer)
             {
                 timerDuration = _levelData.timerDuration;
-                if(_levelData.timerDuration == 0)
-                    timerDuration = GameManager.instance.GameSettings.globalTimedModeSeconds;
+                if(_levelData.timerDuration <= 0)
+                    timerDuration = Mathf.Max(1, GameManager.instance.GameSettings.globalTimedModeSeconds);
             }
 
             FindObjectsOfType<MonoBehaviour>().OfType<IBeforeLevelLoadable>().ToList().ForEach(x => x.OnLevelLoaded(_levelData));
@@ -329,9 +337,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (ExternalResolveEnabled)
                 return;
 
+            AwardPoints(obj.GetActiveItems().Count * GameManager.instance.GameSettings.ScorePerCell);
+
             var lines = field.GetFilledLines(false, false);
             if (lines.Count > 0)
             {
+                missCounter = 0;
                 comboCounter++;
                 shakeCanvas.DOShakePosition(0.2f, 35f, 50);
                 StartCoroutine(AfterMoveProcessing(obj, lines));
@@ -445,6 +456,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (comboCounter == 0)
                 field.ShowOutline(false);
 
+            AwardPoints(scoreGain);
             completed?.Invoke();
 
             if (EventManager.GameStatus == EGameState.Playing)
@@ -470,10 +482,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
             if (scoreGain > 0)
             {
-                OnScored?.Invoke(scoreGain);
-
-                if (gameMode == EGameMode.Adventure)
-                    targetManager.UpdateScoreTarget(scoreGain);
+                AwardPoints(scoreGain);
             }
 
             if (comboCounter > 1)
@@ -557,60 +566,18 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private IEnumerator AfterMoveProcessing(Shape shape, List<List<Cell>> lines)
         {
-            Vector3 center = GetFieldCenter();
-            Vector3 scorePosition = center + new Vector3(0, 0.75f, 0); // Move score higher
-            Vector3 gratzPosition = center + new Vector3(0, 0.35f, 0); // Position gratz between score and center
-
-            yield return new WaitForSeconds(0.1f);
-            if (gameMode == EGameMode.Adventure)
-            {
-                StartCoroutine(targetManager.AnimateTarget(lines));
-            }
-
-            yield return StartCoroutine(DestroyLines(lines, shape));
-
-            var scoreTarget = GameManager.instance.GameSettings.ScorePerLine * lines.Count * comboCounter;
-            OnScored?.Invoke(scoreTarget);
-            if (gameMode == EGameMode.Adventure)
-            {
-                targetManager.UpdateScoreTarget(scoreTarget);
-            }
-            
-            // Show combo first if active
-            if (comboCounter > 1)
-            {
-                ShowComboText(comboCounter);
-                yield return new WaitForSeconds(0.5f);
-            }
-
-            // Then show score at higher position
-            var scoreText = scoreTextPool.Get();
-            scoreText.transform.position = scorePosition;
-            scoreText.ShowScore(scoreTarget, scorePosition);
-            DOVirtual.DelayedCall(0.75f, () => { scoreTextPool.Release(scoreText); }); // Halved from 1.5f to match faster animation
-
-            // Show congratulatory words below score
-            if (Random.Range(0, 3) == 0)
-            {
-                var txt = wordsPool.Get();
-                txt.transform.position = gratzPosition;
-
-                // Ensure txt is within the bounds of the gameCanvas
-                var canvasCorners = new Vector3[4];
-                gameCanvas.GetWorldCorners(canvasCorners);
-
-                var txtPosition = txt.transform.position;
-                txtPosition.x = Mathf.Clamp(txtPosition.x, canvasCorners[0].x, canvasCorners[2].x);
-                txtPosition.y = Mathf.Clamp(txtPosition.y, canvasCorners[0].y, canvasCorners[2].y);
-                txt.transform.position = txtPosition;
-
-                DOVirtual.DelayedCall(1.5f, () => { wordsPool.Release(txt); });
-            }
-
-            if (EventManager.GameStatus == EGameState.Playing)
-                yield return StartCoroutine(CheckLose());
+            var gain = GameManager.instance.GameSettings.ScorePerCell *
+                lines.SelectMany(line => line).Distinct().Count() * Mathf.Max(1, comboCounter);
+            yield return AfterExternalMoveProcessing(shape, lines, gain, null);
         }
 
+        private void AwardPoints(int gain)
+        {
+            if (gain <= 0) return;
+            OnScored?.Invoke(gain);
+            if (gameMode == EGameMode.Adventure)
+                targetManager.UpdateScoreTarget(gain);
+        }
         private IEnumerator CheckLose()
         {
             // Runtime owns the Classic lifecycle, but the visible board/tray are
@@ -682,7 +649,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void SetWin()
         {
-            GameDataManager.UnlockLevel(currentLevel + 1);
+            if (EventManager.GameStatus == EGameState.PreWin || EventManager.GameStatus == EGameState.Win)
+                return;
+            timerManager?.StopTimer();
+            var next = ArcadeLevelCatalog.Next(currentLevel);
+            if (gameMode == EGameMode.Adventure && next != null)
+                GameDataManager.UnlockLevel(next.Number);
             EventManager.GameStatus = EGameState.PreWin;
         }
 
@@ -697,6 +669,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void SetLose()
         {
+            if (EventManager.GameStatus == EGameState.PreFailed || EventManager.GameStatus == EGameState.Failed ||
+                EventManager.GameStatus == EGameState.PreWin || EventManager.GameStatus == EGameState.Win)
+                return;
+            timerManager?.StopTimer();
             if (gameMode == EGameMode.Classic)
                 GameState.Delete(EGameMode.Classic);
             else if (gameMode == EGameMode.Timed)
@@ -774,104 +750,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void Update()
         {
-            if (Keyboard.current != null)
-            {
-                // Debug keys for win/lose
-                if(Keyboard.current[GameManager.instance.debugSettings.Win].wasPressedThisFrame)
-                {
-                    SetWin();
-                }
-
-                if(Keyboard.current[GameManager.instance.debugSettings.Lose].wasPressedThisFrame)
-                {
-                    SetLose();
-                }
-
-                // Other debug keys
-                if (Keyboard.current.spaceKey.wasPressedThisFrame)
-                {
-                    // Fill the first row with tiles
-                    var rowCells = new List<Cell>();
-                    for (int col = 0; col < field.cells.GetLength(1); col++)
-                    {
-                        rowCells.Add(field.cells[0, col]);
-                    }
-
-                    var itemTemplate = Resources.Load<ItemTemplate>("Items/ItemTemplate 0");
-                    
-                    // Get all available bonus items from the level data
-                    var availableBonuses = _levelData.targetInstance
-                        .Where(t => t.targetScriptable.bonusItem != null)
-                        .Select(t => t.targetScriptable.bonusItem)
-                        .ToList();
-
-                    foreach (var cell in rowCells)
-                    {
-                        if (cell != null && cell.IsEmpty())
-                        {
-                            cell.FillCell(itemTemplate);
-                            
-                            // 30% chance to add a bonus to the cell
-                            if (availableBonuses.Count > 0 && Random.Range(0f, 1f) < 0.3f)
-                            {
-                                var randomBonus = availableBonuses[Random.Range(0, availableBonuses.Count)];
-                                cell.SetBonus(randomBonus);
-                            }
-                        }
-                    }
-
-                    // Increment combo and show effects
-                    comboCounter++;
-                    field.ShowOutline(true);
-                    
-                    // Calculate score for a full row
-                    int scoreToAdd = GameManager.instance.GameSettings.ScorePerLine * comboCounter;
-                    
-                    // Add score based on game mode
-                    if (gameMode == EGameMode.Classic)
-                    {
-                        if (classicModeHandler != null)
-                            classicModeHandler.UpdateScore(classicModeHandler.score + scoreToAdd);
-                    }
-                    else if (gameMode == EGameMode.Timed)
-                    {
-                        if (timedModeHandler != null)
-                            timedModeHandler.UpdateScore(timedModeHandler.score + scoreToAdd);
-                    }
-
-                    // Create a dummy shape for the animation position
-                    var dummyShape = itemFactory.CreateRandomShape(null, PoolObject.GetObject(cellDeck.shapePrefab.gameObject));
-                    dummyShape.transform.position = rowCells[0].transform.position;
-                    
-                    // Screen shake effect
-                    shakeCanvas.DOShakePosition(0.2f, 35f, 50);
-                    
-                    // Process the row destruction with proper animations
-                    StartCoroutine(AfterMoveProcessing(dummyShape, new List<List<Cell>> { rowCells }));
-                    
-                    // Clean up the dummy shape
-                    Destroy(dummyShape.gameObject);
-                }
-
-                // Use the configurable UpdateDeck key from debug settings instead of hardcoded dKey
-                if (Keyboard.current[GameManager.instance.debugSettings.UpdateDeck].wasPressedThisFrame)
-                {
-                    cellDeck.ClearCellDecks();
-                    cellDeck.FillCellDecks();
-                }
-
-                if (Keyboard.current.aKey.wasPressedThisFrame)
-                {
-                    StartCoroutine(CheckLose());
-                }
-
-                if (Keyboard.current.rKey.wasPressedThisFrame)
-                {
-                    GameManager.instance.RestartLevel();
-                }
-            }
+#if UNITY_EDITOR
+            if (Keyboard.current == null || EventManager.GameStatus != EGameState.Playing) return;
+            if (Keyboard.current[GameManager.instance.debugSettings.Win].wasPressedThisFrame && gameMode == EGameMode.Adventure) SetWin();
+            if (Keyboard.current[GameManager.instance.debugSettings.Lose].wasPressedThisFrame) SetLose();
+#endif
         }
-
         public Level GetCurrentLevel()
         {
             return _levelData;

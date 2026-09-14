@@ -29,7 +29,7 @@ namespace RainbowBlockSaga.Presentation.Contracts
         GameplaySessionState CurrentState { get; }
 
         int CurrentScore { get; }
-        int ScorePerLine { get; }
+        int ScorePerCell { get; }
         int ResetComboAfterMoves { get; }
 
         void ResetCurrentScore();

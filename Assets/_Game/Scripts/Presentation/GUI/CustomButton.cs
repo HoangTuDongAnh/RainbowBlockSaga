@@ -44,7 +44,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         public override void OnPointerClick(PointerEventData eventData)
         {
-            if (blockInput || isClicked)
+            if (blockInput || isClicked || !IsActive() || !IsInteractable())
             {
                 return;
             }
@@ -68,7 +68,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         public void Pressed()
         {
-            if (blockInput)
+            if (blockInput || !IsActive() || !IsInteractable())
             {
                 return;
             }

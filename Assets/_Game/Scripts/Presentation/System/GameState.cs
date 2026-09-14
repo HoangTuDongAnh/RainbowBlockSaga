@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using RainbowBlockSaga.Presentation.Scripts.LevelsData;
@@ -16,10 +17,53 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
         public LevelRow[] levelRows;
         public DateTime quitTime;
         public int bestScore;
+        public SavedLevelRow[] savedRows;
+
+        [Serializable]
+        public class SavedLevelRow
+        {
+            public string[] items;
+            public bool[] bonuses;
+            public bool[] disabled;
+        }
+
+        public static string Serialize(GameState state)
+        {
+            state.savedRows = state.levelRows?.Select(row => new SavedLevelRow
+            {
+                items = row.cells.Select(item => item != null ? item.name : "").ToArray(),
+                bonuses = row.bonusItems,
+                disabled = row.disabled
+            }).ToArray();
+            return JsonUtility.ToJson(state);
+        }
+
+        public static GameState Deserialize(string json, EGameMode mode)
+        {
+            GameState state = mode == EGameMode.Classic ? JsonUtility.FromJson<ClassicGameState>(json) :
+                mode == EGameMode.Timed ? JsonUtility.FromJson<TimedGameState>(json) : null;
+            if (state == null || state.gameMode != mode) return null;
+            if (state.savedRows != null)
+            {
+                var templates = Resources.LoadAll<ItemTemplate>("Items");
+                state.levelRows = state.savedRows.Select(saved =>
+                {
+                    var row = new LevelRow(saved.items.Length);
+                    for (var i = 0; i < saved.items.Length; i++)
+                    {
+                        row.cells[i] = templates.FirstOrDefault(item => item.name == saved.items[i]);
+                        row.bonusItems[i] = saved.bonuses != null && i < saved.bonuses.Length && saved.bonuses[i];
+                        row.disabled[i] = saved.disabled != null && i < saved.disabled.Length && saved.disabled[i];
+                    }
+                    return row;
+                }).ToArray();
+            }
+            return state;
+        }
 
         public static void Save(GameState state, FieldManager field)
         {
-            if (state == null) return;
+            if (state == null || GameDataManager.isTestPlay) return;
             
             if (field != null)
             {
@@ -31,6 +75,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                     state.levelRows[i] = new LevelRow(cells.GetLength(1));
                     for (var j = 0; j < cells.GetLength(1); j++) 
                     {
+                        state.levelRows[i].disabled[j] = cells[i, j].IsDisabled();
                         if (cells[i, j].item != null && !cells[i, j].IsEmpty())
                         {
                             state.levelRows[i].cells[j] = cells[i, j].item?.itemTemplate;
@@ -43,7 +88,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
             
             state.quitTime = DateTime.Now;
             
-            var json = JsonUtility.ToJson(state);
+            var json = Serialize(state);
             string key = "GameState_" + state.gameMode;
             PlayerPrefs.SetString(key, json);
             
@@ -93,10 +138,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                     switch (gameMode)
                     {
                         case EGameMode.Classic:
-                            state = JsonUtility.FromJson<ClassicGameState>(json);
+                            state = Deserialize(json, gameMode);
                             break;
                         case EGameMode.Timed:
-                            state = JsonUtility.FromJson<TimedGameState>(json);
+                            state = Deserialize(json, gameMode);
                             break;
                     }
                     
@@ -157,6 +202,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public static void Delete(EGameMode gameMode)
         {
+            if (GameDataManager.isTestPlay) return;
             PlayerPrefs.DeleteKey("GameState_" + gameMode);
             PlayerPrefs.Save();
         }

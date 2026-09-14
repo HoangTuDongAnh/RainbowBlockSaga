@@ -101,6 +101,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void FreeSpin()
         {
+            if (isSpinning || !CanUseFreeSpinToday()) return;
             PlayerPrefs.SetString(LastFreeSpinTimeKey, DateTime.Now.ToString("o"));
             Spin();
         }
@@ -138,6 +139,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void BuySpin()
         {
+            if (isSpinning) return;
             if (ResourceManager.instance.Consume("Coins", spinSettings.costToSpin))
             {
                 ShowCoinsSpendFX(buySpinButton.transform.position);
@@ -147,6 +149,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void Spin()
         {
+            if (isSpinning) return;
+            isSpinning = true;
             StartCoroutine(StartSpin());
         }
 
@@ -173,7 +177,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             }
 
             rb.angularDamping *= 100;
-            yield return new WaitWhile(() => rb.angularVelocity != 0);
+            yield return new WaitWhile(() => Mathf.Abs(rb.angularVelocity) > .1f);
+            rb.angularVelocity = 0;
             isSpinning = false;
             CheckReward(GetWinReward());
         }

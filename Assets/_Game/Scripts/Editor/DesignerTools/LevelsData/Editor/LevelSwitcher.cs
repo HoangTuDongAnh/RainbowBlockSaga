@@ -1,21 +1,9 @@
-// // ©2015 - 2025 Candy Smith
-// // All rights reserved
-// // Redistribution of this software is strictly not allowed.
-// // Copy of this software can be obtained from unity asset store only.
-// // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// // FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-// // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// // THE SOFTWARE.
-
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -23,133 +11,105 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 {
     public class LevelSwitcher : VisualElement
     {
-        private IntegerField levelNumberField;
-        private readonly int num;
-        private readonly LevelEditor levelEditor;
-        private readonly Level level;
-        private EScreenStates previousState;
-
-        public LevelSwitcher(SerializedObject levelSerializedObject, Level level, LevelEditor levelEditor)
+        public LevelSwitcher(SerializedObject serialized, Level level, LevelEditor editor)
         {
-            this.level = level;
-            num = level.Number;
-            this.levelEditor = levelEditor;
-            Draw(AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/_Game/UIBuilder/LevelSwitcher.uxml").Instantiate());
+            var actions = new VisualElement();
+            actions.style.flexDirection = FlexDirection.Row;
+            actions.Add(new Button(() => { editor.Save(); LevelPlayPreview.Play(level); }) { text = "Play level" });
+            actions.Add(new Button(editor.Save) { text = "Save" });
+            Add(actions);
+            var navigation = new VisualElement();
+            navigation.style.flexDirection = FlexDirection.Row;
+            navigation.Add(new Button(() => Select(ArcadeLevelCatalog.LoadAll().LastOrDefault(l => l.Number < level.Number))) { text = "<<" });
+            var number = new IntegerField { value = level.Number };
+            number.style.width = 70;
+            number.RegisterCallback<KeyDownEvent>(e => { if (e.keyCode == KeyCode.Return) Select(ArcadeLevelCatalog.Find(number.value)); });
+            navigation.Add(number);
+            navigation.Add(new Button(() => Select(ArcadeLevelCatalog.Next(level.Number))) { text = ">>" });
+            navigation.Add(new Button(() => Create(level)) { text = "New" });
+            var delete = new Button(() => DeleteLast(level)) { text = "Delete last" };
+            delete.SetEnabled(!EditorApplication.isPlaying && ArcadeLevelCatalog.LoadAll().Length > 1 && ArcadeLevelCatalog.LoadAll().LastOrDefault() == level);
+            navigation.Add(delete);
+            Add(navigation);
         }
-
-        private void Draw(TemplateContainer visualTree)
+        static void Select(Level level) { if (level != null) Selection.activeObject = level; }
+        static void Create(Level source)
         {
-            visualTree.Q<Button>("PlayButton").clickable.clicked += PlayLevel;
-            visualTree.Q<Button>("PrevLevel").clickable.clicked += OpenPrevLevel;
-            visualTree.Q<Button>("NextLevel").clickable.clicked += OpenNextLevel;
-            visualTree.Q<Button>("NewLevel").clickable.clicked += NewLevel;
-            visualTree.Q<Button>("DelLevel").clickable.clicked += DelLevel;
-            visualTree.Q<Button>("Save").clickable.clicked += Save;
-            levelNumberField = visualTree.Q<IntegerField>("LevelNum");
-            levelNumberField.value = num;
-            levelNumberField.RegisterCallback<KeyDownEvent>(evt =>
+            if (EditorApplication.isPlaying || source.levelType == null) return;
+            var levels = ArcadeLevelCatalog.LoadAll();
+            var id = levels.Length == 0 ? 1 : levels.Last().Number + 1;
+            var level = ScriptableObject.CreateInstance<Level>();
+            level.name = "Level_" + id;
+            level.Resize(source.rows, source.columns);
+            level.levelType = source.levelType;
+            level.UpdateTargets();
+            AssetDatabase.CreateAsset(level, "Assets/_Game/Resources/Levels/" + level.name + ".asset");
+            AssetDatabase.SaveAssets();
+            Select(level);
+        }
+        static void DeleteLast(Level level)
+        {
+            var levels = ArcadeLevelCatalog.LoadAll();
+            if (EditorApplication.isPlaying || levels.Length <= 1 || levels.Last() != level) return;
+            if (!EditorUtility.DisplayDialog("Delete level", "Delete " + level.name + "? Its asset and meta will be removed.", "Delete", "Cancel")) return;
+            var path = AssetDatabase.GetAssetPath(level);
+            Select(levels[levels.Length - 2]);
+            AssetDatabase.DeleteAsset(path);
+        }
+    }
+
+    // SessionState keeps the selected asset across domain reloads.
+    [InitializeOnLoad]
+    internal static class LevelPlayPreview
+    {
+        const string Key = "RBS.LevelPreview";
+        static LevelPlayPreview() { EditorApplication.playModeStateChanged += OnPlayMode; }
+        internal static void Play(Level level)
+        {
+            if (EditorApplication.isPlaying) { EditorApplication.isPlaying = false; return; }
+            if (level == null || level.levelType == null || level.levelType.stateHandler == null)
+            { Debug.LogError("Set Level Type and its State Handler before playing."); return; }
+            if (StateManager.instance == null)
             {
-                if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
-                {
-                    SwitchLevel(levelNumberField.value);
-                }
-            });
-
-            Add(visualTree);
+                if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+                EditorSceneManager.OpenScene("Assets/_Game/Scenes/Gameplay.unity");
+            }
+            SessionState.SetString(Key, AssetDatabase.GetAssetPath(level));
+            SessionState.SetInt(Key + ".mode", PlayerPrefs.GetInt("GameMode", 0));
+            SessionState.SetBool(Key + ".hadMode", PlayerPrefs.HasKey("GameMode"));
+            Prepare();
+            EditorApplication.isPlaying = true;
         }
-
-        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void Prepare()
         {
+            var path = SessionState.GetString(Key, "");
+            if (string.IsNullOrEmpty(path)) return;
+            var level = AssetDatabase.LoadAssetAtPath<Level>(path);
+            if (level == null) return;
+            GameDataManager.SetGameMode(level.levelType.elevelType == ELevelType.Classic ? EGameMode.Classic : EGameMode.Adventure);
+            GameDataManager.SetLevel(level);
+            GameDataManager.isTestPlay = true;
+        }
+        static void OnPlayMode(PlayModeStateChange state)
+        {
+            if (string.IsNullOrEmpty(SessionState.GetString(Key, ""))) return;
             if (state == PlayModeStateChange.EnteredPlayMode)
             {
-                previousState = StateManager.instance.CurrentState;
+                Prepare();
+                GameManager.instance.SetTutorialMode(false);
                 StateManager.instance.CurrentState = EScreenStates.Game;
             }
-            else if (state == PlayModeStateChange.ExitingPlayMode)
+            else if (state == PlayModeStateChange.EnteredEditMode)
             {
-                StateManager.instance.CurrentState = previousState;
-                EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+                if (SessionState.GetBool(Key + ".hadMode", false))
+                    PlayerPrefs.SetInt("GameMode", SessionState.GetInt(Key + ".mode", 0));
+                else PlayerPrefs.DeleteKey("GameMode");
+                PlayerPrefs.Save();
+                GameDataManager.SetLevel(null);
+                GameDataManager.isTestPlay = false;
+                SessionState.EraseString(Key);
             }
-        }
-
-        private void PlayLevel()
-        {
-            if (EditorApplication.isPlaying)
-            {
-                EditorApplication.isPlaying = false;
-            }
-            else
-            {
-                levelEditor.Save();
-                GameDataManager.SetGameMode(level.levelType.elevelType == ELevelType.Classic ? EGameMode.Classic : EGameMode.Adventure);
-                GameDataManager.SetLevel(level);
-                GameDataManager.isTestPlay = true;
-                EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-                EditorApplication.isPlaying = true;
-            }
-        }
-
-        private void DelLevel()
-        {
-            var levelsNum = GetFiles().Length;
-            if (levelsNum > 1)
-            {
-                var scenePath = $"Assets/_Game/Resources/Levels/Level_{levelsNum}.asset";
-                if (File.Exists(scenePath))
-                {
-                    File.Delete(scenePath);
-                    SwitchLevel(levelsNum - 1);
-                    AssetDatabase.Refresh();
-                }
-            }
-        }
-
-        private void OpenPrevLevel()
-        {
-            if (num > 1)
-            {
-                SwitchLevel(num - 1);
-            }
-        }
-
-        private void OpenNextLevel()
-        {
-            SwitchLevel(num + 1);
-        }
-
-        private void SwitchLevel(int levelNumber)
-        {
-            var levels = GetFiles();
-            if (levelNumber > 0 && levelNumber <= levels.Length)
-            {
-                var nextLevel = levels[levelNumber - 1];
-                Selection.activeObject = nextLevel;
-            }
-        }
-
-        private void Save()
-        {
-            levelEditor.Save();
-        }
-
-        private void NewLevel()
-        {
-            var levelsNum = GetFiles().Length + 1;
-            var newLevel = ScriptableObject.CreateInstance<Level>();
-            newLevel.name = $"Level_{levelsNum}";
-            newLevel.levelType = level.levelType;
-            newLevel.UpdateTargets();
-            var path = $"Assets/_Game/Resources/Levels/Level_{levelsNum}.asset";
-            AssetDatabase.CreateAsset(newLevel, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            SwitchLevel(levelsNum);
-        }
-
-        private Level[] GetFiles()
-        {
-            return Resources.LoadAll<Level>("Levels").OrderBy(l => l.Number).ToArray();
         }
     }
 }

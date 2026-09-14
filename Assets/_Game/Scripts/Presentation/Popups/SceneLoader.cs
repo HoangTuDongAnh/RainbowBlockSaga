@@ -23,7 +23,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
     public class SceneLoader : SingletonBehaviour<SceneLoader>
     {
         public static Action<Scene> OnSceneLoadedCallback;
-        private Loading loading;
         private Scene previouseScene;
 
         private void Start()
@@ -33,23 +32,36 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void StartGameSceneTimed()
         {
-            GameDataManager.SetGameMode(EGameMode.Timed);
-            GameDataManager.SetLevel(Resources.Load<Level>("Misc/TimeLevel"));
-            StateManager.instance.CurrentState = EScreenStates.Game;
+            StartLevel(EGameMode.Timed, Resources.Load<Level>("Misc/TimeLevel"));
         }
 
         public void StartGameSceneClassic()
         {
-            GameDataManager.SetGameMode(EGameMode.Classic);
-            GameDataManager.SetLevel(Resources.Load<Level>("Misc/ClassicLevel"));
-            StateManager.instance.CurrentState = EScreenStates.Game;
+            StartLevel(EGameMode.Classic, Resources.Load<Level>("Misc/ClassicLevel"));
         }
 
         public void StartGameScene(int levelNumber = 0)
         {
-            GameDataManager.SetGameMode(EGameMode.Adventure);
-            GameDataManager.SetLevel(Resources.Load<Level>("Levels/Level_" + (levelNumber > 0 ? levelNumber : GameDataManager.GetLevelNum())));
-            StateManager.instance.CurrentState = EScreenStates.Game;
+            StartLevel(EGameMode.Adventure, ArcadeLevelCatalog.Find(levelNumber > 0 ? levelNumber : GameDataManager.GetLevelNum()));
+        }
+
+        private void StartLevel(EGameMode mode, Level level)
+        {
+            if (level == null || level.levelType == null)
+            {
+                Debug.LogError("Cannot start a level with missing data or Level Type.");
+                return;
+            }
+
+            var alreadyPlaying = StateManager.instance.CurrentState == EScreenStates.Game;
+            GameDataManager.SetGameMode(mode);
+            GameDataManager.SetLevel(level);
+            if (mode == EGameMode.Adventure)
+                GameDataManager.SetLevelNum(level.Number);
+            if (alreadyPlaying)
+                GameManager.instance.RestartLevel();
+            else
+                StateManager.instance.CurrentState = EScreenStates.Game;
         }
 
         public void GoMain()

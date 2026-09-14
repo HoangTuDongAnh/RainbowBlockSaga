@@ -27,12 +27,13 @@ namespace RainbowBlockSaga.Gameplay.Score
 
             if (resolve.ClearedLines > 0)
             {
+                Misses = 0;
                 Combo++;
                 ComboChanged?.Invoke(Combo);
 
                 if (rule.UseComboStreak)
                 {
-                    gain += resolve.ClearedLines * rule.BaseLineScore * Mathf.Max(1, Combo);
+                    gain += resolve.ClearedCells.Count * rule.ClearScorePerCell * Mathf.Max(1, Combo);
                 }
                 else
                 {
@@ -40,8 +41,8 @@ namespace RainbowBlockSaga.Gameplay.Score
                         1f + (resolve.ClearedLines - 1) * rule.AdditionalLineMultiplier;
 
                     gain += Mathf.RoundToInt(
-                        resolve.ClearedLines *
-                        rule.BaseLineScore *
+                        resolve.ClearedCells.Count *
+                        rule.ClearScorePerCell *
                         multiplier);
                 }
             }

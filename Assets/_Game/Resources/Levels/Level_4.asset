@@ -25,8 +25,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -37,8 +37,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
@@ -49,8 +49,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
     bonusItems: 0001000000000100
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -61,8 +61,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -73,8 +73,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
@@ -85,8 +85,8 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
     bonusItems: 0001000000000100
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -97,8 +97,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -109,8 +109,8 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     bonusItems: 0000000000000000
-    disabled: 
-    highlighted: 
+    disabled: 0000000000000000
+    highlighted: 0000000000000000
   levelType: {fileID: 11400000, guid: 094ecb60bbb264d369f89462b75805fb, type: 2}
   enableTimer: 1
   timerDuration: 120

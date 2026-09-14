@@ -63,3 +63,6 @@ CONTINUEORLOSEPROGRESS : ¿Nuevas formas o perder el progreso?
 ENDLESS : SIN FIN
 ARCADE : ARCADE
 SPIN : GIRAR
+
+CLAIM : Reclamar
+RESUMESAVEDGAME : ¿Continuar tu partida guardada?

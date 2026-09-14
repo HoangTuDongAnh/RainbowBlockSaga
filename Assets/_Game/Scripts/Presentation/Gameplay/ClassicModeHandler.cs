@@ -17,11 +17,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             bestScoreText.text = bestScore.ToString();
 
             // Load current score from game state using the proper mode-specific loading
-            var state = GameState.Load(EGameMode.Classic) as ClassicGameState;
+            var state = GameDataManager.isTestPlay ? null : GameState.Load(EGameMode.Classic) as ClassicGameState;
             if (state != null)
             {
                 score = state.score;
-                bestScore = state.bestScore;
+                bestScore = Mathf.Max(bestScore, state.bestScore);
+                bestScoreText.text = bestScore.ToString();
                 scoreText.text = score.ToString();
             }
             else
@@ -45,19 +46,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 };
                 GameState.Save(state, fieldManager);
             }
-            //hexagon
-/*            var fieldManagerHexagon = _levelManagerHexagon.GetFieldManager();
-            if (fieldManagerHexagon != null)
-            {
-                var state = new ClassicGameState
-                {
-                    score = score,
-                    bestScore = bestScore,
-                    gameMode = EGameMode.Classic,
-                    gameStatus = EventManager.GameStatus
-                };
-                GameState.Save(state, fieldManagerHexagon);
-            }*/
         }
 
         protected override void DeleteGameState()
@@ -67,6 +55,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public override void OnLose()
         {
+            if (GameDataManager.isTestPlay) return;
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
             if (score > bestScore)
             {

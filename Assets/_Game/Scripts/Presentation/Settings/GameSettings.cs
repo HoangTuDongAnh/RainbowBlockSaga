@@ -31,7 +31,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Settings
         public int continueTimerBonus = 30;
 
         [Header("Gameplay")]
-        public int ScorePerLine = 10;
+        [UnityEngine.Serialization.FormerlySerializedAs("ScorePerLine")]
+        [Min(0), Tooltip("Points per placed cell and per cleared cell, before the clear combo multiplier.")]
+        public int ScorePerCell = 10;
         public bool enablePool;
         public int ResetComboAfterMoves = 3;
 

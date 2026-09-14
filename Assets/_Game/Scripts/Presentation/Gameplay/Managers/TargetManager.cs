@@ -53,7 +53,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public bool IsLevelComplete()
         {
-            return _levelTargetInstance.All(t => t.OnCompleted()) && _levelTargetInstance.Count > 0;
+            return _levelTargetInstance != null && _levelTargetInstance.Count > 0 && _levelTargetInstance.All(t => t.OnCompleted());
         }
 
         public bool WillLevelBeComplete()

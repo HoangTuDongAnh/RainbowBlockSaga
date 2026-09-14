@@ -23,6 +23,7 @@ namespace RainbowBlockSaga.Runtime
         GameSession observedSession;
         GameSessionResult pendingResult;
         bool losePresented;
+        ResolveScoreRuntime boundResolve;
 
         void Awake()
         {
@@ -54,9 +55,9 @@ namespace RainbowBlockSaga.Runtime
 
             endPresentation?.SetRuntimeLifecycleOwnership(false);
 
-            var resolveRuntime = ResolveScoreRuntime.Current;
-            if (resolveRuntime != null)
-                resolveRuntime.PresentationCompleted -= OnPresentationCompleted;
+            if (boundResolve != null)
+                boundResolve.PresentationCompleted -= OnPresentationCompleted;
+            boundResolve = null;
 
             observedSession = null;
             pendingResult = null;
@@ -98,11 +99,13 @@ namespace RainbowBlockSaga.Runtime
         void BindResolveRuntime()
         {
             var resolveRuntime = ResolveScoreRuntime.Current;
-            if (resolveRuntime == null)
+            if (resolveRuntime == boundResolve)
                 return;
-
-            resolveRuntime.PresentationCompleted -= OnPresentationCompleted;
-            resolveRuntime.PresentationCompleted += OnPresentationCompleted;
+            if (boundResolve != null)
+                boundResolve.PresentationCompleted -= OnPresentationCompleted;
+            boundResolve = resolveRuntime;
+            if (boundResolve != null)
+                boundResolve.PresentationCompleted += OnPresentationCompleted;
         }
 
         void OnSessionCreated(GameSession session)

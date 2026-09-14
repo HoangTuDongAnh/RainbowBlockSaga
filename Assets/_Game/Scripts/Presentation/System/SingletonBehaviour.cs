@@ -34,14 +34,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public virtual void Awake()
         {
-            if (instance != null && instance != this)
+            if (_instance != null && _instance != this)
             {
+                enabled = false;
                 Destroy(gameObject);
             }
             else
             {
                 instance = (T)this;
             }
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (_instance == this) _instance = null;
         }
     }
 }

@@ -15,6 +15,7 @@ using System.Globalization;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using RainbowBlockSaga.Presentation.Scripts.GUI;
+using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using RainbowBlockSaga.Presentation.Scripts.Popups;
 using RainbowBlockSaga.Presentation.Scripts.Popups.Daily;
 using RainbowBlockSaga.Presentation.Scripts.Settings;
@@ -33,7 +34,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
         private int lastBackgroundIndex = -1;
         private bool isTutorialMode;
         private MainMenu mainMenu;
-        private bool blockButtons;
+
 
         public int Score { get=> ResourceManager.instance.GetResource("Score").GetValue(); set => ResourceManager.instance.GetResource("Score").Set(value); }
 
@@ -54,13 +55,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         private void OnEnable()
         {
-            if (StateManager.instance.CurrentState == EScreenStates.MainMenu)
-            {
-                if (!GameDataManager.isTestPlay && CheckDailyBonusConditions())
-                {
-                    blockButtons = true;
-                }
-            }
+
 
             if (!IsTutorialShown() && !GameDataManager.isTestPlay)
             {
@@ -106,10 +101,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
             if (shouldShowDailyBonus)
             {
-                var daily = MenuManager.instance.ShowPopup<DailyBonus>(()=>
-                {
-                    blockButtons = false;
-                });
+                MenuManager.instance.ShowPopup<DailyBonus>();
             }
         }
 
@@ -130,6 +122,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public void MainMenu()
         {
+            if (StateManager.instance.CurrentState == EScreenStates.Game)
+                foreach (var handler in FindObjectsByType<BaseModeHandler>(FindObjectsSortMode.None))
+                    handler.SaveCurrentRun();
             DOTween.KillAll();
             if (StateManager.instance.CurrentState == EScreenStates.Game && GameDataManager.GetGameMode() == EGameMode.Classic)
             {
@@ -155,8 +150,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public void OpenMap()
         {
-            if (blockButtons && StateManager.instance.CurrentState == EScreenStates.MainMenu)
-                return;
             if (GetGameMode() == EGameMode.Classic)
             {
                 SceneLoader.instance.StartGameSceneClassic();
@@ -200,9 +193,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public void NextLevel()
         {
-            GameDataManager.LevelNum++;
-            OpenGame();
-            RestartLevel();
+            var playedLevel = GameDataManager.GetLevel();
+            var next = playedLevel != null ? ArcadeLevelCatalog.Next(playedLevel.Number) : null;
+            if (next != null)
+                SceneLoader.instance.StartGameScene(next.Number);
+            else
+                SceneLoader.instance.StartMapScene();
         }
 
         public void SetTutorialMode(bool tutorial)

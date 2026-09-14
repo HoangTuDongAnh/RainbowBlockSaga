@@ -60,8 +60,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public int CurrentScore => GetClassicScore();
 
-        public int ScorePerLine =>
-            GameManager.instance.GameSettings.ScorePerLine;
+        public int ScorePerCell =>
+            GameManager.instance.GameSettings.ScorePerCell;
 
         public int ResetComboAfterMoves =>
             GameManager.instance.GameSettings.ResetComboAfterMoves;

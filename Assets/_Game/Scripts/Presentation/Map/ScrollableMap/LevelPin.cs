@@ -38,9 +38,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 
         private void OnValidate()
         {
-            number = transform.GetSiblingIndex() + 1;
             name = "Level_" + number;
-            numberLabel.text = number.ToString();
+            if (numberLabel != null) numberLabel.text = number.ToString();
         }
 
         public void SetNumber(int number)

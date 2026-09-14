@@ -22,7 +22,7 @@ MonoBehaviour:
   enableTimedMode: 1
   globalTimedModeSeconds: 60
   continueTimerBonus: 60
-  ScorePerLine: 10
+  ScorePerCell: 10
   enablePool: 1
   ResetComboAfterMoves: 3
   continuePrice: 15

@@ -24,7 +24,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 11400000, guid: 85ebb1f53c8674f2894e5ebb8a375354, type: 2}
-    bonusItems: 0000000000000000
+    bonusItems: 0100000000000001
   - cells:
     - {fileID: 0}
     - {fileID: 0}
@@ -94,11 +94,11 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 11400000, guid: 85ebb1f53c8674f2894e5ebb8a375354, type: 2}
-    bonusItems: 0000000000000000
+    bonusItems: 0100000000000001
   levelType: {fileID: 11400000, guid: 094ecb60bbb264d369f89462b75805fb, type: 2}
   targetInstance:
   - targetScriptable: {fileID: 11400000, guid: 12f6802e4643f40148f460acf831cafc, type: 2}
-    amount: 0
+    amount: 4
   - targetScriptable: {fileID: 11400000, guid: ed67ff4519d40482b807761925a30dec, type: 2}
     amount: 0
   - targetScriptable: {fileID: 11400000, guid: f4eba0b18c2014528a4036dca51e5039, type: 2}

@@ -37,7 +37,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
         private bool waitingForTutorial = false;
         private float initialDuration;
 
-        public int RemainingTime => Mathf.FloorToInt(remainingTime);
+        public int RemainingTime => Mathf.CeilToInt(Mathf.Max(0, remainingTime));
         
         private void OnEnable()
         {
@@ -47,6 +47,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
         
         private void OnDisable()
         {
+            StopWarningEffect();
             EventManager.OnGameStateChanged -= HandleGameStateChange;
             EventManager.GetEvent(EGameEvent.TutorialCompleted).Unsubscribe(OnTutorialCompleted);
         }
@@ -65,9 +66,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 
         public void InitializeTimer(float duration)
         {
+            StopWarningEffect();
+            initialDuration = Mathf.Max(0, duration);
+            remainingTime = initialDuration;
+            enabled = true;
             //Debug.Log("Just call InitializeTimer"); 
             if (GameManager.instance.IsTutorialMode())
             {
+                isTimerActive = false;
                 waitingForTutorial = true;
                 if (timerPanel != null)
                 {
@@ -76,8 +82,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
                 return;
             }
 
-            initialDuration = duration;
-            remainingTime = duration;
+            waitingForTutorial = false;
             isTimerActive = true;
             isTimerPaused = false;
             enabled = true;
@@ -175,6 +180,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
         
         public void StopTimer()
         {
+            waitingForTutorial = false;
             isTimerActive = false;
             enabled = false;
             StopWarningEffect();
@@ -190,12 +196,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
             {
                 remainingTime -= Time.deltaTime;
                 UpdateTimerDisplay();
-                if (RemainingTime <= 0)
+                if (remainingTime <= 0)
                 {
-                    isTimerActive = false;
+                    remainingTime = 0;
+                    StopTimer();
                     EventManager.GetEvent(EGameEvent.TimerExpired).Invoke();
                     OnTimerExpired?.Invoke();
-                    StopTimer();
                 }
             }
         }
