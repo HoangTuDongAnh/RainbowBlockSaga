@@ -34,12 +34,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 _levelManager.OnScored += OnScored;
             }
 
-            // ResetScore();
             LoadScores();
+            _displayedScore = score;
         }
 
         protected virtual void OnDisable()
         {
+            if (_counterCoroutine != null) StopCoroutine(_counterCoroutine);
+            _counterCoroutine = null;
             if (_levelManager != null)
             {
                 _levelManager.OnLose -= OnLose;
@@ -66,7 +68,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public virtual void OnScored(int scoreToAdd)
         {
-            int previousScore = this.score;
+            int previousScore = _displayedScore;
             this.score += scoreToAdd;
 
             // Update UI immediately
@@ -83,17 +85,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             _displayedScore = startValue;
 
-            float actualSpeed = counterSpeed;
-            if (endValue - startValue > 100)
-                actualSpeed = counterSpeed * 0.5f;
-            else if (endValue - startValue > 500)
-                actualSpeed = counterSpeed * 0.2f;
-
-            while (_displayedScore < endValue)
+            float duration = Mathf.Clamp(Mathf.Abs(endValue - startValue) * counterSpeed, .2f, .8f);
+            for (float elapsed = 0; elapsed < duration; elapsed += Time.deltaTime)
             {
-                _displayedScore++;
+                _displayedScore = Mathf.RoundToInt(Mathf.Lerp(startValue, endValue, elapsed / duration));
                 scoreText.text = _displayedScore.ToString();
-                yield return new WaitForSeconds(actualSpeed);
+                yield return null;
             }
 
             _displayedScore = endValue;
@@ -107,7 +104,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public virtual void UpdateScore(int newScore)
         {
-            int previousScore = this.score;
+            int previousScore = _displayedScore;
             this.score = newScore;
             
             // Update UI immediately

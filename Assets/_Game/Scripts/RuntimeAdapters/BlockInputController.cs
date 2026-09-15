@@ -78,6 +78,11 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void Update()
         {
+            if (ResolveScoreRuntime.Current != null && ResolveScoreRuntime.Current.IsPresenting)
+            {
+                CancelDragIfActive();
+                return;
+            }
             if (EventManager.GameStatus != EGameState.Playing &&
                 EventManager.GameStatus != EGameState.Tutorial)
                 return;
@@ -262,6 +267,12 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
         {
             if (!isDragging)
                 return;
+
+            if (ResolveScoreRuntime.Current != null && ResolveScoreRuntime.Current.IsPresenting)
+            {
+                CancelDragIfActive();
+                return;
+            }
 
             isDragging = false;
             activeTouchId = -1;

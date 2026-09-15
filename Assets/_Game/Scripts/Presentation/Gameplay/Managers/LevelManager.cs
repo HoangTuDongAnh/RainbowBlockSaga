@@ -44,6 +44,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public int comboCounter;
         private int missCounter;
+        private EndlessClearFeedback endlessFeedback;
 
         [SerializeField]
         private RectTransform gameCanvas;
@@ -219,6 +220,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             CancelInvoke(nameof(StartGame));
             StopAllCoroutines();
+            if (endlessFeedback) endlessFeedback.Clear();
             comboCounter = 0;
             missCounter = 0;
             field.ShowOutline(false);
@@ -229,6 +231,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             CancelInvoke();
             StopAllCoroutines();
+            if (endlessFeedback) endlessFeedback.Clear();
             EventManager.GetEvent(EGameEvent.RestartLevel).Unsubscribe(RestartLevel);
             EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Unsubscribe(CheckLines);
             EventManager.OnGameStateChanged -= HandleGameStateChange;
@@ -337,15 +340,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (ExternalResolveEnabled)
                 return;
 
-            AwardPoints(obj.GetActiveItems().Count * GameManager.instance.GameSettings.ScorePerCell);
+            int blockScore = obj.GetActiveItems().Count * GameManager.instance.GameSettings.ScorePerCell;
 
             var lines = field.GetFilledLines(false, false);
             if (lines.Count > 0)
             {
                 missCounter = 0;
                 comboCounter++;
-                shakeCanvas.DOShakePosition(0.2f, 35f, 50);
-                StartCoroutine(AfterMoveProcessing(obj, lines));
+                ShakeOnClear();
+                StartCoroutine(AfterMoveProcessing(obj, lines, blockScore));
                 if (comboCounter > 1)
                 {
                     field.ShowOutline(true);
@@ -353,8 +356,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             }
             else
             {
+                AwardPoints(blockScore);
                 missCounter++;
-                if (missCounter >= GameManager.instance.GameSettings.ResetComboAfterMoves)
+                if (missCounter >= (IsClassicMode ? GameManager.instance.GameSettings.endlessScoring.ResetAfterMisses : GameManager.instance.GameSettings.ResetComboAfterMoves))
                 {
                     field.ShowOutline(false);
                     missCounter = 0;
@@ -384,6 +388,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             IReadOnlyList<IReadOnlyList<UnityEngine.Object>> lineHandles,
             int scoreGain,
             int combo,
+            ResolveScoreFeedback feedback,
             global::System.Action completed)
         {
             if (shapeHandle is not Shape shape)
@@ -419,7 +424,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 lines,
                 scoreGain,
                 combo,
-                completed);
+                completed, feedback);
         }
 
         public void PresentNoValidMoves()
@@ -432,13 +437,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             List<List<Cell>> lines,
             int scoreGain,
             int externalComboCounter,
-            Action completed)
+            Action completed, ResolveScoreFeedback feedback = default)
         {
             comboCounter = externalComboCounter;
 
             if (lines != null && lines.Count > 0)
             {
-                shakeCanvas.DOShakePosition(0.2f, 35f, 50);
+                ShakeOnClear();
 
                 if (comboCounter > 1)
                     field.ShowOutline(true);
@@ -449,7 +454,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                     shape,
                     lines,
                     scoreGain,
-                    completed));
+                    completed, feedback));
                 return;
             }
 
@@ -467,7 +472,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             Shape shape,
             List<List<Cell>> lines,
             int scoreGain,
-            Action completed)
+            Action completed, ResolveScoreFeedback feedback = default)
         {
             Vector3 center = GetFieldCenter();
             Vector3 scorePosition = center + new Vector3(0, 0.75f, 0);
@@ -478,13 +483,22 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (gameMode == EGameMode.Adventure)
                 StartCoroutine(targetManager.AnimateTarget(lines));
 
-            yield return StartCoroutine(DestroyLines(lines, shape));
+            yield return StartCoroutine(DestroyLines(lines, shape, feedback.RainbowTriggered));
 
             if (scoreGain > 0)
             {
                 AwardPoints(scoreGain);
             }
 
+            if (feedback.IsEndless)
+            {
+                if (!endlessFeedback) endlessFeedback = gameObject.AddComponent<EndlessClearFeedback>();
+                var font = scorePrefab.GetComponentInChildren<TMP_Text>(true)?.font;
+                yield return endlessFeedback.Play(gameCanvas, center, font, null, feedback, GameManager.instance.GameSettings.endlessScoring);
+                completed?.Invoke();
+                if (EventManager.GameStatus == EGameState.Playing) yield return StartCoroutine(CheckLose());
+                yield break;
+            }
             if (comboCounter > 1)
             {
                 ShowComboText(comboCounter);
@@ -554,6 +568,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             return fieldCenter;
         }
 
+        private void ShakeOnClear()
+        {
+            var settings = GameManager.instance.GameSettings.endlessScoring;
+            float strength = !IsClassicMode ? 35f : comboCounter >= settings.StrongFeedbackCombo ? 20f
+                : comboCounter >= settings.SmallFeedbackCombo ? 8f : 0f;
+            if (strength > 0) shakeCanvas.DOShakePosition(.2f, strength, 30);
+        }
+
         private void ShowComboText(int comboCount)
         {
             Vector3 center = GetFieldCenter();
@@ -564,13 +586,18 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             DOVirtual.DelayedCall(0.75f, () => { comboTextPool.Release(comboText); }); // Adjusted to match faster animation
         }
 
-        private IEnumerator AfterMoveProcessing(Shape shape, List<List<Cell>> lines)
+        private IEnumerator AfterMoveProcessing(Shape shape, List<List<Cell>> lines, int blockScore)
         {
-            var gain = GameManager.instance.GameSettings.ScorePerCell *
-                lines.SelectMany(line => line).Distinct().Count() * Mathf.Max(1, comboCounter);
-            yield return AfterExternalMoveProcessing(shape, lines, gain, null);
+            int cellCount = lines.SelectMany(line => line).Distinct().Count();
+            int lineScore = GameManager.instance.GameSettings.ScorePerCell * cellCount;
+            var settings = GameManager.instance.GameSettings.endlessScoring;
+            bool fullClear = cellCount > 0 && field.GetAllCells().Cast<Cell>().Count(c => !c.IsEmpty() && !c.IsDisabled()) == cellCount;
+            bool rainbow = IsClassicMode && (comboCounter == Mathf.Max(1, settings.RainbowCombo) || fullClear);
+            var feedback = new ResolveScoreFeedback(IsClassicMode, blockScore, lineScore,
+                IsClassicMode ? settings.Multiplier(comboCounter) : Mathf.Max(1,comboCounter),
+                rainbow ? settings.RainbowBonus : 0, comboCounter, fullClear, rainbow);
+            yield return AfterExternalMoveProcessing(shape, lines, feedback.Total, null, feedback);
         }
-
         private void AwardPoints(int gain)
         {
             if (gain <= 0) return;
@@ -707,9 +734,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             }
         }
 
-        private IEnumerator DestroyLines(List<List<Cell>> lines, Shape shape)
+        private IEnumerator DestroyLines(List<List<Cell>> lines, Shape shape, bool rainbow = false)
         {
-            SoundBase.instance.PlayLimitSound(SoundBase.instance.combo[Mathf.Min(comboCounter, SoundBase.instance.combo.Length - 1)]);
+            if (!rainbow) SoundBase.instance.PlayLimitSound(SoundBase.instance.combo[Mathf.Min(comboCounter, SoundBase.instance.combo.Length - 1)]);
             EventManager.GetEvent<Shape>(EGameEvent.LineDestroyed).Invoke(shape);
 
             // Mark cells as destroying immediately at the start

@@ -45,6 +45,7 @@ namespace RainbowBlockSaga.Runtime
                 : GameplaySessionState.Unknown;
 
         public event Action<GameSession> SessionCreated;
+        public event Action SessionReset;
         public event Action<GameSessionResult> SessionEnded;
 
         void OnEnable()
@@ -109,15 +110,23 @@ namespace RainbowBlockSaga.Runtime
                 ScriptableObject.CreateInstance<ScoreRuleData>();
             runtimeScoreRule.name =
                 "Runtime_SessionScoreRule";
+        }
+
+        void RefreshScoreRule()
+        {
             runtimeScoreRule.PlacementScorePerCell = sessionPresentation.ScorePerCell;
             runtimeScoreRule.ClearScorePerCell = sessionPresentation.ScorePerCell;
             runtimeScoreRule.UseComboStreak = true;
+            runtimeScoreRule.IsEndless = sessionPresentation.IsEndlessScoring;
+            runtimeScoreRule.Endless = sessionPresentation.EndlessScoring ?? new EndlessScoringSettings();
             runtimeScoreRule.ResetComboAfterMisses =
                 sessionPresentation.ResetComboAfterMoves;
         }
 
         public GameSession GetOrCreateSession()
         {
+            if (Session != null && runtimeScoreRule.IsEndless != sessionPresentation.IsEndlessScoring)
+                ResetSession();
             if (Session != null)
                 return Session;
 
@@ -126,6 +135,7 @@ namespace RainbowBlockSaga.Runtime
                 return null;
 
             RefreshSpawnProfile();
+            RefreshScoreRule();
 
             Session = new GameSession(
                 boardRuntime.Model,
@@ -208,6 +218,7 @@ namespace RainbowBlockSaga.Runtime
 
         public void ResetSession()
         {
+            SessionReset?.Invoke();
             if (Session == null)
             {
                 presentationScoreInitialized = false;

@@ -23,6 +23,20 @@ MonoBehaviour:
   globalTimedModeSeconds: 60
   continueTimerBonus: 60
   ScorePerCell: 10
+  endlessScoring:
+    ComboMultipliers:
+    - 1
+    - 1.1
+    - 1.2
+    - 1.3
+    - 1.5
+    ResetAfterMisses: 1
+    SmallFeedbackCombo: 3
+    StrongFeedbackCombo: 4
+    RainbowCombo: 5
+    RainbowBonus: 100
+    RainbowSound: {fileID: 0}
+    FlashOpacity: 0.18
   enablePool: 1
   ResetComboAfterMoves: 3
   continuePrice: 15

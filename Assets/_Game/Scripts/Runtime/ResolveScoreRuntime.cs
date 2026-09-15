@@ -52,11 +52,20 @@ namespace RainbowBlockSaga.Runtime
         void OnEnable()
         {
             resolvePresentation?.SetRuntimeResolveOwnership(true);
+            sessionRuntime.SessionReset += ResetPresentation;
         }
 
         void OnDisable()
         {
+            sessionRuntime.SessionReset -= ResetPresentation;
+            IsPresenting = false;
             resolvePresentation?.SetRuntimeResolveOwnership(false);
+        }
+
+        void ResetPresentation()
+        {
+            IsPresenting = false;
+            boardRuntime.ResumePresentationSync();
         }
 
         void OnDestroy()
@@ -104,6 +113,7 @@ namespace RainbowBlockSaga.Runtime
                 presentationLines,
                 outcome.ScoreGain,
                 session.Score.Combo,
+                session.Score.LastTurn,
                 () => OnPresentationCompleted(
                     outcome.Resolve.ClearedLines > 0));
 

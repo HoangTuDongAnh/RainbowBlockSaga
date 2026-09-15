@@ -60,6 +60,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public int CurrentScore => GetClassicScore();
 
+        public bool IsEndlessScoring => GameDataManager.GetGameMode() == EGameMode.Classic;
+        public EndlessScoringSettings EndlessScoring => GameManager.instance.GameSettings.endlessScoring;
         public int ScorePerCell =>
             GameManager.instance.GameSettings.ScorePerCell;
 

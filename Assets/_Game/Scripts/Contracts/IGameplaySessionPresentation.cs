@@ -30,6 +30,8 @@ namespace RainbowBlockSaga.Presentation.Contracts
 
         int CurrentScore { get; }
         int ScorePerCell { get; }
+        bool IsEndlessScoring { get; }
+        EndlessScoringSettings EndlessScoring { get; }
         int ResetComboAfterMoves { get; }
 
         void ResetCurrentScore();

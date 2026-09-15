@@ -34,6 +34,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Settings
         [UnityEngine.Serialization.FormerlySerializedAs("ScorePerLine")]
         [Min(0), Tooltip("Points per placed cell and per cleared cell, before the clear combo multiplier.")]
         public int ScorePerCell = 10;
+        [Header("Endless scoring and Rainbow feedback")]
+        public RainbowBlockSaga.Presentation.Contracts.EndlessScoringSettings endlessScoring = new();
         public bool enablePool;
         public int ResetComboAfterMoves = 3;
 

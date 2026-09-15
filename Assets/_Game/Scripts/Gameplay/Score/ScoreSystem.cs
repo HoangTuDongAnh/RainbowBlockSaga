@@ -1,4 +1,5 @@
 using System;
+using RainbowBlockSaga.Presentation.Contracts;
 using RainbowBlockSaga.Gameplay.Placement;
 using RainbowBlockSaga.Gameplay.Resolve;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace RainbowBlockSaga.Gameplay.Score
         public int Score { get; private set; }
         public int Combo { get; private set; }
         public int Misses { get; private set; }
+        public ResolveScoreFeedback LastTurn { get; private set; }
 
         public event Action<int> Changed;
         public event Action<int> ComboChanged;
@@ -23,45 +25,33 @@ namespace RainbowBlockSaga.Gameplay.Score
 
         public int Apply(PlacementResult placement, BoardResolveResult resolve)
         {
-            int gain = placement.Cells.Count * rule.PlacementScorePerCell;
-
+            if (placement == null || !placement.Success || resolve == null) return 0;
+            int block = placement.Cells.Count * rule.PlacementScorePerCell;
+            int line = resolve.ClearedCells.Count * rule.ClearScorePerCell;
+            float multiplier = 1f;
+            bool rainbow = false;
             if (resolve.ClearedLines > 0)
             {
                 Misses = 0;
                 Combo++;
                 ComboChanged?.Invoke(Combo);
-
-                if (rule.UseComboStreak)
-                {
-                    gain += resolve.ClearedCells.Count * rule.ClearScorePerCell * Mathf.Max(1, Combo);
-                }
-                else
-                {
-                    float multiplier =
-                        1f + (resolve.ClearedLines - 1) * rule.AdditionalLineMultiplier;
-
-                    gain += Mathf.RoundToInt(
-                        resolve.ClearedCells.Count *
-                        rule.ClearScorePerCell *
-                        multiplier);
-                }
+                multiplier = rule.IsEndless ? rule.Endless.Multiplier(Combo) : rule.UseComboStreak
+                    ? Mathf.Max(1, Combo) : 1f + (resolve.ClearedLines - 1) * rule.AdditionalLineMultiplier;
+                rainbow = rule.IsEndless && (Combo == Mathf.Max(1, rule.Endless.RainbowCombo) || resolve.IsFullClear);
             }
-            else if (rule.UseComboStreak)
+            else if (rule.IsEndless || rule.UseComboStreak)
             {
                 Misses++;
-
-                if (Misses >= rule.ResetComboAfterMisses)
+                var limit = rule.IsEndless ? rule.Endless.ResetAfterMisses : rule.ResetComboAfterMisses;
+                if (Misses >= Mathf.Max(1, limit))
                 {
                     Misses = 0;
-
-                    if (Combo != 0)
-                    {
-                        Combo = 0;
-                        ComboChanged?.Invoke(Combo);
-                    }
+                    if (Combo != 0) { Combo = 0; ComboChanged?.Invoke(Combo); }
                 }
             }
-
+            LastTurn = new ResolveScoreFeedback(rule.IsEndless, block, line, multiplier,
+                rainbow ? Mathf.Max(0, rule.Endless.RainbowBonus) : 0, Combo, resolve.IsFullClear, rainbow);
+            int gain = LastTurn.Total;
             Score += gain;
             Changed?.Invoke(Score);
             return gain;
@@ -75,6 +65,7 @@ namespace RainbowBlockSaga.Gameplay.Score
 
         public void Reset()
         {
+            LastTurn = default;
             Score = 0;
             Combo = 0;
             Misses = 0;

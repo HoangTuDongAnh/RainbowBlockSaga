@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RainbowBlockSaga.Gameplay.Board;
 
 namespace RainbowBlockSaga.Gameplay.Resolve
@@ -18,7 +19,8 @@ namespace RainbowBlockSaga.Gameplay.Resolve
                 detection.LineCount,
                 detection.Cells,
                 new List<int>(detection.Rows),
-                new List<int>(detection.Columns));
+                new List<int>(detection.Columns),
+                detection.Cells.Count > 0 && !board.GetOccupiedCoords().Any());
         }
     }
 }

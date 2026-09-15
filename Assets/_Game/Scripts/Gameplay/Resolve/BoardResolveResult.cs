@@ -6,6 +6,7 @@ namespace RainbowBlockSaga.Gameplay.Resolve
     public class BoardResolveResult
     {
         public int ClearedLines { get; }
+        public bool IsFullClear { get; }
         public IReadOnlyCollection<BoardCoord> ClearedCells { get; }
         public IReadOnlyList<int> Rows { get; }
         public IReadOnlyList<int> Columns { get; }
@@ -14,8 +15,9 @@ namespace RainbowBlockSaga.Gameplay.Resolve
             int clearedLines,
             IReadOnlyCollection<BoardCoord> clearedCells,
             IReadOnlyList<int> rows,
-            IReadOnlyList<int> columns)
+            IReadOnlyList<int> columns, bool isFullClear = false)
         {
+            IsFullClear = isFullClear;
             ClearedLines = clearedLines;
             ClearedCells = clearedCells;
             Rows = rows;

@@ -17,6 +17,7 @@ namespace RainbowBlockSaga.Presentation.Contracts
             IReadOnlyList<IReadOnlyList<UnityEngine.Object>> lines,
             int scoreGain,
             int combo,
+            ResolveScoreFeedback feedback,
             Action completed);
     }
 }
