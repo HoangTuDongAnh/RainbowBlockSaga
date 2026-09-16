@@ -34,8 +34,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
             comboLabel.text = rainbow
                 ? (turn.FullClear ? "FULL CLEAR  ·  " : "") + $"COMBO {turn.Combo}  ×{turn.Multiplier:0.0}\nTOTAL +{turn.Total}"
                 : $"COMBO {turn.Combo}  ×{turn.Multiplier:0.0}";
-            scoreLabel.color = Color.white;
-            comboLabel.color = Color.white;
+            scoreLabel.color = rainbow ? new Color(1f, .86f, .28f) : Color.white;
+            comboLabel.color = rainbow ? new Color(1f, .45f, .86f) : new Color(.35f, .9f, 1f);
             scoreLabel.gameObject.SetActive(false);
             comboLabel.gameObject.SetActive(false);
             for (int i=0; i<particles.Length; i++) particles[i].gameObject.SetActive(i<count);
@@ -70,7 +70,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
                 if (t>=scoreStart)
                 {
                     scoreLabel.gameObject.SetActive(true);
-                    scoreLabel.rectTransform.localScale = Vector3.one * (1 + .12f*Mathf.Sin(Mathf.Clamp01((t-scoreStart)/.25f)*Mathf.PI));
+                    float pulse = 1 + (rainbow ? .22f : .15f) * Mathf.Sin(Mathf.Clamp01((t-scoreStart)/.3f)*Mathf.PI);
+                    scoreLabel.rectTransform.localScale = Vector3.one * pulse;
                 }
                 if (t>=(rainbow ? .48f : .12f)) comboLabel.gameObject.SetActive(true);
                 float alpha = Mathf.Clamp01((duration-t)/.25f);
@@ -101,6 +102,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
             var go=new GameObject(name,typeof(RectTransform),typeof(TextMeshProUGUI));go.transform.SetParent(root,false);
             var label=go.GetComponent<TextMeshProUGUI>();label.font=font;label.fontSize=size;label.fontStyle=FontStyles.Bold;
             label.alignment=TextAlignmentOptions.Center;label.raycastTarget=false;label.rectTransform.sizeDelta=new Vector2(850,210);
+            label.outlineWidth = .24f;
+            label.outlineColor = new Color(.18f, .03f, .3f, .95f);
             label.rectTransform.anchoredPosition=position;return label;
         }
         public void Clear(){if(root)root.gameObject.SetActive(false);}

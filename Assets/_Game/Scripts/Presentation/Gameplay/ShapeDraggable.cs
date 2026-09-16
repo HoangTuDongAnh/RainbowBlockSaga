@@ -299,7 +299,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             }
 
             HapticFeedback.TriggerHapticFeedback(HapticFeedback.HapticForce.Light);
-            SoundBase.instance.PlaySound(SoundBase.instance.placeShape);
+            SoundBase.instance.PlayPlacementSound();
 
             foreach (var kvp in highlightManager.GetHighlightedCells())
             {

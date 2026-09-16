@@ -736,7 +736,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private IEnumerator DestroyLines(List<List<Cell>> lines, Shape shape, bool rainbow = false)
         {
-            if (!rainbow) SoundBase.instance.PlayLimitSound(SoundBase.instance.combo[Mathf.Min(comboCounter, SoundBase.instance.combo.Length - 1)]);
+            if (!rainbow) SoundBase.instance.PlayClearSound(comboCounter - 1);
             EventManager.GetEvent<Shape>(EGameEvent.LineDestroyed).Invoke(shape);
 
             // Mark cells as destroying immediately at the start

@@ -41,6 +41,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Audio
         public AudioClip selected;
         public AudioClip dropItem;
         private AudioSource audioSource;
+        AudioClip fallbackPlace;
+        AudioClip fallbackClear;
 
         private readonly HashSet<AudioClip> clipsPlaying = new();
 
@@ -52,7 +54,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Audio
 
         private void Start()
         {
-            mixer.SetFloat(soundParameter, PlayerPrefs.GetInt("Sound", 1) == 0 ? -80 : 0);
+            if (mixer != null)
+                mixer.SetFloat(soundParameter, PlayerPrefs.GetInt("Sound", 1) == 0 ? -80 : 0);
+            if (audioSource != null)
+            {
+                audioSource.playOnAwake = false;
+                audioSource.volume = 1f;
+                audioSource.ignoreListenerPause = true;
+            }
         }
 
         public void PlaySound(AudioClip clip)
@@ -61,6 +70,40 @@ namespace RainbowBlockSaga.Presentation.Scripts.Audio
             {
                 audioSource.PlayOneShot(clip);
             }
+        }
+
+        public void PlayPlacementSound()
+        {
+            PlayGameplayClip(placeShape != null ? placeShape : selected != null ? selected : click != null ? click : fallbackPlace ??= CreateTone("RBS_Place", 640, .08f, .18f));
+        }
+
+        public void PlayClearSound(int comboIndex)
+        {
+            AudioClip clip = null;
+            if (combo != null && combo.Length > 0)
+                clip = combo[Mathf.Clamp(comboIndex, 0, combo.Length - 1)];
+            PlayGameplayClip(clip != null ? clip : fillEmpty != null ? fillEmpty : coins != null ? coins : fallbackClear ??= CreateTone("RBS_Clear", 920, .16f, .24f));
+        }
+
+        void PlayGameplayClip(AudioClip clip)
+        {
+            if (clip != null && audioSource != null)
+                audioSource.PlayOneShot(clip, 1.35f);
+        }
+
+        static AudioClip CreateTone(string name, int frequency, float duration, float volume)
+        {
+            const int rate = 44100;
+            int length = Mathf.CeilToInt(rate * duration);
+            var samples = new float[length];
+            for (int i = 0; i < length; i++)
+            {
+                float envelope = 1f - i / (float)length;
+                samples[i] = Mathf.Sin(2f * Mathf.PI * frequency * i / rate) * envelope * volume;
+            }
+            var clip = AudioClip.Create(name, length, 1, rate, false);
+            clip.SetData(samples, 0);
+            return clip;
         }
 
         public void PlayDelayed(AudioClip clip, float delay)

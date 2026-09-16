@@ -295,7 +295,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                 boardRuntime.Model.SetOccupied(coord);
 
             HapticFeedback.TriggerHapticFeedback(HapticFeedback.HapticForce.Light);
-            SoundBase.instance.PlaySound(SoundBase.instance.placeShape);
+            SoundBase.instance.PlayPlacementSound();
 
             foreach (var pair in currentHits)
             {
