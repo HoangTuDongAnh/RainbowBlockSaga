@@ -16,10 +16,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
         TextMeshProUGUI scoreLabel, comboLabel;
         static readonly Color[] Colors = { new(1,.3f,.55f), new(1,.65f,.25f), new(1,.9f,.35f), new(.4f,1,.6f), new(.3f,.8f,1), new(.7f,.4f,1) };
 
-        public IEnumerator Play(RectTransform parent, Vector3 center, TMP_FontAsset font, Sprite sprite,
+        public IEnumerator Play(RectTransform parent, Vector3 center, TMP_FontAsset font,
             ResolveScoreFeedback turn, EndlessScoringSettings settings)
         {
-            Build(parent, font, sprite);
+            Build(parent, font);
             root.gameObject.SetActive(true);
             root.position = center;
             root.SetAsLastSibling();
@@ -59,11 +59,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
                 {
                     sounded = true;
                     var sound = SoundBase.instance;
-                    if (rainbow && sound != null)
+                    if (rainbow)
                     {
-                        var clip = settings.RainbowSound;
-                        if (!clip && sound.combo != null && sound.combo.Length>0) clip=sound.combo[sound.combo.Length-1];
-                        sound.PlaySound(clip ? clip : sound.coins);
+                        sound.PlaySound(settings.RainbowSound);
                     }
                 }
                 float scoreStart = rainbow ? .25f : 0;
@@ -81,14 +79,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
             Clear();
         }
 
-        void Build(RectTransform parent, TMP_FontAsset font, Sprite sprite)
+        void Build(RectTransform parent, TMP_FontAsset font)
         {
             if(root) return;
             var go = new GameObject("EndlessClearFeedback",typeof(RectTransform));
             root = (RectTransform)go.transform; root.SetParent(parent,false); root.sizeDelta=new Vector2(800,450);
             flash = Image("RainbowFlash",new Vector2(850,850));
             particles = new Image[30];
-            for(int i=0;i<particles.Length;i++) { particles[i]=Image("SugarSpark",new Vector2(i%3==0?10:18, i%3==0?30:18)); particles[i].sprite=sprite; }
+            for(int i=0;i<particles.Length;i++) particles[i]=Image("SugarSpark",new Vector2(i%3==0?10:18, i%3==0?30:18));
             scoreLabel = Label("Score",font,70,new Vector2(0,85));
             comboLabel = Label("Combo",font,44,new Vector2(0,-110));
         }

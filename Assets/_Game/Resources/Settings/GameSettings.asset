@@ -35,7 +35,7 @@ MonoBehaviour:
     StrongFeedbackCombo: 4
     RainbowCombo: 5
     RainbowBonus: 100
-    RainbowSound: {fileID: 0}
+    RainbowSound: {fileID: 8300000, guid: 2e2c268fcc7b245a39a6f7073f3d77a0, type: 3}
     FlashOpacity: 0.18
   enablePool: 1
   ResetComboAfterMoves: 3
