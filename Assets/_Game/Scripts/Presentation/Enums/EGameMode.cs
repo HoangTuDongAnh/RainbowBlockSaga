@@ -2,7 +2,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Enums
 {
     public enum EGameMode
     {
-        Classic,
+        Endless,
         Adventure,
         Timed
     }

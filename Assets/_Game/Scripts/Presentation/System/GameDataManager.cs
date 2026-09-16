@@ -71,7 +71,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
             _level = GetGameMode() switch
             {
-                EGameMode.Classic => Resources.Load<Level>("Misc/ClassicLevel"),
+                EGameMode.Endless => Resources.Load<Level>("Misc/EndlessLevel"),
                 EGameMode.Timed => Resources.Load<Level>("Misc/TimeLevel"),
                 _ => ArcadeLevelCatalog.Find(GetLevelNum())
             };

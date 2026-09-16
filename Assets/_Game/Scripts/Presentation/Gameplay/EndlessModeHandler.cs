@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
-    public class ClassicModeHandler : BaseModeHandler
+    public class EndlessModeHandler : BaseModeHandler
     {
         public Image rhombusImage;
 
@@ -17,7 +17,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             bestScoreText.text = bestScore.ToString();
 
             // Load current score from game state using the proper mode-specific loading
-            var state = GameDataManager.isTestPlay ? null : GameState.Load(EGameMode.Classic) as ClassicGameState;
+            var state = GameDataManager.isTestPlay ? null : GameState.Load(EGameMode.Endless) as EndlessGameState;
             if (state != null)
             {
                 score = state.score;
@@ -37,11 +37,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             var fieldManager = _levelManager?.GetFieldManager();
             if (fieldManager != null)
             {
-                var state = new ClassicGameState
+                var state = new EndlessGameState
                 {
                     score = score,
                     bestScore = bestScore,
-                    gameMode = EGameMode.Classic,
+                    gameMode = EGameMode.Endless,
                     gameStatus = EventManager.GameStatus
                 };
                 GameState.Save(state, fieldManager);
@@ -50,7 +50,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         protected override void DeleteGameState()
         {
-            GameState.Delete(EGameMode.Classic);
+            GameState.Delete(EGameMode.Endless);
         }
 
         public override void OnLose()

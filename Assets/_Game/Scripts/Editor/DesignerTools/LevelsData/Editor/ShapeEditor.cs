@@ -54,18 +54,18 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
             root.Add(new Label("Click on a square to add/remove a block") { name = "instructions" });
 
-            var classicModeContainer = new VisualElement { name = "classic-mode-container" };
-            classicModeContainer.AddToClassList("classic-mode-box");
-            classicModeContainer.Add(new Label("Classic mode parameters") { name = "classic-mode-title" });
+            var endlessModeContainer = new VisualElement { name = "endless-mode-container" };
+            endlessModeContainer.AddToClassList("endless-mode-box");
+            endlessModeContainer.Add(new Label("Endless mode parameters") { name = "endless-mode-title" });
 
             var scoreField = new IntegerField("Score for Spawn") { value = _target.scoreForSpawn };
-            scoreField.AddToClassList("classic-mode-field");
+            scoreField.AddToClassList("endless-mode-field");
             scoreField.RegisterValueChangedCallback(evt =>
             {
                 _target.scoreForSpawn = evt.newValue;
                 EditorUtility.SetDirty(_target);
             });
-            classicModeContainer.Add(scoreField);
+            endlessModeContainer.Add(scoreField);
 
 
             gridContainer = new VisualElement { name = "grid-container" };
@@ -83,7 +83,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 chanceValue.value = evt.newValue;
                 _target.chanceForSpawn = evt.newValue;
             });
-            chanceField.AddToClassList("classic-mode-field");
+            chanceField.AddToClassList("endless-mode-field");
             chanceField.style.width = 200;
             chanceField.RegisterValueChangedCallback(evt =>
             {
@@ -94,10 +94,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             sliderContainer.Add(chanceValue);
             root.Add(sliderContainer);
 
-            root.Add(classicModeContainer);
+            root.Add(endlessModeContainer);
 
-            var adventureModeContainer = new VisualElement { name = "classic-mode-container" };
-            adventureModeContainer.AddToClassList("classic-mode-box");
+            var adventureModeContainer = new VisualElement { name = "endless-mode-container" };
+            adventureModeContainer.AddToClassList("endless-mode-box");
             adventureModeContainer.Add(new Label("Adventure mode parameters") { name = "adventure-mode-title" });
 
             var spawnFromLevel = new IntegerField("spawn from level") { value = _target.spawnFromLevel };

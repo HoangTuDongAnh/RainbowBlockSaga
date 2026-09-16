@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
-    public class FailedClassic : Failed
+    public class FailedEndless : Failed
     {
         public GameObject failedStuff;
         public GameObject bestScoreStuff;

@@ -62,7 +62,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public Action OnLose;
 
         public static bool ExternalResolveEnabled { get; set; }
-        public static bool ExternalClassicLifecycleEnabled { get; set; }
+        public static bool ExternalEndlessLifecycleEnabled { get; set; }
 
         private FieldManager field;
         public CellDeckManager cellDeck;
@@ -73,7 +73,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private ObjectPool<LineExplosion> lineExplosionPool;
         private ObjectPool<ScoreText> scoreTextPool;
         private ObjectPool<GameObject> wordsPool;
-        private ClassicModeHandler classicModeHandler;
+        private EndlessModeHandler endlessModeHandler;
         private TimedModeHandler timedModeHandler;
         public TimerManager timerManager;
         private int timerDuration;
@@ -131,7 +131,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 Destroy
             );
             RestartLevel();
-            if (gameMode == EGameMode.Classic)
+            if (gameMode == EGameMode.Endless)
                 RestoreGameState();
             else if (gameMode == EGameMode.Timed)
                 RestoreTimedGameState();
@@ -140,7 +140,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private void RestoreGameState()
         {
             if (GameDataManager.isTestPlay) return;
-            var state = GameState.Load(EGameMode.Classic) as ClassicGameState;
+            var state = GameState.Load(EGameMode.Endless) as EndlessGameState;
             if (state != null)
             {
                 GameManager.instance.Score = state.score;
@@ -311,7 +311,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private void StartGame()
         {
             EventManager.GameStatus = EGameState.PrepareGame;
-            classicModeHandler = FindObjectOfType<ClassicModeHandler>();
+            endlessModeHandler = FindObjectOfType<EndlessModeHandler>();
         }
 
         private void LoadLevel(Level levelData)
@@ -346,7 +346,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             {
                 AwardPoints(blockScore);
                 missCounter++;
-                if (missCounter >= (IsClassicMode ? GameManager.instance.GameSettings.endlessScoring.ResetAfterMisses : GameManager.instance.GameSettings.ResetComboAfterMoves))
+                if (missCounter >= (IsEndlessMode ? GameManager.instance.GameSettings.endlessScoring.ResetAfterMisses : GameManager.instance.GameSettings.ResetComboAfterMoves))
                 {
                     field.ShowOutline(false);
                     missCounter = 0;
@@ -358,8 +358,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         }
 
 
-        public bool IsClassicMode =>
-            gameMode == EGameMode.Classic;
+        public bool IsEndlessMode =>
+            gameMode == EGameMode.Endless;
 
         public void SetRuntimeResolveOwnership(bool enabled)
         {
@@ -368,7 +368,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void SetRuntimeLifecycleOwnership(bool enabled)
         {
-            ExternalClassicLifecycleEnabled = enabled;
+            ExternalEndlessLifecycleEnabled = enabled;
         }
 
         public void PresentResolve(
@@ -559,7 +559,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private void ShakeOnClear()
         {
             var settings = GameManager.instance.GameSettings.endlessScoring;
-            float strength = !IsClassicMode ? 35f : comboCounter >= settings.StrongFeedbackCombo ? 20f
+            float strength = !IsEndlessMode ? 35f : comboCounter >= settings.StrongFeedbackCombo ? 20f
                 : comboCounter >= settings.SmallFeedbackCombo ? 8f : 0f;
             if (strength > 0) shakeCanvas.DOShakePosition(.2f, strength, 30);
         }
@@ -580,9 +580,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             int lineScore = GameManager.instance.GameSettings.ScorePerCell * cellCount;
             var settings = GameManager.instance.GameSettings.endlessScoring;
             bool fullClear = cellCount > 0 && field.GetAllCells().Cast<Cell>().Count(c => !c.IsEmpty() && !c.IsDisabled()) == cellCount;
-            bool rainbow = IsClassicMode && (comboCounter == Mathf.Max(1, settings.RainbowCombo) || fullClear);
-            var feedback = new ResolveScoreFeedback(IsClassicMode, blockScore, lineScore,
-                IsClassicMode ? settings.Multiplier(comboCounter) : Mathf.Max(1,comboCounter),
+            bool rainbow = IsEndlessMode && (comboCounter == Mathf.Max(1, settings.RainbowCombo) || fullClear);
+            var feedback = new ResolveScoreFeedback(IsEndlessMode, blockScore, lineScore,
+                IsEndlessMode ? settings.Multiplier(comboCounter) : Mathf.Max(1,comboCounter),
                 rainbow ? settings.RainbowBonus : 0, comboCounter, fullClear, rainbow);
             yield return AfterExternalMoveProcessing(shape, lines, feedback.Total, null, feedback);
         }
@@ -595,11 +595,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         }
         private IEnumerator CheckLose()
         {
-            // Runtime owns the Classic lifecycle, but the visible board/tray are
+            // Runtime owns the Endless lifecycle, but the visible board/tray are
             // the final presentation truth. Keep this as a safety net so a
-            // runtime/presentation mismatch can never leave Classic stuck.
-            if (gameMode == EGameMode.Classic &&
-                ExternalClassicLifecycleEnabled)
+            // runtime/presentation mismatch can never leave Endless stuck.
+            if (gameMode == EGameMode.Endless &&
+                ExternalEndlessLifecycleEnabled)
             {
                 yield return new WaitForSeconds(0.5f);
 
@@ -612,7 +612,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 yield break;
             }
 
-            if (gameMode != EGameMode.Classic &&
+            if (gameMode != EGameMode.Endless &&
                 targetManager != null &&
                 targetManager.WillLevelBeComplete())
             {
@@ -623,7 +623,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
             bool lose = !HasAnyPresentationMove();
 
-            if (gameMode != EGameMode.Classic &&
+            if (gameMode != EGameMode.Endless &&
                 targetManager != null &&
                 targetManager.WillLevelBeComplete())
             {
@@ -688,8 +688,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 EventManager.GameStatus == EGameState.PreWin || EventManager.GameStatus == EGameState.Win)
                 return;
             timerManager?.StopTimer();
-            if (gameMode == EGameMode.Classic)
-                GameState.Delete(EGameMode.Classic);
+            if (gameMode == EGameMode.Endless)
+                GameState.Delete(EGameMode.Endless);
             else if (gameMode == EGameMode.Timed)
                 GameState.Delete(EGameMode.Timed);
             OnLose?.Invoke();

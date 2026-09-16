@@ -6,8 +6,8 @@ using RainbowBlockSaga.Presentation.Scripts.Popups;
 
 namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
-    // [CreateAssetMenu(fileName = "ClassicStateHandler", menuName = "Rainbow Blocks Saga/Levels/ClassicStateHandler")]
-    public class ClassicLevelStateHandler : LevelStateHandler
+    // [CreateAssetMenu(fileName = "EndlessStateHandler", menuName = "Rainbow Blocks Saga/Levels/EndlessStateHandler")]
+    public class EndlessLevelStateHandler : LevelStateHandler
     {
         private protected override void HandlePreFailed(LevelManager levelManager)
         {

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4a5c42505bd4683b56b6baff710ae0a, type: 3}
-  m_Name: ClassicLevel
+  m_Name: EndlessLevel
   m_EditorClassIdentifier: 
   rows: 8
   columns: 8

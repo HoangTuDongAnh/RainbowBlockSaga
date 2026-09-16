@@ -5,7 +5,7 @@ namespace RainbowBlockSaga.Presentation.Contracts
     /// </summary>
     public interface IGameEndPresentation
     {
-        bool IsClassicMode { get; }
+        bool IsEndlessMode { get; }
 
         void SetRuntimeLifecycleOwnership(bool enabled);
         void PresentNoValidMoves();

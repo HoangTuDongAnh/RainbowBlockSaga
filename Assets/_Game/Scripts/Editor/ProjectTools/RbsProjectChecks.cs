@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using RainbowBlockSaga.Gameplay.Board;
@@ -69,10 +69,10 @@ public static class RbsProjectChecks
             level.Resize(3,4);level.SetItem(1,2,item);level.SetBonus(1,2,true);level.DisableCellToggle(0,0);
             level.Resize(5,6);Check(level.GetItem(1,2)==item&&level.GetBonus(1,2)&&level.IsDisabled(0,0),"Resize must preserve layout and flags");
             level.levelRows[1].disabled=null;level.InitializeIfNeeded();Check(level.GetItem(1,2)==item&&level.levelRows[1].disabled.Length==6,"Repair must preserve cells");
-            var state=new ClassicGameState{score=400,levelRows=level.levelRows};
+            var state=new EndlessGameState{score=400,levelRows=level.levelRows};
             var json=GameState.Serialize(state);
             json=global::System.Text.RegularExpressions.Regex.Replace(json,"\"instanceID\":-?[0-9]+","\"instanceID\":0");
-            var restored=GameState.Deserialize(json,EGameMode.Classic);
+            var restored=GameState.Deserialize(json,EGameMode.Endless);
             Check(restored.score==400&&restored.levelRows[1].cells[2]==item,"Save must resolve sprites across instance ID changes");
             Check(restored.levelRows[0].disabled[0],"Save must retain disabled empty cells");
             var levels=ArcadeLevelCatalog.LoadAll();Check(levels.Length>0,"Arcade has no levels");

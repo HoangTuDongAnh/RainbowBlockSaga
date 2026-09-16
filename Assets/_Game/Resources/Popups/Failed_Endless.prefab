@@ -811,7 +811,7 @@ GameObject:
   - component: {fileID: 7533705215436905394}
   - component: {fileID: 9018703703823889394}
   m_Layer: 5
-  m_Name: Failed_Classic
+  m_Name: Failed_Endless
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

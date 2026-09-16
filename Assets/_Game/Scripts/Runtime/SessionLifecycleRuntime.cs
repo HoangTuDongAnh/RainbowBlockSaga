@@ -7,13 +7,15 @@ using UnityEngine.Serialization;
 namespace RainbowBlockSaga.Runtime
 {
     /// <summary>
-    /// Owns the Classic no-valid-moves lifecycle.
+    /// Owns the Endless no-valid-moves lifecycle.
     /// Popup/end presentation is delegated through IGameEndPresentation.
     /// </summary>
     public class SessionLifecycleRuntime : MonoBehaviour
     {
         [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
+
+        [SerializeField] ResolveScoreRuntime resolveRuntime;
 
         [FormerlySerializedAs("levelManager")]
         [SerializeField] MonoBehaviour endPresentationSource;
@@ -23,7 +25,6 @@ namespace RainbowBlockSaga.Runtime
         GameSession observedSession;
         GameSessionResult pendingResult;
         bool losePresented;
-        ResolveScoreRuntime boundResolve;
 
         void Awake()
         {
@@ -33,6 +34,10 @@ namespace RainbowBlockSaga.Runtime
             if (endPresentation == null)
                 throw new InvalidOperationException(
                     "SessionLifecycleRuntime requires an IGameEndPresentation source.");
+
+            if (resolveRuntime == null)
+                throw new InvalidOperationException(
+                    "SessionLifecycleRuntime requires a ResolveScoreRuntime reference.");
         }
 
         void OnEnable()
@@ -42,7 +47,7 @@ namespace RainbowBlockSaga.Runtime
 
             endPresentation?.SetRuntimeLifecycleOwnership(true);
 
-            BindResolveRuntime();
+            resolveRuntime.PresentationCompleted += OnPresentationCompleted;
 
             if (sessionRuntime.Session != null)
                 OnSessionCreated(sessionRuntime.Session);
@@ -55,9 +60,7 @@ namespace RainbowBlockSaga.Runtime
 
             endPresentation?.SetRuntimeLifecycleOwnership(false);
 
-            if (boundResolve != null)
-                boundResolve.PresentationCompleted -= OnPresentationCompleted;
-            boundResolve = null;
+            resolveRuntime.PresentationCompleted -= OnPresentationCompleted;
 
             observedSession = null;
             pendingResult = null;
@@ -66,8 +69,6 @@ namespace RainbowBlockSaga.Runtime
 
         void Update()
         {
-            BindResolveRuntime();
-
             var session = sessionRuntime.GetOrCreateSession();
             if (session == null)
                 return;
@@ -96,18 +97,6 @@ namespace RainbowBlockSaga.Runtime
             }
         }
 
-        void BindResolveRuntime()
-        {
-            var resolveRuntime = ResolveScoreRuntime.Current;
-            if (resolveRuntime == boundResolve)
-                return;
-            if (boundResolve != null)
-                boundResolve.PresentationCompleted -= OnPresentationCompleted;
-            boundResolve = resolveRuntime;
-            if (boundResolve != null)
-                boundResolve.PresentationCompleted += OnPresentationCompleted;
-        }
-
         void OnSessionCreated(GameSession session)
         {
             observedSession = session;
@@ -128,13 +117,10 @@ namespace RainbowBlockSaga.Runtime
         {
             if (losePresented ||
                 endPresentation == null ||
-                !endPresentation.IsClassicMode)
+                !endPresentation.IsEndlessMode)
                 return;
 
-            var resolveRuntime = ResolveScoreRuntime.Current;
-
-            if (resolveRuntime != null &&
-                resolveRuntime.IsPresenting)
+            if (resolveRuntime.IsPresenting)
             {
                 pendingResult = result;
                 return;

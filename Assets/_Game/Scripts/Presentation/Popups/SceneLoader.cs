@@ -23,9 +23,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             StartLevel(EGameMode.Timed, Resources.Load<Level>("Misc/TimeLevel"));
         }
 
-        public void StartGameSceneClassic()
+        public void StartGameSceneEndless()
         {
-            StartLevel(EGameMode.Classic, Resources.Load<Level>("Misc/ClassicLevel"));
+            StartLevel(EGameMode.Endless, Resources.Load<Level>("Misc/EndlessLevel"));
         }
 
         public void StartGameScene(int levelNumber = 0)

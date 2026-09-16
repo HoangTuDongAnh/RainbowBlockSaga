@@ -127,7 +127,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 levelTypeNames.Add(levelType.name);
             }
 
-            if (level.levelType.elevelType != ELevelType.Classic)
+            if (level.levelType.elevelType != ELevelType.Endless)
             {
                 // Register callback for level type change
                 levelTypeDropdown = new PopupField<string>("Level Type", levelTypeNames, level.levelType.name);

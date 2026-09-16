@@ -114,7 +114,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                 foreach (var handler in FindObjectsByType<BaseModeHandler>(FindObjectsSortMode.None))
                     handler.SaveCurrentRun();
             DOTween.KillAll();
-            if (StateManager.instance.CurrentState == EScreenStates.Game && GameDataManager.GetGameMode() == EGameMode.Classic)
+            if (StateManager.instance.CurrentState == EScreenStates.Game && GameDataManager.GetGameMode() == EGameMode.Endless)
             {
                 SceneLoader.instance.GoMain();
             }
@@ -138,9 +138,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public void OpenMap()
         {
-            if (GetGameMode() == EGameMode.Classic)
+            if (GetGameMode() == EGameMode.Endless)
             {
-                SceneLoader.instance.StartGameSceneClassic();
+                SceneLoader.instance.StartGameSceneEndless();
             }
             else if (GetGameMode() == EGameMode.Timed)
             {

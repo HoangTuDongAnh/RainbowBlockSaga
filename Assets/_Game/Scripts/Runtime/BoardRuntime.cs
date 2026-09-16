@@ -81,7 +81,7 @@ namespace RainbowBlockSaga.Runtime
                 presentation.ColumnCount <= 0)
                 return;
 
-            // A normal Classic restart / restore recreates the presentation Cells,
+            // A normal Endless restart / restore recreates the presentation Cells,
             // but it is still the same logical board layout. Keep the same BoardModel
             // instance so an active GameSession never becomes detached from the board
             // that is currently visible.

@@ -40,7 +40,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public static GameState Deserialize(string json, EGameMode mode)
         {
-            GameState state = mode == EGameMode.Classic ? JsonUtility.FromJson<ClassicGameState>(json) :
+            GameState state = mode == EGameMode.Endless ? JsonUtility.FromJson<EndlessGameState>(json) :
                 mode == EGameMode.Timed ? JsonUtility.FromJson<TimedGameState>(json) : null;
             if (state == null || state.gameMode != mode) return null;
             if (state.savedRows != null)
@@ -137,7 +137,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                 {
                     switch (gameMode)
                     {
-                        case EGameMode.Classic:
+                        case EGameMode.Endless:
                             state = Deserialize(json, gameMode);
                             break;
                         case EGameMode.Timed:
@@ -173,10 +173,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
                 // Convert to appropriate state based on gameMode
                 switch (tempState.gameMode)
                 {
-                    case EGameMode.Classic:
-                        var classicState = new ClassicGameState();
-                        CopyBaseProperties(tempState, classicState);
-                        return classicState;
+                    case EGameMode.Endless:
+                        var endlessState = new EndlessGameState();
+                        CopyBaseProperties(tempState, endlessState);
+                        return endlessState;
                     case EGameMode.Timed:
                         var timedState = new TimedGameState();
                         CopyBaseProperties(tempState, timedState);
@@ -223,13 +223,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
     }
 
     [Serializable]
-    public class ClassicGameState : GameState
+    public class EndlessGameState : GameState
     {
         public int level;
 
-        public ClassicGameState()
+        public EndlessGameState()
         {
-            gameMode = EGameMode.Classic;
+            gameMode = EGameMode.Endless;
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using RainbowBlockSaga.Presentation.Scripts.System;
@@ -87,7 +87,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             if (string.IsNullOrEmpty(path)) return;
             var level = AssetDatabase.LoadAssetAtPath<Level>(path);
             if (level == null) return;
-            GameDataManager.SetGameMode(level.levelType.elevelType == ELevelType.Classic ? EGameMode.Classic : EGameMode.Adventure);
+            GameDataManager.SetGameMode(level.levelType.elevelType == ELevelType.Endless ? EGameMode.Endless : EGameMode.Adventure);
             GameDataManager.SetLevel(level);
             GameDataManager.isTestPlay = true;
         }

@@ -10,7 +10,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class MainMenu : Popup
     {
-        [FormerlySerializedAs("classicMode")]
+        [FormerlySerializedAs("endlessMode")]
         public CustomButton endlessMode;
         [FormerlySerializedAs("adventureMode")]
         public CustomButton arcadeMode;
@@ -58,8 +58,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void PlayEndlessMode()
         {
-            // Keep the existing mode ID so Endless resumes saved Classic games.
-            PlayModeWithResumeCheck(EGameMode.Classic);
+            // Keep the existing mode ID so Endless resumes saved Endless games.
+            PlayModeWithResumeCheck(EGameMode.Endless);
         }
 
         private void PlayArcadeMode()

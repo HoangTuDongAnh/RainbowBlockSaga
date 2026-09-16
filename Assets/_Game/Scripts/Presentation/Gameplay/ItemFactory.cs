@@ -11,7 +11,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 {
     public class ItemFactory : MonoBehaviour, IShapeCatalog, IGameplaySessionPresentation
     {
-        private static ClassicModeHandler classicModeHandlerCached;
+        private static EndlessModeHandler endlessModeHandlerCached;
         private static TimedModeHandler timeModeHandlerCached;
         private ShapeTemplate[] shapes;
         protected ItemTemplate[] items;
@@ -46,9 +46,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public GameplaySessionState CurrentState =>
             ToSessionState(EventManager.GameStatus);
 
-        public int CurrentScore => GetClassicScore();
+        public int CurrentScore => GetEndlessScore();
 
-        public bool IsEndlessScoring => GameDataManager.GetGameMode() == EGameMode.Classic;
+        public bool IsEndlessScoring => GameDataManager.GetGameMode() == EGameMode.Endless;
         public EndlessScoringSettings EndlessScoring => GameManager.instance.GameSettings.endlessScoring;
         public int ScorePerCell =>
             GameManager.instance.GameSettings.ScorePerCell;
@@ -72,10 +72,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void ResetCurrentScore()
         {
-            var classic = FindObjectOfType<ClassicModeHandler>(true);
-            if (classic != null)
+            var endless = FindObjectOfType<EndlessModeHandler>(true);
+            if (endless != null)
             {
-                classic.ResetScore();
+                endless.ResetScore();
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             return levelManager.GetGameMode() == EGameMode.Adventure
                 ? shapes.Where(shape => shape.spawnFromLevel <= levelManager.currentLevel).ToArray()
-                : shapes.Where(shape => shape.scoreForSpawn <= GetClassicScore()).ToArray();
+                : shapes.Where(shape => shape.scoreForSpawn <= GetEndlessScore()).ToArray();
         }
 
         public IReadOnlyList<ShapeDescriptor> GetEligibleShapes()
@@ -216,7 +216,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             ShapeTemplate shapeTemplate = null;
             var shapesToConsider = levelManager.GetGameMode() == EGameMode.Adventure
                 ? shapes.Where(shape => shape.spawnFromLevel <= levelManager.currentLevel).ToArray()
-                : shapes.Where(shape => shape.scoreForSpawn <= GetClassicScore()).ToArray();
+                : shapes.Where(shape => shape.scoreForSpawn <= GetEndlessScore()).ToArray();
 
             var totalWeight = shapesToConsider.Sum(shape => shape.chanceForSpawn);
             var randomWeight = Random.Range(0, totalWeight);
@@ -235,14 +235,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             return shapeTemplate;
         }
 
-        private static int GetClassicScore()
+        private static int GetEndlessScore()
         {
-            if (classicModeHandlerCached == null)
-                classicModeHandlerCached = FindObjectOfType<ClassicModeHandler>(true);
+            if (endlessModeHandlerCached == null)
+                endlessModeHandlerCached = FindObjectOfType<EndlessModeHandler>(true);
 
-            var classicHandler = classicModeHandlerCached;
-            if (classicHandler != null)
-                return classicHandler.score;
+            var endlessHandler = endlessModeHandlerCached;
+            if (endlessHandler != null)
+                return endlessHandler.score;
 
             if (timeModeHandlerCached == null)
                 timeModeHandlerCached = FindObjectOfType<TimedModeHandler>(true);
@@ -277,14 +277,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             
             var eligibleShapes = levelManager.GetGameMode() == EGameMode.Adventure
                 ? shapes.Where(s => s.spawnFromLevel <= levelManager.currentLevel && (usedShapes == null || !usedShapes.Contains(s))).ToArray()
-                : shapes.Where(s => s.scoreForSpawn <= GetClassicScore() && (usedShapes == null || !usedShapes.Contains(s))).ToArray();
+                : shapes.Where(s => s.scoreForSpawn <= GetEndlessScore() && (usedShapes == null || !usedShapes.Contains(s))).ToArray();
             
             // If no unused shapes are available, allow reusing shapes
             if (eligibleShapes.Length == 0)
             {
                 eligibleShapes = levelManager.GetGameMode() == EGameMode.Adventure
                     ? shapes.Where(s => s.spawnFromLevel <= levelManager.currentLevel).ToArray()
-                    : shapes.Where(s => s.scoreForSpawn <= GetClassicScore()).ToArray();
+                    : shapes.Where(s => s.scoreForSpawn <= GetEndlessScore()).ToArray();
             }
             
             // Randomize shape order

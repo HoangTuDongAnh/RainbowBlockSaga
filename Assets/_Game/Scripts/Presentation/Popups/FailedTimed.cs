@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
-    public class FailedTimed : FailedClassic
+    public class FailedTimed : FailedEndless
     {
         public TextMeshProUGUI timeText;
         private TimedModeHandler timedModeHandler;

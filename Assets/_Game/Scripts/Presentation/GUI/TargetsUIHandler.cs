@@ -8,15 +8,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
     {
         public GameObject ScoreLabel;
         public GameObject TargetsLabel;
-        public GameObject ClassicModeLabel;
+        public GameObject EndlessModeLabel;
         public GameObject TimedModeLabel;
 
         public void OnLevelLoaded(ELevelType levelTypeElevelType)
         {
             ScoreLabel.SetActive(levelTypeElevelType == ELevelType.Score);
             TargetsLabel.SetActive(levelTypeElevelType == ELevelType.CollectItems);
-            ClassicModeLabel.SetActive(levelTypeElevelType == ELevelType.Classic && GameDataManager.GetGameMode() == EGameMode.Classic);
-            TimedModeLabel.SetActive(levelTypeElevelType == ELevelType.Classic && GameDataManager.GetGameMode() == EGameMode.Timed);
+            EndlessModeLabel.SetActive(levelTypeElevelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Endless);
+            TimedModeLabel.SetActive(levelTypeElevelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Timed);
         }
     }
 }

@@ -223,7 +223,7 @@ GameObject:
   - component: {fileID: 386741136925613967}
   - component: {fileID: 8295369463841927110}
   m_Layer: 0
-  m_Name: Classic_score
+  m_Name: Endless_score
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

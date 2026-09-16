@@ -861,7 +861,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ScoreLabel: {fileID: 3371140608280273319}
   TargetsLabel: {fileID: 6167252333061722747}
-  ClassicModeLabel: {fileID: 5101187343446081987}
+  EndlessModeLabel: {fileID: 5101187343446081987}
   TimedModeLabel: {fileID: 2993771218662754627}
 --- !u!1 &4494999011386543776
 GameObject:
@@ -1593,7 +1593,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 9a2d484cfd4f2e7479f8f4a7d314e826, type: 2}
     - target: {fileID: 2988315177803178337, guid: 9c0e5a4352f8d492f9a786233d28672b, type: 3}
       propertyPath: m_Name
-      value: Classic_score
+      value: Endless_score
       objectReference: {fileID: 0}
     - target: {fileID: 2988315177803178337, guid: 9c0e5a4352f8d492f9a786233d28672b, type: 3}
       propertyPath: m_IsActive

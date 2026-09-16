@@ -165,7 +165,7 @@ namespace RainbowBlockSaga.Runtime
 
         void OnRestartLevel()
         {
-            // Restart means a brand-new Classic/Timed run.
+            // Restart means a brand-new Endless/Timed run.
             // Do not let stale visual deck contents become the new Session.Queue.
             freshRestartPending = true;
 

@@ -4,6 +4,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Enums
     {
         Score,
         CollectItems,
-        Classic
+        Endless
     }
 }
