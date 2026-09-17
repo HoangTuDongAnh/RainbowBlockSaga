@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Presentation.Scripts.AnimationBehaviours
 {
@@ -8,7 +7,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.AnimationBehaviours
         private float delay;
         private bool hasStartedOnce;
 
-        [FormerlySerializedAs("randomMax")]
         [SerializeField]
         private float delayMax;
 

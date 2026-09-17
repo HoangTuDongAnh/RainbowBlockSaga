@@ -87,7 +87,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             if (string.IsNullOrEmpty(path)) return;
             var level = AssetDatabase.LoadAssetAtPath<Level>(path);
             if (level == null) return;
-            GameDataManager.SetGameMode(level.levelType.elevelType == ELevelType.Endless ? EGameMode.Endless : EGameMode.Adventure);
+            GameDataManager.SetGameMode(level.levelType.levelType == ELevelType.Endless ? EGameMode.Endless : EGameMode.Adventure);
             GameDataManager.SetLevel(level);
             GameDataManager.isTestPlay = true;
         }

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Gameplay.Score
 {
@@ -7,7 +6,6 @@ namespace RainbowBlockSaga.Gameplay.Score
     public class ScoreRuleData : ScriptableObject
     {
         [Min(0)] public int PlacementScorePerCell = 10;
-        [FormerlySerializedAs("BaseLineScore")]
         [Min(0)] public int ClearScorePerCell = 10;
         [Min(0f)] public float AdditionalLineMultiplier = .5f;
 

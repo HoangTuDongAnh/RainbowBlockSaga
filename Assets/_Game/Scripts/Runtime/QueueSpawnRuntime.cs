@@ -3,13 +3,11 @@ using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
     public class QueueSpawnRuntime : MonoBehaviour
     {
-        [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
 
         IBlockTrayPresentation tray;

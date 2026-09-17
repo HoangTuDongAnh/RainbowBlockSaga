@@ -107,11 +107,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map
                 var level = Resources.Load<Level>("Levels/Level_" + levelNum);
                 if (level != null && levelNum <= currentLevel)
                 {
-                    if (level.levelType.elevelType == ELevelType.CollectItems)
+                    if (level.levelType.levelType == ELevelType.CollectItems)
                     {
                         cell.FillCell(mapItemTemplate[0]);
                     }
-                    else if (level.levelType.elevelType != ELevelType.CollectItems)
+                    else if (level.levelType.levelType != ELevelType.CollectItems)
                     {
                         cell.FillCell(mapItemTemplate[1]);
                     }

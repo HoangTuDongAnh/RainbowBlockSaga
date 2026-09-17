@@ -4,15 +4,12 @@ using RainbowBlockSaga.Presentation.Scripts.GUI;
 using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class MainMenu : Popup
     {
-        [FormerlySerializedAs("endlessMode")]
         public CustomButton endlessMode;
-        [FormerlySerializedAs("adventureMode")]
         public CustomButton arcadeMode;
         public CustomButton settingsButton;
         public CustomButton luckySpin;

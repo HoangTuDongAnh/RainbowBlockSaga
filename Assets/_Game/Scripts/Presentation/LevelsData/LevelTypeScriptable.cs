@@ -1,15 +1,13 @@
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.Popups;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
 {
     [CreateAssetMenu(fileName = "LevelTypeScriptable", menuName = "Rainbow Blocks Saga/Levels/LevelTypeScriptable", order = 1)]
     public class LevelTypeScriptable : ScriptableObject
     {
-        [FormerlySerializedAs("levelType")]
-        public ELevelType elevelType;
+        public ELevelType levelType;
 
         public TargetScriptable[] targets;
         public Popup prePlayPopup;

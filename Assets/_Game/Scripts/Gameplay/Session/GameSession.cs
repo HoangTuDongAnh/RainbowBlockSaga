@@ -6,7 +6,6 @@ using RainbowBlockSaga.Gameplay.Placement;
 using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Score;
 using RainbowBlockSaga.Gameplay.Spawn;
-using RainbowBlockSaga.Gameplay.Objectives;
 
 namespace RainbowBlockSaga.Gameplay.Session
 {
@@ -17,7 +16,6 @@ namespace RainbowBlockSaga.Gameplay.Session
         public BoardResolver Resolver { get; }
         public ScoreSystem Score { get; }
         public BlockQueue Queue { get; }
-        public IObjective Objective { get; }
 
         public bool IsStarted { get; private set; }
         public bool IsEnded { get; private set; }
@@ -33,22 +31,6 @@ namespace RainbowBlockSaga.Gameplay.Session
         public event Action<GameSessionResult> Ended;
 
         /// <summary>
-        /// Config-based constructor for sessions that own their board and optional objective.
-        /// </summary>
-        public GameSession(GameSessionConfig config)
-            : this(
-                new BoardModel(config.Board),
-                new PlacementService(),
-                new BoardResolver(),
-                new ScoreSystem(config.ScoreRule),
-                new BlockQueue(),
-                config.Objective ? config.Objective.CreateRuntime() : null,
-                config.Spawn,
-                config.AdventureLevel)
-        {
-        }
-
-        /// <summary>
         /// Composition constructor used by the current runtime when board and presentation state
         /// already exist.
         /// </summary>
@@ -58,7 +40,6 @@ namespace RainbowBlockSaga.Gameplay.Session
             BoardResolver resolver,
             ScoreSystem score,
             BlockQueue queue,
-            IObjective objective,
             SpawnProfileData spawnProfile,
             int adventureLevel = 1)
         {
@@ -67,7 +48,6 @@ namespace RainbowBlockSaga.Gameplay.Session
             Resolver = resolver;
             Score = score;
             Queue = queue;
-            Objective = objective;
 
             this.spawnProfile = spawnProfile;
             this.adventureLevel = adventureLevel;
@@ -86,8 +66,6 @@ namespace RainbowBlockSaga.Gameplay.Session
 
             Board.ClearAll();
             Score.Reset();
-            Objective?.Reset();
-
             EnsureBatch();
             Started?.Invoke();
 
@@ -107,8 +85,6 @@ namespace RainbowBlockSaga.Gameplay.Session
             IsEnded = false;
             IsPaused = false;
             Result = null;
-            Objective?.Reset();
-
             Started?.Invoke();
         }
 
@@ -155,23 +131,12 @@ namespace RainbowBlockSaga.Gameplay.Session
             var resolve = Resolver.Resolve(Board);
             int gain = Score.Apply(placement, resolve);
 
-            Objective?.OnGameplayResolved(
-                Score.Score,
-                placement,
-                resolve);
-
             var outcome = new GameSessionPlacementOutcome(
                 placement,
                 resolve,
                 gain);
 
             Resolved?.Invoke(placement, resolve, gain);
-
-            if (Objective != null && Objective.IsCompleted)
-            {
-                Finish(GameSessionEndReason.ObjectiveCompleted);
-                return outcome;
-            }
 
             EnsureBatch();
             EvaluateEndState();

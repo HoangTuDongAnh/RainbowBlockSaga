@@ -2,7 +2,6 @@ using System;
 using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
@@ -12,12 +11,10 @@ namespace RainbowBlockSaga.Runtime
     /// </summary>
     public class SessionLifecycleRuntime : MonoBehaviour
     {
-        [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
 
         [SerializeField] ResolveScoreRuntime resolveRuntime;
 
-        [FormerlySerializedAs("levelManager")]
         [SerializeField] MonoBehaviour endPresentationSource;
 
         IGameEndPresentation endPresentation;

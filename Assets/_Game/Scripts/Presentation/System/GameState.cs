@@ -162,44 +162,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
             return null;
         }
 
-        public static GameState Load()
-        {
-            // Legacy loading for backward compatibility
-            if (PlayerPrefs.HasKey("GameState"))
-            {
-                var json = PlayerPrefs.GetString("GameState");
-                var tempState = JsonUtility.FromJson<LegacyGameState>(json);
-                
-                // Convert to appropriate state based on gameMode
-                switch (tempState.gameMode)
-                {
-                    case EGameMode.Endless:
-                        var endlessState = new EndlessGameState();
-                        CopyBaseProperties(tempState, endlessState);
-                        return endlessState;
-                    case EGameMode.Timed:
-                        var timedState = new TimedGameState();
-                        CopyBaseProperties(tempState, timedState);
-                        timedState.remainingTime = tempState.remainingTime;
-                        return timedState;
-                    default:
-                        return null;
-                }
-            }
-            return null;
-        }
-
-        private static void CopyBaseProperties(LegacyGameState source, GameState target)
-        {
-            target.gameStatus = source.gameStatus;
-            target.currentLevel = source.currentLevel;
-            target.gameMode = source.gameMode;
-            target.score = source.score;
-            target.levelRows = source.levelRows;
-            target.quitTime = source.quitTime;
-            target.bestScore = source.bestScore;
-        }
-
         public static void Delete(EGameMode gameMode)
         {
             if (GameDataManager.isTestPlay) return;
@@ -209,10 +171,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         public static void Delete()
         {
-            // Delete legacy key
-            PlayerPrefs.DeleteKey("GameState");
-            
-            // Delete all game mode specific keys
             foreach (EGameMode mode in Enum.GetValues(typeof(EGameMode)))
             {
                 PlayerPrefs.DeleteKey("GameState_" + mode);
@@ -255,17 +213,4 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
         }
     }
 
-    [Serializable]
-    public class LegacyGameState
-    {
-        // For backwards compatibility when loading old saved states
-        public EGameState gameStatus;
-        public int currentLevel;
-        public EGameMode gameMode;
-        public int score;
-        public int remainingTime;
-        public LevelRow[] levelRows;
-        public DateTime quitTime;
-        public int bestScore;
-    }
 }

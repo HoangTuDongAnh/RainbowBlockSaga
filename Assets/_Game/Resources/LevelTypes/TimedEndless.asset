@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38e0a7b181df4ac392d6eab85851bb80, type: 3}
   m_Name: TimedEndless
   m_EditorClassIdentifier: 
-  elevelType: 2
+  levelType: 2
   targets: []
   prePlayPopup: {fileID: 0}
   preFailedPopup: {fileID: 3156901565763242253, guid: fc7c984cd7ce14b83ae0e023979e59ff, type: 3}

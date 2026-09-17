@@ -23,7 +23,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         RectTransform rectTransform;
         BlockViewAdapter blockView;
-        Shape legacyShape;
+        Shape shape;
         readonly List<Item> items = new();
         readonly Dictionary<Cell, Item> currentHits = new();
         readonly List<BoardCoord> currentCoords = new();
@@ -44,8 +44,8 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
         {
             rectTransform = (RectTransform)transform;
             blockView = GetComponent<BlockViewAdapter>();
-            legacyShape = blockView.LegacyShape;
-            legacyShape.OnShapeUpdated += UpdateItems;
+            shape = blockView.Shape;
+            shape.OnShapeUpdated += UpdateItems;
             UpdateItems();
 
             canvas = GetComponentInParent<Canvas>();
@@ -58,8 +58,8 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void OnDisable()
         {
-            if (legacyShape != null)
-                legacyShape.OnShapeUpdated -= UpdateItems;
+            if (shape != null)
+                shape.OnShapeUpdated -= UpdateItems;
 
             EventManager.GetEvent(EGameEvent.TimerExpired).Unsubscribe(CancelDragIfActive);
             EventManager.GetEvent(EGameEvent.LevelAboutToComplete).Unsubscribe(CancelDragIfActive);
@@ -73,7 +73,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
         {
             blockView.Refresh();
             items.Clear();
-            items.AddRange(legacyShape.GetActiveItems());
+            items.AddRange(shape.GetActiveItems());
         }
 
         void Update()
@@ -312,11 +312,11 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             bool resolved = resolveRuntime != null &&
                             resolveRuntime.TryResolvePlacement(
                                 blockView.Data,
-                                legacyShape,
+                                shape,
                                 currentCoords);
 
             if (resolved)
-                EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Invoke(legacyShape);
+                EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Invoke(shape);
 
             ClearPlacementState();
         }

@@ -127,7 +127,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 levelTypeNames.Add(levelType.name);
             }
 
-            if (level.levelType.elevelType != ELevelType.Endless)
+            if (level.levelType.levelType != ELevelType.Endless)
             {
                 // Register callback for level type change
                 levelTypeDropdown = new PopupField<string>("Level Type", levelTypeNames, level.levelType.name);
@@ -198,7 +198,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
 
         private void UpdateToolPanel()
         {
-            var isBonusItemLevelType = level.levelType.elevelType == ELevelType.CollectItems;
+            var isBonusItemLevelType = level.levelType.levelType == ELevelType.CollectItems;
             cellGreyWithBonus.style.display = isBonusItemLevelType ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
@@ -284,7 +284,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
                 randomTemplate = availableTemplates[random.Next(1, availableTemplates.Count)];
             }
 
-            if (level.levelType.elevelType == ELevelType.CollectItems)
+            if (level.levelType.levelType == ELevelType.CollectItems)
             {
                 RandomizeCollectItemsLevel(random);
             }

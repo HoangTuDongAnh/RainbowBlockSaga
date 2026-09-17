@@ -30,7 +30,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
         {
             bool isTutorial = GameManager.instance.IsTutorialMode();
 
-            // Booster buttons are optional in the stripped BlockBlast-only migration scene.
+            // Booster buttons are optional in this game mode.
             if (renewButton != null)
                 renewButton.SetActive(!isTutorial);
 

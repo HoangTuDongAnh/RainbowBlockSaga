@@ -4,7 +4,6 @@ using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Placement;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
@@ -14,7 +13,6 @@ namespace RainbowBlockSaga.Runtime
     /// </summary>
     public class BoardRuntime : MonoBehaviour
     {
-        [FormerlySerializedAs("legacyField")]
         [SerializeField] MonoBehaviour fieldManager;
 
         IBoardPresentation presentation;
@@ -29,11 +27,7 @@ namespace RainbowBlockSaga.Runtime
         public BoardData Data => runtimeData;
         public PlacementService Placement { get; } = new();
 
-        /// <summary>
-        /// Exposed only for presentation-side controllers that still need their concrete
-        /// component during the next migration phases.
-        /// BoardRuntime itself never casts this back to a toolkit type.
-        /// </summary>
+        /// <summary>Presentation handle used by the input layer for cell lookup.</summary>
         public MonoBehaviour PresentationSource => fieldManager;
         public IBoardPresentation Presentation => presentation;
 

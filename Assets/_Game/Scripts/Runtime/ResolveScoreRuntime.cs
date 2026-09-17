@@ -5,7 +5,6 @@ using RainbowBlockSaga.Gameplay.Resolve;
 using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
@@ -15,13 +14,10 @@ namespace RainbowBlockSaga.Runtime
     /// </summary>
     public class ResolveScoreRuntime : MonoBehaviour
     {
-        [FormerlySerializedAs("levelManager")]
         [SerializeField] MonoBehaviour resolvePresentationSource;
 
-        [FormerlySerializedAs("boardBridge")]
         [SerializeField] BoardRuntime boardRuntime;
 
-        [FormerlySerializedAs("sessionBridge")]
         [SerializeField] GameSessionRuntime sessionRuntime;
 
         IResolvePresentation resolvePresentation;

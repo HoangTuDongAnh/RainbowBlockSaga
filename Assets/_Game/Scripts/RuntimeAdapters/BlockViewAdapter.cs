@@ -10,29 +10,29 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
     /// </summary>
     public class BlockViewAdapter : MonoBehaviour
     {
-        Shape legacyShape;
+        Shape shape;
 
-        public Shape LegacyShape => legacyShape ? legacyShape : legacyShape = GetComponent<Shape>();
+        public Shape Shape => shape ? shape : shape = GetComponent<Shape>();
         public BlockShapeData Data { get; private set; }
 
         void Awake()
         {
-            legacyShape = GetComponent<Shape>();
-            legacyShape.OnShapeUpdated += Refresh;
+            shape = GetComponent<Shape>();
+            shape.OnShapeUpdated += Refresh;
             Refresh();
         }
 
         void OnDestroy()
         {
-            if (legacyShape != null)
-                legacyShape.OnShapeUpdated -= Refresh;
+            if (shape != null)
+                shape.OnShapeUpdated -= Refresh;
         }
 
         public void Refresh()
         {
             var catalog = GameSessionRuntime.Current?.ShapeCatalog;
             Data = ShapeDataAdapter.GetOrCreate(
-                LegacyShape.shapeTemplate,
+                Shape.shapeTemplate,
                 catalog);
         }
     }

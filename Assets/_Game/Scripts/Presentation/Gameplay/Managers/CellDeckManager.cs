@@ -1,6 +1,3 @@
-// ©2015 - 2025 Candy Smith
-// Original toolkit presentation preserved. Step 4 adds assembly-safe migration hooks only.
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,11 +23,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public CellDeck[] cellDecks;
 
-        [SerializeField] private FieldManager field;
         [SerializeField] private ItemFactory itemFactory;
         [SerializeField] public Shape shapePrefab;
-
-        private readonly HashSet<ShapeTemplate> usedShapes = new();
 
         private void OnEnable()
         {
@@ -53,20 +47,18 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (cellDecks.Any(x => !x.IsEmpty))
                 return;
 
-            if (TryFillFromRuntimeProvider())
-                return;
-
-            FillLegacyBatch();
+            FillFromRuntimeProvider();
         }
 
-        bool TryFillFromRuntimeProvider()
+        void FillFromRuntimeProvider()
         {
             if (BatchProvider == null)
-                return false;
+                throw new InvalidOperationException(
+                    "CellDeckManager requires QueueSpawnRuntime to provide a batch.");
 
             var handles = BatchProvider.Invoke();
             if (handles == null || handles.Length == 0)
-                return false;
+                return;
 
             var batch = new ShapeTemplate[handles.Length];
 
@@ -74,33 +66,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 batch[i] = handles[i] as ShapeTemplate;
 
             FillCellDecksWithShapes(batch);
-            return true;
-        }
-
-        void FillLegacyBatch()
-        {
-            var usedShapeTemplates = new HashSet<ShapeTemplate>(GetShapes().Select(s => s.shapeTemplate));
-            var fitShapesCount = 0;
-
-            for (var index = 0; index < cellDecks.Length; index++)
-            {
-                var cellDeck = cellDecks[index];
-                if (!cellDeck.IsEmpty)
-                    continue;
-
-                var shapeObject = PoolObject.GetObject(shapePrefab.gameObject);
-                Shape randomShape;
-
-                if (fitShapesCount < 2 && index >= cellDecks.Length - 2)
-                    randomShape = itemFactory.CreateRandomShapeFits(shapeObject);
-                else
-                    randomShape = itemFactory.CreateRandomShape(usedShapeTemplates, shapeObject);
-
-                if (field.CanPlaceShape(randomShape))
-                    fitShapesCount++;
-
-                cellDeck.FillCell(randomShape);
-            }
         }
 
         public void FillCellDecksWithShapes(ShapeTemplate[] shapes)
@@ -169,61 +134,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             RecoveryRequested?.Invoke();
             ClearCellDecks();
 
-            if (TryFillFromRuntimeProvider())
-                return;
-
-            foreach (var cellDeck in cellDecks)
-            {
-                cellDeck.ClearCell();
-                cellDeck.FillCell(itemFactory.CreateRandomShapeFits(PoolObject.GetObject(shapePrefab.gameObject)));
-            }
+            FillFromRuntimeProvider();
         }
 
         public void OnSceneActivated(Level level)
         {
             if (!GameManager.instance.IsTutorialMode())
-                StartCoroutine(DelayedFillFitShapesOnly());
+                StartCoroutine(DelayedFillFromRuntime());
         }
 
-        private IEnumerator DelayedFillFitShapesOnly()
+        private IEnumerator DelayedFillFromRuntime()
         {
             yield return new WaitForSeconds(0.2f);
-
-            if (TryFillFromRuntimeProvider())
-                yield break;
-
-            FillFitShapesOnlyLegacy();
-        }
-
-        private void FillFitShapesOnlyLegacy()
-        {
             if (cellDecks.All(x => x.IsEmpty))
-                usedShapes.Clear();
-
-            for (var index = 0; index < cellDecks.Length; index++)
-            {
-                var cellDeck = cellDecks[index];
-                cellDeck.ClearCell();
-
-                var shapeObject = PoolObject.GetObject(shapePrefab.gameObject);
-                var shape = itemFactory.CreateRandomShapeFits(shapeObject, usedShapes);
-
-                if (shape != null)
-                {
-                    cellDeck.FillCell(shape);
-                    if (shape.shapeTemplate != null)
-                        usedShapes.Add(shape.shapeTemplate);
-                }
-                else
-                {
-                    shapeObject = PoolObject.GetObject(shapePrefab.gameObject);
-                    shape = itemFactory.CreateRandomShape(usedShapes, shapeObject);
-                    cellDeck.FillCell(shape);
-
-                    if (shape.shapeTemplate != null)
-                        usedShapes.Add(shape.shapeTemplate);
-                }
-            }
+                FillFromRuntimeProvider();
         }
 
         public UnityEngine.Object[] GetVisibleShapeHandles()

@@ -7,7 +7,6 @@ using RainbowBlockSaga.Gameplay.Session;
 using RainbowBlockSaga.Gameplay.Spawn;
 using RainbowBlockSaga.Presentation.Contracts;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RainbowBlockSaga.Runtime
 {
@@ -17,12 +16,9 @@ namespace RainbowBlockSaga.Runtime
     /// </summary>
     public class GameSessionRuntime : MonoBehaviour
     {
-        [FormerlySerializedAs("boardBridge")]
         [SerializeField] BoardRuntime boardRuntime;
-        [FormerlySerializedAs("deckManager")]
         [SerializeField] MonoBehaviour trayPresentationSource;
 
-        [FormerlySerializedAs("itemFactory")]
         [SerializeField] MonoBehaviour shapeCatalogSource;
 
         IBlockTrayPresentation trayPresentation;
@@ -143,7 +139,6 @@ namespace RainbowBlockSaga.Runtime
                 new BoardResolver(),
                 new ScoreSystem(runtimeScoreRule),
                 new BlockQueue(),
-                null,
                 runtimeSpawnProfile,
                 int.MaxValue);
 

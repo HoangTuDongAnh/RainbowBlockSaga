@@ -11,12 +11,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
         public GameObject EndlessModeLabel;
         public GameObject TimedModeLabel;
 
-        public void OnLevelLoaded(ELevelType levelTypeElevelType)
+        public void OnLevelLoaded(ELevelType levelType)
         {
-            ScoreLabel.SetActive(levelTypeElevelType == ELevelType.Score);
-            TargetsLabel.SetActive(levelTypeElevelType == ELevelType.CollectItems);
-            EndlessModeLabel.SetActive(levelTypeElevelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Endless);
-            TimedModeLabel.SetActive(levelTypeElevelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Timed);
+            ScoreLabel.SetActive(levelType == ELevelType.Score);
+            TargetsLabel.SetActive(levelType == ELevelType.CollectItems);
+            EndlessModeLabel.SetActive(levelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Endless);
+            TimedModeLabel.SetActive(levelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Timed);
         }
     }
 }

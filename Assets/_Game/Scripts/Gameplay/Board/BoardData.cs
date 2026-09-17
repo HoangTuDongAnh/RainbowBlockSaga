@@ -10,7 +10,6 @@ namespace RainbowBlockSaga.Gameplay.Board
         [Min(1)] public int Height = 8;
         [Tooltip("Empty means every coordinate inside Width x Height is playable.")]
         public List<BoardCoord> PlayableCells = new();
-        public BoardViewProfile ViewProfile;
 
         public bool IsPlayable(BoardCoord coord)
         {

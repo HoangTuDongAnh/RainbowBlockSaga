@@ -285,18 +285,6 @@ MonoBehaviour:
     - {fileID: 5860020106513450911}
     - {fileID: 6169046565398687906}
   topLeftItem: {fileID: 7223609756509519392}
---- !u!114 &-4847927563475850843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3576372769918652864}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a885e50851148a3acf76f15bf84e224, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &7123456789012345001
 MonoBehaviour:
   m_ObjectHideFlags: 0
