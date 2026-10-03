@@ -81,6 +81,7 @@ namespace RainbowBlockSaga.Runtime
             // that is currently visible.
             if (CanReuseCurrentModel())
             {
+                runtimeData.RequireCompleteLines = presentation.RequireCompleteLines;
                 SyncStateFromPresentation();
                 return;
             }
@@ -98,6 +99,7 @@ namespace RainbowBlockSaga.Runtime
             runtimeData.Width = presentation.ColumnCount;
             runtimeData.Height = presentation.RowCount;
             runtimeData.PlayableCells = BuildPlayableCells();
+            runtimeData.RequireCompleteLines = presentation.RequireCompleteLines;
 
             Model = new BoardModel(runtimeData);
             SyncStateFromPresentation();

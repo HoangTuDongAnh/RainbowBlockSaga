@@ -56,9 +56,8 @@ namespace RainbowBlockSaga.Presentation.Gameplay
 
         void OnEnable()
         {
-            bool endless = GameDataManager.GetGameMode() == EGameMode.Endless;
-            if (!endless) return;
-
+            foreach (var config in configs)
+                counts[config.item] = PlayerPrefs.GetInt(Key(config.item), 0);
             foreach (var view in buttons)
             {
                 if (view == null || view.Button == null) continue;
@@ -66,12 +65,6 @@ namespace RainbowBlockSaga.Presentation.Gameplay
                 view.Button.onClick.AddListener(() => SelectOrBuy(captured));
             }
             RefreshViews();
-        }
-
-        void Start()
-        {
-            if (GameDataManager.GetGameMode() != EGameMode.Endless)
-                gameObject.SetActive(false);
         }
 
         void OnDisable()
@@ -112,6 +105,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         }
 
         bool CanUseItems() => GameDataManager.GetGameMode() == EGameMode.Endless &&
+            !GameManager.instance.IsTutorialMode() &&
             EventManager.GameStatus == EGameState.Playing && field.IsReady &&
             !ResolveScoreRuntime.Current.IsPresenting;
 

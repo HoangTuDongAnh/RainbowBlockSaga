@@ -33,6 +33,7 @@ namespace RainbowBlockSaga.Runtime
         public static GameSessionRuntime Current { get; private set; }
 
         public GameSession Session { get; private set; }
+        public bool CanAcceptPlacement => sessionPresentation.CanAcceptPlacement;
         public IBlockTrayPresentation TrayPresentation => trayPresentation;
         public IShapeCatalog ShapeCatalog => shapeCatalog;
         public GameplaySessionState CurrentPresentationState =>
@@ -185,6 +186,10 @@ namespace RainbowBlockSaga.Runtime
 
         void OnGameStateChanged(GameplaySessionState state)
         {
+            // Preparation runs after the board, tray and saved run statistics are restored.
+            // A reused board can otherwise leave the previous session's combo alive.
+            if (state == GameplaySessionState.Prepare)
+                ResetSession();
             ApplyPresentationGameState(state);
         }
 
@@ -281,7 +286,8 @@ namespace RainbowBlockSaga.Runtime
                 return;
 
             presentationScoreInitialized = true;
-            Session.Score.SetScore(sessionPresentation.CurrentScore);
+            Session.Score.Restore(sessionPresentation.CurrentScore, sessionPresentation.CurrentCombo,
+                sessionPresentation.CurrentMisses, sessionPresentation.HighestCombo);
         }
 
         public void RefreshSpawnProfile()

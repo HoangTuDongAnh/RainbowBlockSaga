@@ -1,43 +1,38 @@
 using UnityEngine;
 using RainbowBlockSaga.Presentation.Scripts.Enums;
 using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.GUI.Orientation;
 
 namespace RainbowBlockSaga.Presentation.Gameplay
 {
     // Board, tray and boosters use separate canvases: arrange them in screen space.
-    [ExecuteAlways, DefaultExecutionOrder(10000)]
+    [DefaultExecutionOrder(10000)]
     public sealed class EndlessGameplayLayout : MonoBehaviour
     {
         [SerializeField] RectTransform board;
         [SerializeField] RectTransform tray;
         [SerializeField] RectTransform support;
+        [SerializeField] OrientationTransformableObject boardOrientation;
+        [SerializeField] OrientationTransformableObject trayOrientation;
         [SerializeField, Range(0.05f, 0.3f)] float headerFraction = 0.16f;
         [SerializeField, Range(0.01f, 0.08f)] float gapFraction = 0.025f;
         readonly Vector3[] corners = new Vector3[4];
-        Snapshot boardBefore, trayBefore;
         bool applied;
 
-        struct Snapshot
+        void OnEnable() => RefreshVisibility();
+
+        bool RefreshVisibility()
         {
-            public Vector3 position, scale;
-            public Quaternion rotation;
-            public Snapshot(RectTransform rect)
-            {
-                position = rect.localPosition;
-                scale = rect.localScale;
-                rotation = rect.localRotation;
-            }
-            public void Restore(RectTransform rect)
-            {
-                rect.localPosition = position;
-                rect.localScale = scale;
-                rect.localRotation = rotation;
-            }
+            bool show = GameDataManager.GetGameMode() == EGameMode.Endless &&
+                !GameManager.instance.IsTutorialMode();
+            if (support.gameObject.activeSelf != show)
+                support.gameObject.SetActive(show);
+            return show;
         }
 
         void LateUpdate()
         {
-            if (GameDataManager.GetGameMode() != EGameMode.Endless)
+            if (!RefreshVisibility())
             {
                 Restore();
                 return;
@@ -45,12 +40,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             // These transforms can be temporarily zero-scaled by screen transitions.
             if (board.lossyScale.x == 0 || tray.lossyScale.x == 0 || support.lossyScale.x == 0)
                 return;
-            if (!applied)
-            {
-                boardBefore = new Snapshot(board);
-                trayBefore = new Snapshot(tray);
-                applied = true;
-            }
+            applied = true;
             var safe = Screen.safeArea;
             float gap = safe.height * gapFraction;
             float bottom = safe.yMin + gap;
@@ -99,8 +89,17 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         void Restore()
         {
             if (!applied) return;
-            boardBefore.Restore(board);
-            trayBefore.Restore(tray);
+            // Restore the original preset for the current orientation, not a stale snapshot.
+            if (Screen.width > Screen.height)
+            {
+                boardOrientation.PreviewLandscapeConfiguration();
+                trayOrientation.PreviewLandscapeConfiguration();
+            }
+            else
+            {
+                boardOrientation.PreviewPortraitConfiguration();
+                trayOrientation.PreviewPortraitConfiguration();
+            }
             applied = false;
         }
     }
