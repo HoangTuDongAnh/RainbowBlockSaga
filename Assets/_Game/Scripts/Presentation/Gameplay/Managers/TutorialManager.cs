@@ -41,6 +41,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 
         private Coroutine handAnimationCoroutine;
         private bool subscribed;
+        private bool phaseTransitionPending;
 
         private void OnEnable()
         {
@@ -61,10 +62,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 
             EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Unsubscribe(OnShapePlaced);
             EventManager.GetEvent<Shape>(EGameEvent.LineDestroyed).Unsubscribe(OnLineDestroyed);
+            subscribed = false;
         }
 
         public void StartTutorial()
         {
+            IsTutorialActive = true;
+            phaseTransitionPending = false;
             FillCellDecks();
             StartCoroutine(DelayedBoundsCalculation());
         }
@@ -84,7 +88,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
 
         public void EndTutorial()
         {
+            if (!IsTutorialActive) return;
             IsTutorialActive = false;
+            StopAllCoroutines();
             GameManager.instance.SetTutorialCompleted();
             StopHandAnimation();
             outline.gameObject.SetActive(false);
@@ -92,20 +98,22 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.Managers
             
             // Trigger tutorial completed event before restarting level
             EventManager.GetEvent(EGameEvent.TutorialCompleted).Invoke();
-            
-            GameManager.instance.RestartLevel();
+
+            // Unsubscribe tutorial callbacks before creating the real board and tray.
             gameObject.SetActive(false);
+            GameManager.instance.RestartLevel();
         }
 
         private void OnShapePlaced(Shape obj)
         {
-            StopHandAnimation();
-            cellDeckManager.AddShapeToFreeCell(tutorialShapesQueue[0]);
+            if (!IsTutorialActive) return;
             StopHandAnimation();
         }
 
         private void OnLineDestroyed(Shape obj)
         {
+            if (!IsTutorialActive || phaseTransitionPending) return;
+            phaseTransitionPending = true;
             currentPhase++;
             StartCoroutine(DelayedNextPhase());
         }

@@ -46,25 +46,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public bool WillLevelBeComplete()
         {
-            if (_levelTargetInstance == null || _levelTargetInstance.Count == 0) return false;
-
-            var pendingDeductions = new Dictionary<TargetScriptable, int>();
-            foreach (var targetScriptable in _activeAnimationTargets.Values)
-            {
-                pendingDeductions[targetScriptable] = pendingDeductions.GetValueOrDefault(targetScriptable, 0) + 1;
-            }
-
-            foreach (var target in _levelTargetInstance)
-            {
-                int currentAmount = target.amount;
-                int deductions = pendingDeductions.GetValueOrDefault(target.targetScriptable, 0);
-                int predictedAmount = currentAmount - deductions;
-                
-                if (predictedAmount > 0)
-                {
-                    return false;
-                }
-            }
+            if (!IsLevelComplete()) return false;
 
             // Notify that level is about to complete
             EventManager.GetEvent(EGameEvent.LevelAboutToComplete).Invoke();
@@ -73,6 +55,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void OnLevelLoaded(Level obj)
         {
+            CancelAnimations();
             level = obj;
             if (level == null)
             {
@@ -104,8 +87,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public void RegisterTargetGuiElement(TargetScriptable target, TargetGUIElement targetGuiElement)
         {
             _targetGuiElements[target] = targetGuiElement;
-            var newCount = _levelTargetInstance.Find(t => t.targetScriptable == target).amount;
-            targetGuiElement.UpdateCount(target.descending ? newCount : 0, false);
+            var instance = _levelTargetInstance.Find(t => t.targetScriptable == target);
+            targetGuiElement.UpdateCount(target is ScoreTargetScriptable ? instance.totalAmount - instance.amount : instance.amount, instance.OnCompleted());
         }
 
         public void UpdateTargetCount(Target targetScriptable)
@@ -134,11 +117,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public IEnumerator AnimateTarget(List<List<Cell>> lines)
         {
             var bonusItems = new Dictionary<BonusItemTemplate, List<Vector3>>();
+            var visitedCells = new HashSet<Cell>();
             foreach (var cells in lines)
             {
                 foreach (var cell in cells)
                 {
-                    if (cell.HasBonusItem())
+                    if (visitedCells.Add(cell) && cell.HasBonusItem())
                     {
                         var bonusItem = cell.GetBonusItem();
                         if (!bonusItems.ContainsKey(bonusItem))
@@ -174,14 +158,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                             
                             _activeAnimationTargets[bonus] = target.targetScriptable;
                             _bonusAnimations.Add(bonus);
+                            // Commit collection before the animation, so pause/save cannot lose it.
+                            target.amount = Mathf.Max(0, target.amount - 1);
                             
                             bonus.OnFinish = _ =>
                             {
                                 _activeAnimationTargets.Remove(bonus);
                                 _bonusAnimations.Remove(bonus);
 
-                                target.amount--;
-                                target.amount = Mathf.Max(0, target.amount);
                                 
                                 var targetTransform = _targetGuiElements[target.targetScriptable].transform;
                                 targetTransform.DOScale(Vector3.one * 1.2f, 0.1f)
@@ -216,17 +200,28 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public void UpdateScoreTarget(int score)
         {
             var targetScriptable = _levelTargetInstance.Find(t => t.targetScriptable.GetType() == typeof(ScoreTargetScriptable));
-            if (targetScriptable != null && _targetGuiElements.TryGetValue(targetScriptable.targetScriptable, out var targetGuiElement))
+            if (targetScriptable != null)
             {
                 var target = _levelTargetInstance.Find(t => t.targetScriptable == targetScriptable.targetScriptable);
-                target.amount -= score;
-                targetGuiElement.UpdateCount(score, IsTargetCompleted(targetScriptable));
+                target.amount = Mathf.Max(0, target.amount - score);
+                if (_targetGuiElements.TryGetValue(targetScriptable.targetScriptable, out var targetGuiElement))
+                    targetGuiElement.UpdateCount(target.totalAmount - target.amount, IsTargetCompleted(targetScriptable));
             }
         }
 
         public bool IsAnimationPlaying()
         {
             return _bonusAnimations != null && _bonusAnimations.Count > 0;
+        }
+
+        private void OnDisable() => CancelAnimations();
+        private void CancelAnimations()
+        {
+            StopAllCoroutines();
+            if (_bonusAnimations == null) return;
+            foreach (var bonus in _bonusAnimations.ToArray()) bonusAnimationPool.Release(bonus);
+            _bonusAnimations.Clear();
+            _activeAnimationTargets.Clear();
         }
     }
 }
