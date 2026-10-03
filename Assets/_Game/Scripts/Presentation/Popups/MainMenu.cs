@@ -62,6 +62,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         private void PlayArcadeMode()
         {
             GameManager.instance.SetGameMode(EGameMode.Adventure);
+            var saved = RunSnapshot.Load(EGameMode.Adventure);
+            if (saved != null)
+            {
+                MenuManager.instance.ShowPopup<ContinueGamePopup>(null, result =>
+                {
+                    if (result == EPopupResult.Restart)
+                    {
+                        RunSnapshot.Delete(EGameMode.Adventure);
+                        GameManager.instance.OpenMap();
+                    }
+                    else SceneLoader.instance.StartGameScene(saved.level);
+                });
+                return;
+            }
             GameManager.instance.OpenMap();
         }
 
@@ -69,7 +83,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             GameManager.instance.SetGameMode(mode);
 
-            if (!GameState.HasMeaningfulState(mode))
+            if (RunSnapshot.Load(mode) == null)
             {
                 GameManager.instance.OpenMap();
                 return;
@@ -80,7 +94,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 result =>
                 {
                     if (result == EPopupResult.Restart)
+                    {
                         GameState.Delete(mode);
+                        RunSnapshot.Delete(mode);
+                    }
 
                     GameManager.instance.OpenMap();
                 });

@@ -7,17 +7,24 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
     {
         public Bonus bonus;
         public GameObject check;
+        private bool scoreTarget;
+        private int total;
 
         public void FillElement(BonusItemTemplate bonusItemTemplate, int targetAmount)
         {
-            bonus.FillIcon(bonusItemTemplate);
+            scoreTarget = bonusItemTemplate == null;
+            total = targetAmount;
+            bonus.gameObject.SetActive(!scoreTarget);
+            if (!scoreTarget) bonus.FillIcon(bonusItemTemplate);
             countText.text = targetAmount.ToString();
         }
 
         public override void UpdateCount(int newCount, bool isTargetCompleted)
         {
-            base.UpdateCount(newCount, isTargetCompleted);
-            if (isTargetCompleted || newCount == 0)
+            countText.text = scoreTarget ? $"SCORE\n{newCount}/{total}" : newCount.ToString();
+            countText.gameObject.SetActive(!isTargetCompleted);
+            check.SetActive(isTargetCompleted);
+            if (isTargetCompleted)
             {
                 TargetCheck();
             }

@@ -11,6 +11,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public TextMeshProUGUI[] scoreText;
         public TextMeshProUGUI bestScoreText;
+        [SerializeField] private TextMeshProUGUI runSummaryText;
         protected BaseModeHandler modeHandler;
 
         protected override void OnEnable()
@@ -21,7 +22,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             var bestScore = modeHandler.bestScore;
             scoreText[0].text = score.ToString();
             scoreText[1].text = score.ToString();
-            bestScoreText.text = bestScore.ToString();
+            bestScoreText.text = Mathf.Max(score, bestScore).ToString();
+            var level = FindObjectOfType<LevelManager>();
+            if (level.IsEndlessMode)
+                runSummaryText.text = $"HIGHEST COMBO  {level.HighestCombo}\n{level.RewardSummary}";
             if (score > bestScore)
             {
                 bestScoreStuff.SetActive(true);

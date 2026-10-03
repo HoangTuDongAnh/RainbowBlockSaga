@@ -21,7 +21,11 @@ namespace RainbowBlockSaga.Gameplay.Resolve
                 for (int x = 0; x < board.Width; x++)
                 {
                     var coord = new BoardCoord(x, y);
-                    if (!board.IsPlayable(coord)) continue;
+                    if (!board.IsPlayable(coord))
+                    {
+                        if (board.Data.RequireCompleteLines) { full = false; break; }
+                        continue;
+                    }
                     hasPlayable = true;
                     if (!board.IsOccupied(coord)) { full = false; break; }
                 }
@@ -44,7 +48,11 @@ namespace RainbowBlockSaga.Gameplay.Resolve
                 for (int y = 0; y < board.Height; y++)
                 {
                     var coord = new BoardCoord(x, y);
-                    if (!board.IsPlayable(coord)) continue;
+                    if (!board.IsPlayable(coord))
+                    {
+                        if (board.Data.RequireCompleteLines) { full = false; break; }
+                        continue;
+                    }
                     hasPlayable = true;
                     if (!board.IsOccupied(coord)) { full = false; break; }
                 }

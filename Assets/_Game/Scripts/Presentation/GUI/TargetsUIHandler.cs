@@ -13,6 +13,16 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         public void OnLevelLoaded(ELevelType levelType)
         {
+            // Activate only the selected panel last, so it owns target registrations.
+            ScoreLabel.SetActive(false);
+            TargetsLabel.SetActive(false);
+            EndlessModeLabel.SetActive(false);
+            TimedModeLabel.SetActive(false);
+            // Activate only the selected panel last, so it owns target registrations.
+            ScoreLabel.SetActive(false);
+            TargetsLabel.SetActive(false);
+            EndlessModeLabel.SetActive(false);
+            TimedModeLabel.SetActive(false);
             ScoreLabel.SetActive(levelType == ELevelType.Score);
             TargetsLabel.SetActive(levelType == ELevelType.CollectItems);
             EndlessModeLabel.SetActive(levelType == ELevelType.Endless && GameDataManager.GetGameMode() == EGameMode.Endless);

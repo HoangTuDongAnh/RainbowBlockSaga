@@ -16,37 +16,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
             bestScoreText.text = bestScore.ToString();
 
-            // Load current score from game state using the proper mode-specific loading
-            var state = GameDataManager.isTestPlay ? null : GameState.Load(EGameMode.Endless) as EndlessGameState;
-            if (state != null)
-            {
-                score = state.score;
-                bestScore = Mathf.Max(bestScore, state.bestScore);
-                bestScoreText.text = bestScore.ToString();
-                scoreText.text = score.ToString();
-            }
-            else
-            {
-                score = 0;
-                scoreText.text = "0";
-            }
+            score = _levelManager.RunScore;
+            scoreText.text = score.ToString();
         }
 
-        protected override void SaveGameState()
-        {
-            var fieldManager = _levelManager?.GetFieldManager();
-            if (fieldManager != null)
-            {
-                var state = new EndlessGameState
-                {
-                    score = score,
-                    bestScore = bestScore,
-                    gameMode = EGameMode.Endless,
-                    gameStatus = EventManager.GameStatus
-                };
-                GameState.Save(state, fieldManager);
-            }
-        }
+        protected override void SaveGameState() => _levelManager.SaveRun();
 
         protected override void DeleteGameState()
         {

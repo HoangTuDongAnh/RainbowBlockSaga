@@ -42,6 +42,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
             Vector3 backwardPos = transform.position + (Vector3)(direction * 0.3f);
             
             Sequence sequence = DOTween.Sequence();
+            sequence.SetTarget(this);
             sequence.Append(transform.DOMove(backwardPos, 0.15f).SetEase(Ease.OutQuad));
             sequence.Append(transform.DOMove(new Vector3(targetPos.x, targetPos.y, transform.position.z), 0.3f).SetEase(Ease.Linear));
             sequence.OnComplete(Finish);
@@ -51,7 +52,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
         {
             PoolObject.GetObject(sparklePrefab).transform.position = transform.position;
             OnFinish(bonusItem.bonusItemTemplate);
-            PoolObject.Return(gameObject);
         }
 
         public void Fill(BonusItemTemplate getBonusItem)
@@ -62,6 +62,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay.FX
                 return;
             }
             bonusItem.FillIcon(getBonusItem);
+        }
+
+        private void OnDisable()
+        {
+            DOTween.Kill(this);
+            OnFinish = null;
         }
     }
 }

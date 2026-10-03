@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.LevelsData;
 using RainbowBlockSaga.Presentation.Contracts;
+using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public event global::System.Action BoardChanged;
 
         public bool IsReady => cells != null;
+        public bool RequireCompleteLines => GameManager.instance.IsTutorialMode();
         public int RowCount => cells?.GetLength(0) ?? 0;
         public int ColumnCount => cells?.GetLength(1) ?? 0;
         public float CellSize => _cellSize;

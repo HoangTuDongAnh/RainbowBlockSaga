@@ -69,7 +69,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 
         public override void UpdateCount(int newCount, bool isTargetCompleted)
         {
-            float targetValue = scoreSlider.value + newCount;
+            currentTween?.Kill();
+            float targetValue = Mathf.Clamp(newCount, 0, scoreSlider.maxValue);
             currentTween = scoreSlider.DOValue(targetValue, duration)
                 .SetEase(Ease.InOutQuad);
         }
@@ -87,6 +88,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI.Labels
 
         private void OnDisable()
         {
+            currentTween?.Kill();
             scoreSlider.onValueChanged.RemoveListener(UpdateScoreText);
         }
     }

@@ -68,7 +68,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             FillCellDecksWithShapes(batch);
         }
 
-        public void FillCellDecksWithShapes(ShapeTemplate[] shapes)
+        public void FillCellDecksWithShapes(ShapeTemplate[] shapes, bool generateBonuses = true)
         {
             if (shapes == null || shapes.Length == 0)
                 return;
@@ -90,6 +90,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
                 shape.UpdateShape(shapeTemplate);
                 shape.UpdateColor(itemFactory.GetColor());
+                if (generateBonuses) itemFactory.GenerateBonus(shape);
                 cellDeck.FillCell(shape);
                 presented[index] = shapeTemplate;
             }

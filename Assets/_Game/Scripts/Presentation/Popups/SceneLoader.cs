@@ -30,6 +30,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void StartGameScene(int levelNumber = 0)
         {
+            if (levelNumber == 0)
+            {
+                var saved = RunSnapshot.Load(EGameMode.Adventure);
+                if (saved != null) levelNumber = saved.level;
+            }
             StartLevel(EGameMode.Adventure, ArcadeLevelCatalog.Find(levelNumber > 0 ? levelNumber : GameDataManager.GetLevelNum()));
         }
 
@@ -54,6 +59,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void GoMain()
         {
+            SaveActiveRun();
             StateManager.instance.CurrentState = EScreenStates.MainMenu;
         }
 
@@ -70,7 +76,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void StartMapScene()
         {
+            SaveActiveRun();
             StateManager.instance.CurrentState = EScreenStates.Map;
+        }
+
+        private void SaveActiveRun()
+        {
+            if (StateManager.instance.CurrentState == EScreenStates.Game)
+                FindObjectOfType<LevelManager>().SaveRun();
         }
 
     }

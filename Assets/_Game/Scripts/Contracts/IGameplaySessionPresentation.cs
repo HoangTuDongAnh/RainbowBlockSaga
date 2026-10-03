@@ -29,6 +29,10 @@ namespace RainbowBlockSaga.Presentation.Contracts
         GameplaySessionState CurrentState { get; }
 
         int CurrentScore { get; }
+        int CurrentCombo { get; }
+        int CurrentMisses { get; }
+        int HighestCombo { get; }
+        bool CanAcceptPlacement { get; }
         int ScorePerCell { get; }
         bool IsEndlessScoring { get; }
         EndlessScoringSettings EndlessScoring { get; }

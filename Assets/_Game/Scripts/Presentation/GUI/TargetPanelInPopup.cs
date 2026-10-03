@@ -32,6 +32,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         private void ShowTargets()
         {
+            foreach (Transform child in transform) Destroy(child.gameObject);
             var targets = targetManager?.GetTargetGuiElements();
             if (targets != null)
             {
@@ -42,7 +43,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
                     targetElement.transform.localScale = animate ? Vector3.zero : Vector3.one * 1.5f;
                     if (EventManager.GameStatus == EGameState.PreWin || EventManager.GameStatus == EGameState.Win)
                     {
-                        targetElement.GetComponent<TargetBonusGUIElement>().TargetCheck();
+                        if (targetElement is TargetBonusGUIElement bonus) bonus.TargetCheck();
                     }
                 }
             }

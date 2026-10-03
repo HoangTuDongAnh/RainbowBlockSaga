@@ -78,6 +78,11 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void Update()
         {
+            if (!GameSessionRuntime.Current.CanAcceptPlacement)
+            {
+                CancelDragIfActive();
+                return;
+            }
             if (ResolveScoreRuntime.Current != null && ResolveScoreRuntime.Current.IsPresenting)
             {
                 CancelDragIfActive();
@@ -278,6 +283,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             activeTouchId = -1;
 
             // Re-evaluate at the final pointer position before committing.
+            if (!GameSessionRuntime.Current.CanAcceptPlacement) { ReturnToDeck(); return; }
             highlightManager.ClearAllHighlights();
             ClearPlacementState();
             boardRuntime.SyncNow();

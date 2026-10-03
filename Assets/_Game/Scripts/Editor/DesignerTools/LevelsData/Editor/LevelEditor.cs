@@ -110,6 +110,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             timerContainer.Add(timerDurationField);
 
             root.Add(timerContainer);
+            var movesField = new IntegerField("Move limit (0 = unlimited)") { value = level.moveLimit };
+            movesField.RegisterValueChangedCallback(evt => {
+                Undo.RecordObject(level, "Change move limit");
+                level.moveLimit = Mathf.Max(0, evt.newValue);
+                EditorUtility.SetDirty(level);
+            });
+            root.Add(movesField);
+            root.Add(new HelpBox("For mixed objectives choose Collect Items and set both Score and gem amounts. All positive targets must be completed. Timer and move limit may be combined.", HelpBoxMessageType.Info));
             root.Add(new Label(""));
 
             var levelTypes = Resources.LoadAll<LevelTypeScriptable>("").Where(i => i.selectable).ToArray();
@@ -207,6 +215,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData.Editor
             targetParameters.Clear();
             targetParameters.style.flexDirection = FlexDirection.Row;
 
+            foreach (var available in level.levelType.targets)
+                if (available != null && !level.targetInstance.Any(t => t.targetScriptable == available))
+                {
+                    level.targetInstance.Add(new Target(available));
+                    EditorUtility.SetDirty(level);
+                }
             for (var index = 0; index < level.targetInstance.Count; index++)
             {
                 var targetInstance = level.targetInstance[index];

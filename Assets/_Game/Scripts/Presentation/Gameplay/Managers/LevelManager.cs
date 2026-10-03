@@ -91,13 +91,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             itemFactory = FindObjectOfType<ItemFactory>();
             cellDeck = FindObjectOfType<CellDeckManager>();
             field = FindObjectOfType<FieldManager>();
-            // Get or add the TimerManager component
+            // TimerManager is serialized on the gameplay scene.
             timerManager = GetComponent<TimerManager>();
-            if (timerManager == null)
-            {
-                timerManager = gameObject.AddComponent<TimerManager>();
-            }
-
             if (timerManager != null)
             {
                 timerManager.OnTimerExpired += OnTimerExpired;
@@ -131,77 +126,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 Destroy
             );
             RestartLevel();
-            if (gameMode == EGameMode.Endless)
-                RestoreGameState();
-            else if (gameMode == EGameMode.Timed)
-                RestoreTimedGameState();
-        }
-
-        private void RestoreGameState()
-        {
-            if (GameDataManager.isTestPlay) return;
-            var state = GameState.Load(EGameMode.Endless) as EndlessGameState;
-            if (state != null)
-            {
-                GameManager.instance.Score = state.score;
-
-                if (state.levelRows != null)
-                {
-                    var fieldManager = FindObjectOfType<FieldManager>();
-                    if (fieldManager != null)
-                    {
-                        fieldManager.RestoreFromState(state.levelRows);
-                    }
-                }
-            }
-        }
-
-        private void RestoreTimedGameState()
-        {
-            if (GameDataManager.isTestPlay) return;
-            var state = GameState.Load(EGameMode.Timed) as TimedGameState;
-            if (state != null)
-            {
-                Debug.Log($"Restoring timed game state with {(state.levelRows?.Length ?? 0)} rows");
-                timedModeHandler = FindObjectOfType<TimedModeHandler>();
-                if (timedModeHandler != null)
-                {
-                    timedModeHandler.score = state.score;
-                    timedModeHandler.bestScore = state.bestScore;
-                    
-                    // Initialize timer with saved remaining time
-                    if (timerManager != null)
-                    {
-                        timerManager.InitializeTimer(state.remainingTime);
-                    }
-
-                    // Restore field state if we have saved rows
-                    if (state.levelRows != null && state.levelRows.Length > 0)
-                    {
-                        var fieldManager = FindObjectOfType<FieldManager>();
-                        if (fieldManager != null)
-                        {
-                            Debug.Log("Restoring field state from saved state");
-                            fieldManager.RestoreFromState(state.levelRows);
-                        }
-                        else
-                        {
-                            Debug.LogError("Could not find FieldManager component to restore field state");
-                        }
-                    }
-
-                    // Let TimedModeHandler handle the timer start
-                    timedModeHandler.ResumeGame();
-                }
-            }
-            else
-            {
-                // If no saved state, start fresh timer
-                if (timerManager != null && timedModeHandler != null)
-                {
-                    timerManager.InitializeTimer(GameManager.instance.GameSettings.globalTimedModeSeconds);
-                }
-            }
+            RestoreRun();
         }
 
         private void RestartLevel()
@@ -217,6 +142,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnDisable()
         {
+            runReady = false;
             CancelInvoke();
             StopAllCoroutines();
             if (endlessFeedback) endlessFeedback.Clear();
@@ -250,12 +176,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            // Saving is owned by BaseModeHandler. LevelManager only controls presentation timing.
+            if (pauseStatus) SaveRun();
             PauseTimer(pauseStatus);
         }
 
         private void Load()
         {
+            gameMode = GameDataManager.GetGameMode();
             if (GameManager.instance.IsTutorialMode())
             {
                 _levelData = tutorialManager.GetLevelForPhase();
@@ -271,6 +198,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 return;
             }
             currentLevel = gameMode == EGameMode.Adventure ? _levelData.Number : 0;
+            BeginRun();
 
             // Apply global time settings if timed mode is enabled
             if (_levelData.enableTimer)
@@ -310,8 +238,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void StartGame()
         {
+            runReady = true;
+            cellDeck.FillCellDecks();
+            SaveRun();
             EventManager.GameStatus = EGameState.PrepareGame;
             endlessModeHandler = FindObjectOfType<EndlessModeHandler>();
+            if (gameMode == EGameMode.Endless && endlessModeHandler != null) endlessModeHandler.UpdateScore(RunScore);
         }
 
         private void LoadLevel(Level levelData)
@@ -427,7 +359,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             int externalComboCounter,
             Action completed, ResolveScoreFeedback feedback = default)
         {
-            comboCounter = externalComboCounter;
+            CommitTurn(shape, lines, scoreGain, externalComboCounter);
+            AwardPoints(scoreGain);
+            if (gameMode == EGameMode.Adventure && lines != null && lines.Count > 0)
+                StartCoroutine(targetManager.AnimateTarget(lines));
 
             if (lines != null && lines.Count > 0)
             {
@@ -449,7 +384,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (comboCounter == 0)
                 field.ShowOutline(false);
 
-            AwardPoints(scoreGain);
             completed?.Invoke();
 
             if (EventManager.GameStatus == EGameState.Playing)
@@ -468,15 +402,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
             yield return new WaitForSeconds(0.1f);
 
-            if (gameMode == EGameMode.Adventure)
-                StartCoroutine(targetManager.AnimateTarget(lines));
-
             yield return StartCoroutine(DestroyLines(lines, shape, feedback.RainbowTriggered));
-
-            if (scoreGain > 0)
-            {
-                AwardPoints(scoreGain);
-            }
 
             if (feedback.IsEndless)
             {
@@ -578,6 +504,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             int cellCount = lines.SelectMany(line => line).Distinct().Count();
             int lineScore = GameManager.instance.GameSettings.ScorePerCell * cellCount;
+            if (IsEndlessMode) lineScore = Mathf.RoundToInt(lineScore * GameManager.instance.GameSettings.endlessScoring.LineMultiplier(lines.Count));
             var settings = GameManager.instance.GameSettings.endlessScoring;
             bool fullClear = cellCount > 0 && field.GetAllCells().Cast<Cell>().Count(c => !c.IsEmpty() && !c.IsDisabled()) == cellCount;
             bool rainbow = IsEndlessMode && (comboCounter == Mathf.Max(1, settings.RainbowCombo) || fullClear);
@@ -622,6 +549,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             yield return new WaitForSeconds(0.5f);
 
             bool lose = !HasAnyPresentationMove();
+            if (EventManager.GameStatus != EGameState.Playing && EventManager.GameStatus != EGameState.WinWaiting)
+                yield break;
+            if (EventManager.GameStatus != EGameState.Playing && EventManager.GameStatus != EGameState.WinWaiting)
+                yield break;
 
             if (gameMode != EGameMode.Endless &&
                 targetManager != null &&
@@ -632,6 +563,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 lose = false;
             }
 
+            lose |= OutOfMoves;
+            if (targetManager.IsLevelComplete() && gameMode == EGameMode.Adventure) lose = false;
             if (lose &&
                 EventManager.GameStatus != EGameState.PreFailed &&
                 EventManager.GameStatus != EGameState.Failed)
@@ -667,6 +600,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (EventManager.GameStatus == EGameState.PreWin || EventManager.GameStatus == EGameState.Win)
                 return;
             timerManager?.StopTimer();
+            CompleteRun(true);
             var next = ArcadeLevelCatalog.Next(currentLevel);
             if (gameMode == EGameMode.Adventure && next != null)
                 GameDataManager.UnlockLevel(next.Number);

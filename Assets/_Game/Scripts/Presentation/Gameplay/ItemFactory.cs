@@ -16,7 +16,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private ShapeTemplate[] shapes;
         protected ItemTemplate[] items;
         private Level level;
-        private Dictionary<BonusItemTemplate, int> predictedTargets;
         public bool _oneColorMode;
         protected int _oneColor;
 
@@ -46,7 +45,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public GameplaySessionState CurrentState =>
             ToSessionState(EventManager.GameStatus);
 
-        public int CurrentScore => GetEndlessScore();
+        public int CurrentScore => levelManager.RunScore;
+        public int CurrentCombo => levelManager.comboCounter;
+        public int CurrentMisses => levelManager.RunMisses;
+        public int HighestCombo => levelManager.HighestCombo;
+        public bool CanAcceptPlacement => !levelManager.OutOfMoves;
 
         public bool IsEndlessScoring => GameDataManager.GetGameMode() == EGameMode.Endless;
         public EndlessScoringSettings EndlessScoring => GameManager.instance.GameSettings.endlessScoring;
@@ -72,6 +75,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void ResetCurrentScore()
         {
+            levelManager.ResetRunStats();
             var endless = FindObjectOfType<EndlessModeHandler>(true);
             if (endless != null)
             {
@@ -263,7 +267,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             var currentTargets = targetManager.GetTargets();
             if (currentTargets != null && currentTargets.Any(i => i.targetScriptable.bonusItem != null))
             {
-                GenerateBonus(shape, currentTargets);
+                GenerateBonus(shape);
             }
 
             shape.UpdateColor(GetColor());
@@ -300,11 +304,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 if (field.CanPlaceShape(shape))
                 {
                     // Add bonus generation like in CreateRandomShape
-                    var currentTargets = targetManager.GetTargets();
-                    if (currentTargets != null && currentTargets.Any(i => i.targetScriptable.bonusItem != null))
-                    {
-                        GenerateBonus(shape, currentTargets);
-                    }
+                    GenerateBonus(shape);
                     return shape;
                 }
             }
@@ -324,12 +324,17 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             return items[_oneColor];
         }
 
-        private void GenerateBonus(Shape shapeObject, List<Target> targets)
+        public void GenerateBonus(Shape shapeObject)
         {
+            if (GameDataManager.GetGameMode() != EGameMode.Adventure ||
+                GameManager.instance.IsTutorialMode()) return;
+            var targets = targetManager.GetTargets();
             var predictedTargets = new Dictionary<BonusItemTemplate, int>(targets.Count);
             foreach (var target in targets)
             {
-                predictedTargets[target.targetScriptable.bonusItem] = target.amount;
+                var bonus = target.targetScriptable.bonusItem;
+                if (bonus != null && target.amount > 0)
+                    predictedTargets[bonus] = target.amount;
             }
 
             // Count the amount of targets already on the field cells
@@ -376,7 +381,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
             foreach (var key in keys)
             {
-                if (predictedTargets[key] > 0 && Random.Range(0, 3) == 0)
+                // A missing objective must have a supply; do not gate it behind chance.
+                if (predictedTargets[key] > 0)
                 {
                     shapeObject.SetBonus(key, predictedTargets[key]);
                     return;

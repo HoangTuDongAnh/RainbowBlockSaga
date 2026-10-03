@@ -13,6 +13,7 @@ namespace RainbowBlockSaga.Gameplay.Score
         public int Score { get; private set; }
         public int Combo { get; private set; }
         public int Misses { get; private set; }
+        public int HighestCombo { get; private set; }
         public ResolveScoreFeedback LastTurn { get; private set; }
 
         public event Action<int> Changed;
@@ -28,12 +29,14 @@ namespace RainbowBlockSaga.Gameplay.Score
             if (placement == null || !placement.Success || resolve == null) return 0;
             int block = placement.Cells.Count * rule.PlacementScorePerCell;
             int line = resolve.ClearedCells.Count * rule.ClearScorePerCell;
+            if (rule.IsEndless) line = Mathf.RoundToInt(line * rule.Endless.LineMultiplier(resolve.ClearedLines));
             float multiplier = 1f;
             bool rainbow = false;
             if (resolve.ClearedLines > 0)
             {
                 Misses = 0;
                 Combo++;
+                HighestCombo = Mathf.Max(HighestCombo, Combo);
                 ComboChanged?.Invoke(Combo);
                 multiplier = rule.IsEndless ? rule.Endless.Multiplier(Combo) : rule.UseComboStreak
                     ? Mathf.Max(1, Combo) : 1f + (resolve.ClearedLines - 1) * rule.AdditionalLineMultiplier;
@@ -69,7 +72,18 @@ namespace RainbowBlockSaga.Gameplay.Score
             Score = 0;
             Combo = 0;
             Misses = 0;
+            HighestCombo = 0;
 
+            Changed?.Invoke(Score);
+            ComboChanged?.Invoke(Combo);
+        }
+
+        public void Restore(int score, int combo, int misses, int highestCombo)
+        {
+            Score = Mathf.Max(0, score);
+            Combo = Mathf.Max(0, combo);
+            Misses = Mathf.Max(0, misses);
+            HighestCombo = Mathf.Max(Combo, highestCombo);
             Changed?.Invoke(Score);
             ComboChanged?.Invoke(Combo);
         }

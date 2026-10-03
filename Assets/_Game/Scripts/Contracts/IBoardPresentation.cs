@@ -12,6 +12,7 @@ namespace RainbowBlockSaga.Presentation.Contracts
         event Action BoardChanged;
 
         bool IsReady { get; }
+        bool RequireCompleteLines { get; }
         int RowCount { get; }
         int ColumnCount { get; }
         float CellSize { get; }

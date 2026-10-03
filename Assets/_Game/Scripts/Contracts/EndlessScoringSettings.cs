@@ -8,6 +8,7 @@ namespace RainbowBlockSaga.Presentation.Contracts
     {
         [Tooltip("Last value is used for all higher combos.")]
         public float[] ComboMultipliers = { 1f, 1.1f, 1.2f, 1.3f, 1.5f };
+        public float LineMultiplier(int lines) => Mathf.Min(3f, 1f + Mathf.Max(0, lines - 1) * .5f);
         [Tooltip("Consecutive placements without a clear before resetting the streak.")]
         [Min(1)] public int ResetAfterMisses = 1;
         [Min(1)] public int SmallFeedbackCombo = 3;

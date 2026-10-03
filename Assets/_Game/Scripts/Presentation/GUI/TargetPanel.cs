@@ -12,6 +12,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         protected override void OnEnableInternal()
         {
+            foreach (var view in _list.Values) if (view != null) Destroy(view.gameObject);
             _list.Clear();
             var levelManager = FindObjectOfType<LevelManager>(true);
             if (levelManager != null)

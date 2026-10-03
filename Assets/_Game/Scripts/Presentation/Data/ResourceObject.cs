@@ -27,11 +27,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Data
         //runs when the object is created
         private void OnEnable()
         {
-            Task.Run(async () =>
-            {
-                await Task.Delay(1000);
-                await LoadPrefs();
-            });
+            Resource = LoadResource();
         }
 
         //loads prefs from player prefs and assigns to resource variable
@@ -51,6 +47,17 @@ namespace RainbowBlockSaga.Presentation.Scripts.Data
         {
             Resource += amount;
             PlayerPrefs.SetInt(ResourceName, Resource);
+            PlayerPrefs.Save();
+            OnResourceChanged();
+        }
+
+        public void GrantOnce(string receipt, int amount)
+        {
+            if (PlayerPrefs.HasKey(receipt)) return;
+            Resource += Mathf.Max(0, amount);
+            PlayerPrefs.SetInt(ResourceName, Resource);
+            PlayerPrefs.SetInt(receipt, 1);
+            PlayerPrefs.Save();
             OnResourceChanged();
         }
 

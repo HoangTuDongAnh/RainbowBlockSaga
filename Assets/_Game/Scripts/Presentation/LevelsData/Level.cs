@@ -31,6 +31,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
         public LevelTypeScriptable levelType;
         public bool enableTimer = false;
         public int timerDuration = 120;
+        [Min(0), Tooltip("0 = unlimited. Only successful placements consume a move.")]
+        public int moveLimit;
 
         [SerializeField]
         public Dictionary<Color, int> bonusItemColors;

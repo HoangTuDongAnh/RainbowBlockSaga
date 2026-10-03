@@ -111,6 +111,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
         public void MainMenu()
         {
             if (StateManager.instance.CurrentState == EScreenStates.Game)
+                FindObjectOfType<LevelManager>().SaveRun();
+            if (StateManager.instance.CurrentState == EScreenStates.Game)
                 foreach (var handler in FindObjectsByType<BaseModeHandler>(FindObjectsSortMode.None))
                     handler.SaveCurrentRun();
             DOTween.KillAll();

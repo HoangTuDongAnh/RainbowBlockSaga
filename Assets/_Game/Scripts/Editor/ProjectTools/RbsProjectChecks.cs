@@ -50,9 +50,9 @@ public static class RbsProjectChecks
                 Check(score.Apply(single,row)==expected,"Endless combo table or fifth-combo bonus is incorrect");
             Check(!score.LastTurn.RainbowTriggered,"Combo six must not repeat the fifth-combo milestone bonus");
             Check(score.Apply(new PlacementResult(true,Cells(4)),new BoardResolveResult(0,Cells(0)))==40&&score.Combo==0,"Endless miss must award placement points and reset the streak");
-            Check(score.Apply(single,cross)==260&&score.LastTurn.RainbowBonus==100,"Full clear must award 100 even at combo one");
+            Check(score.Apply(single,cross)==335&&score.LastTurn.RainbowBonus==100,"Full clear must award 100 even at combo one");
             for(int i=0;i<3;i++)score.Apply(single,row);
-            Check(score.Apply(single,cross)==335&&score.LastTurn.RainbowBonus==100,"Full clear plus combo five must award the bonus only once");
+            Check(score.Apply(single,cross)==448&&score.LastTurn.RainbowBonus==100,"Full clear plus combo five must award the bonus only once");
             var previousScore=score.Score;
             Check(score.Apply(new PlacementResult(false,Cells(0)),row)==0&&score.Score==previousScore&&score.Combo==5,"Rejected placements must not change score or combo");
             rule.Endless.ResetAfterMisses=2;

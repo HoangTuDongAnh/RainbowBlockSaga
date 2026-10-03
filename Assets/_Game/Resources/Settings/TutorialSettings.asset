@@ -15,10 +15,10 @@ MonoBehaviour:
   tutorialShapes:
   - {fileID: 11400000, guid: 99204750325178a44bd78a7ca406fb6f, type: 2}
   - {fileID: 11400000, guid: 1b920f6af6c78431ea3e2fad9ea18091, type: 2}
-  - {fileID: 11400000, guid: eb852a6d904ed439295f6a6b4c43b978, type: 2}
+  - {fileID: 11400000, guid: 1b920f6af6c78431ea3e2fad9ea18091, type: 2}
   - {fileID: 11400000, guid: 99204750325178a44bd78a7ca406fb6f, type: 2}
   - {fileID: 11400000, guid: b823ac7471de26e44a051bbbfe6fec47, type: 2}
-  - {fileID: 11400000, guid: aa4fe1315e425426a92b4919e1e5c8fa, type: 2}
+  - {fileID: 11400000, guid: b823ac7471de26e44a051bbbfe6fec47, type: 2}
   tutorialLevels:
   - {fileID: 11400000, guid: ca7334e723a92475e812ae922e2b48d3, type: 2}
   - {fileID: 11400000, guid: a9c750a376f8941a8a953c3d7ba9d464, type: 2}
