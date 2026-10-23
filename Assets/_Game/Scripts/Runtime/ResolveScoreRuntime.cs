@@ -75,7 +75,7 @@ namespace RainbowBlockSaga.Runtime
         public bool TryResolvePlacement(
             RainbowBlockSaga.Gameplay.Block.BlockShapeData shapeData,
             UnityEngine.Object presentationShapeHandle,
-            IReadOnlyList<BoardCoord> placedCoords)
+            IReadOnlyList<BoardCoord> placedCoords, bool consumeFromTray = true)
         {
             var session = Session;
 
@@ -91,7 +91,7 @@ namespace RainbowBlockSaga.Runtime
             var outcome =
                 session.ResolveExternalPlacement(
                     shapeData,
-                    placedCoords);
+                    placedCoords, consumeFromTray);
 
             if (outcome == null)
                 return false;

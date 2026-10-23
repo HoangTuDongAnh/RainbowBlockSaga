@@ -85,7 +85,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             }
             for (int i = 0; i < snapshot.tray.Length; i++)
             {
-                var shape = cellDeck.cellDecks[i].shape;
+                var shape = cellDeck.GetPersistentShape(i);
                 snapshot.tray[i] = shape == null ? new RunSnapshot.SavedShape() : new RunSnapshot.SavedShape {
                     shape = shape.shapeTemplate.name, items = shape.GetActiveItems().Select(RunSnapshot.CaptureItem).ToArray()
                 };

@@ -15,7 +15,7 @@ using Object = UnityEngine.Object;
 public static class RbsProjectChecks
 {
     [MenuItem("Rainbow Blocks Saga/Validate Project")]
-    public static void Validate() { Debug.Log(Run()); }
+    public static void Validate() { Debug.Log(Run()+"\n"+TrayPlannerChecks.Run()); }
     static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
     static List<BoardCoord> Cells(int n) => Enumerable.Range(0,n).Select(i => new BoardCoord(i,0)).ToList();
     public static string Run()

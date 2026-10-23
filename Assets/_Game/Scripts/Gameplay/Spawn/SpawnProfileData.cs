@@ -11,6 +11,7 @@ namespace RainbowBlockSaga.Gameplay.Spawn
         public bool EnsureAtLeastOnePlayable = true;
         [Min(0)] public int MinPlayablePerBatch = 1;
         public bool PreferDistinctShapes = true;
+        public bool UseBoardLookAhead;
         public List<BlockShapeData> Shapes = new();
     }
 }

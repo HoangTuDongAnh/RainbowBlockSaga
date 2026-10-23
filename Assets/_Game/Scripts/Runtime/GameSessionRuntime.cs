@@ -292,6 +292,7 @@ namespace RainbowBlockSaga.Runtime
 
         public void RefreshSpawnProfile()
         {
+            runtimeSpawnProfile.UseBoardLookAhead = sessionPresentation.IsEndlessScoring;
             runtimeSpawnProfile.BatchSize =
                 trayPresentation.SlotCount;
             runtimeSpawnProfile.MinPlayablePerBatch =

@@ -20,6 +20,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public ShapeTemplate shapeTemplate;
         public ShapeRow[] row;
         public Action OnShapeUpdated;
+        public Action BeforeSupportPlacement;
+        private bool suspendedForSupport;
+
+        public void SetSuspendedForSupport(bool suspended)
+        {
+            suspendedForSupport = suspended;
+            transform.DOKill();
+            gameObject.SetActive(!suspended);
+        }
         public Item topLeftItem;
 
         private readonly List<Item> activeItems = new();
@@ -45,6 +54,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnDisable()
         {
+            if (suspendedForSupport) return;
             foreach (var kvp in customItems)
             {
                 if (kvp.Value != null)

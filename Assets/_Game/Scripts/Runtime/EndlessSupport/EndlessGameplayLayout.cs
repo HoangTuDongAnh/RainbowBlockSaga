@@ -46,7 +46,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             float bottom = safe.yMin + gap;
             float top = safe.yMax - safe.height * headerFraction;
             float trayRatio = tray.rect.height / tray.rect.width;
-            const float supportRatio = 0.35f; // Includes count badges and price pills.
+            const float supportRatio = 0.46f; // Includes the action hint, count badges and price pills.
             if (safe.width <= safe.height)
             {
                 float width = Mathf.Min(safe.width * 0.80f,

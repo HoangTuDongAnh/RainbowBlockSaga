@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using RainbowBlockSaga.Gameplay.Block;
 using RainbowBlockSaga.Gameplay.Board;
 using RainbowBlockSaga.Gameplay.Placement;
+using RainbowBlockSaga.Gameplay.Resolve;
 using UnityEngine;
 
 namespace RainbowBlockSaga.Gameplay.Spawn
@@ -26,6 +27,12 @@ namespace RainbowBlockSaga.Gameplay.Spawn
             if (candidates.Count == 0)
                 return result;
 
+            if (profile.UseBoardLookAhead)
+            {
+                var planned = PlanBatch(board, candidates, profile);
+                if (planned != null) return planned;
+            }
+
             for (int i = 0; i < profile.BatchSize; i++)
                 result.Add(WeightedPick(candidates, profile.PreferDistinctShapes ? result : null));
 
@@ -35,6 +42,70 @@ namespace RainbowBlockSaga.Gameplay.Spawn
 
             EnsurePlayableCount(board, candidates, result, requiredPlayable);
             return result;
+        }
+
+        // Bounded stochastic rollouts: each candidate tray has a witnessed sequence
+        // of placements, including line clears. The real board is never modified.
+        List<BlockShapeData> PlanBatch(BoardModel board, List<BlockShapeData> candidates, SpawnProfileData profile)
+        {
+            var resolver = new BoardResolver();
+            List<BlockShapeData> best = null;
+            float bestScore = float.NegativeInfinity;
+            for (int attempt = 0; attempt < 6; attempt++)
+            {
+                var simulated = CopyBoard(board);
+                var batch = new List<BlockShapeData>();
+                float score = 0;
+                for (int slot = 0; slot < profile.BatchSize; slot++)
+                {
+                    var playable = candidates.FindAll(s => placement.HasAnyValidPlacement(simulated, s));
+                    if (playable.Count == 0) break;
+                    var shape = WeightedPick(playable, profile.PreferDistinctShapes ? batch : null);
+                    var anchors = placement.GetValidPlacements(simulated, shape);
+                    BoardModel next = null;
+                    float nextScore = float.NegativeInfinity;
+                    int offset = Random.Range(0, anchors.Count);
+                    int samples = Mathf.Min(12, anchors.Count);
+                    for (int sample = 0; sample < samples; sample++)
+                    {
+                        var candidate = CopyBoard(simulated);
+                        var anchor = anchors[(offset + sample * anchors.Count / samples) % anchors.Count];
+                        placement.Place(candidate, shape, anchor);
+                        var cleared = resolver.Resolve(candidate);
+                        float value = cleared.ClearedCells.Count * 2f - CountIsolatedHoles(candidate) * 3f + Random.value;
+                        if (value > nextScore) { nextScore = value; next = candidate; }
+                    }
+                    simulated = next;
+                    batch.Add(shape);
+                    score += nextScore;
+                }
+                // Do not claim a complete path when the bounded search found none.
+                if (batch.Count == profile.BatchSize && score > bestScore)
+                {
+                    best = batch;
+                    bestScore = score;
+                }
+            }
+            return best;
+        }
+
+        static BoardModel CopyBoard(BoardModel source)
+        {
+            var copy = new BoardModel(source.Data);
+            foreach (var cell in source.GetOccupiedCoords()) copy.SetOccupied(cell);
+            return copy;
+        }
+
+        static int CountIsolatedHoles(BoardModel board)
+        {
+            int holes = 0;
+            foreach (var cell in board.GetPlayableCoords())
+                if (board.IsEmpty(cell) &&
+                    !board.IsEmpty(new BoardCoord(cell.X - 1, cell.Y)) &&
+                    !board.IsEmpty(new BoardCoord(cell.X + 1, cell.Y)) &&
+                    !board.IsEmpty(new BoardCoord(cell.X, cell.Y - 1)) &&
+                    !board.IsEmpty(new BoardCoord(cell.X, cell.Y + 1))) holes++;
+            return holes;
         }
 
         void EnsurePlayableCount(

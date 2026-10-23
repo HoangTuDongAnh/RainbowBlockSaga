@@ -34,7 +34,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         {
             icon.transform.localScale = Vector3.one * (selected ? 1.08f : 1f);
             nameLabel.gameObject.SetActive(selected);
-            nameLabel.text = "TAP A CELL";
+            nameLabel.text = Item == EndlessSupportItem.RainbowCell ? "DRAG BLOCK" : "TAP A CELL";
         }
 
         public void SetInteractable(bool value)

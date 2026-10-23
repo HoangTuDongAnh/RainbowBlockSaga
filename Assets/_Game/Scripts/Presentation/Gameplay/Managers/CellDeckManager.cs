@@ -25,6 +25,49 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         [SerializeField] private ItemFactory itemFactory;
         [SerializeField] public Shape shapePrefab;
+        private Shape[] suspendedShapes;
+        private Shape supportShape;
+        public bool HasSupportShape => supportShape != null;
+        public Shape GetPersistentShape(int slot) => suspendedShapes != null ? suspendedShapes[slot] : cellDecks[slot].shape;
+
+        public void ShowSupportShape(ShapeTemplate template, Action placed)
+        {
+            suspendedShapes = cellDecks.Select(d => d.shape).ToArray();
+            foreach (var deck in cellDecks)
+            {
+                if (deck.shape != null) deck.shape.SetSuspendedForSupport(true);
+                deck.FillCell(null);
+            }
+            supportShape = PoolObject.GetObject(shapePrefab.gameObject).GetComponent<Shape>();
+            supportShape.UpdateShape(template);
+            supportShape.UpdateColor(itemFactory.GetColor());
+            supportShape.BeforeSupportPlacement = () =>
+            {
+                RestoreSuspendedShapes();
+                placed();
+            };
+            cellDecks[cellDecks.Length / 2].FillCell(supportShape);
+        }
+
+        void RestoreSuspendedShapes()
+        {
+            if (suspendedShapes == null) return;
+            for (int i = 0; i < cellDecks.Length; i++)
+            {
+                if (suspendedShapes[i] != null) suspendedShapes[i].SetSuspendedForSupport(false);
+                cellDecks[i].FillCell(suspendedShapes[i]);
+            }
+            suspendedShapes = null;
+        }
+
+        public void CancelSupportShape()
+        {
+            if (supportShape == null) return;
+            RestoreSuspendedShapes();
+            supportShape.BeforeSupportPlacement = null;
+            PoolObject.Return(supportShape.gameObject);
+            supportShape = null;
+        }
 
         private void OnEnable()
         {
@@ -107,6 +150,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (shape == null)
                 return;
 
+            if (shape == supportShape)
+            {
+                supportShape.BeforeSupportPlacement = null;
+                PoolObject.Return(supportShape.gameObject);
+                supportShape = null;
+                return;
+            }
+
             foreach (var cellDeck in cellDecks)
             {
                 if (cellDeck.shape != shape)
@@ -121,6 +172,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void ClearCellDecks()
         {
+            CancelSupportShape();
             foreach (var cellDeck in cellDecks)
                 cellDeck.ClearCell();
         }
@@ -153,7 +205,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public UnityEngine.Object[] GetVisibleShapeHandles()
         {
-            var shapes = GetShapes();
+            var shapes = (suspendedShapes ?? cellDecks.Select(d => d.shape).ToArray()).Where(s => s != null).ToArray();
             var handles = new UnityEngine.Object[shapes.Length];
 
             for (int i = 0; i < shapes.Length; i++)

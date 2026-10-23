@@ -17,7 +17,7 @@ using UnityEngine;
 using Object=UnityEngine.Object;
 
 [InitializeOnLoad]
-public static class GddPlayValidation
+public static partial class GddPlayValidation
 {
     const string Dir="Temp/GddImplementation/";
     const string Active="RBS_GDD_PLAY_TEST";
@@ -27,7 +27,7 @@ public static class GddPlayValidation
     static Level testLevel;
     static List<string> errors=new();
     [Serializable] class Backup { public Entry[] entries; }
-    [Serializable] class Entry { public string key,value;public int number;public bool exists,isString; }
+    [Serializable] class Entry { public string key,value;public int number;public float decimalNumber;public bool exists,isString,isFloat; }
     static GddPlayValidation()
     {
         EditorApplication.update+=Tick;
@@ -42,7 +42,7 @@ public static class GddPlayValidation
     static void StateChanged(PlayModeStateChange state)
     {
         if(!SessionState.GetBool(Active,false))return;
-        if(state==PlayModeStateChange.EnteredPlayMode){Application.runInBackground=true;step=0;next=EditorApplication.timeSinceStartup+4;}
+        if(state==PlayModeStateChange.EnteredPlayMode){Application.runInBackground=true;errors.Clear();step=0;next=EditorApplication.timeSinceStartup+4;}
         if(state==PlayModeStateChange.EnteredEditMode)
         {
             RestorePrefs(); SessionState.SetBool(Active,false);
@@ -55,6 +55,7 @@ public static class GddPlayValidation
         {
             if(!e.exists)PlayerPrefs.DeleteKey(e.key);
             else if(e.isString)PlayerPrefs.SetString(e.key,e.value);
+            else if(e.isFloat)PlayerPrefs.SetFloat(e.key,e.decimalNumber);
             else PlayerPrefs.SetInt(e.key,e.number);
         }
         PlayerPrefs.Save();
@@ -69,9 +70,10 @@ public static class GddPlayValidation
             if(EditorSceneManager.GetActiveScene().path!="Assets/_Game/Scenes/Gameplay.unity"||EditorSceneManager.GetActiveScene().isDirty)
             { File.WriteAllText(Dir+"play-result.txt","BLOCKED: Gameplay scene must be open and saved before automated Play tests.");File.Delete(Dir+"play.request");return; }
             File.Delete(Dir+"play.request");
-            string[] ints={"tutorial","GameMode","Level","Coins","Score","RewardStreak","RBS_RewardLevel_2","RBS_RewardRun_gdd-validation","RBS_EndlessSupport_RainbowCell","RBS_EndlessSupport_Bomb3x3","RBS_EndlessSupport_ShuffleTray"};
+            string[] ints={"Music","Sound","tutorial","GameMode","Level","Coins","Score","RewardStreak","RBS_RewardLevel_2","RBS_RewardRun_gdd-validation","RBS_EndlessSupport_RainbowCell","RBS_EndlessSupport_Bomb3x3","RBS_EndlessSupport_ShuffleTray"};
+            ints=ints.Concat(ArcadeLevelCatalog.LoadAll().Select(l=>"RBS_RewardLevel_"+l.Number)).Distinct().ToArray();
             string[] strings={"RBS_Run_Endless","RBS_Run_Adventure","GameState_Endless","GameState_Timed","LastPlayedMode","DailyBonusDay","LastFreeSpinTime"};
-            var entries=ints.Select(k=>new Entry{key=k,exists=PlayerPrefs.HasKey(k),number=PlayerPrefs.GetInt(k)}).Concat(strings.Select(k=>new Entry{key=k,exists=PlayerPrefs.HasKey(k),isString=true,value=PlayerPrefs.GetString(k)})).ToArray();
+            var entries=ints.Select(k=>new Entry{key=k,exists=PlayerPrefs.HasKey(k),number=PlayerPrefs.GetInt(k)}).Concat(strings.Select(k=>new Entry{key=k,exists=PlayerPrefs.HasKey(k),isString=true,value=PlayerPrefs.GetString(k)})).Concat(new[]{new Entry{key="VibrationLevel",exists=PlayerPrefs.HasKey("VibrationLevel"),isFloat=true,decimalNumber=PlayerPrefs.GetFloat("VibrationLevel")}}).ToArray();
             File.WriteAllText(Dir+"prefs-backup.json",JsonUtility.ToJson(new Backup{entries=entries}));
             PlayerPrefs.SetInt("tutorial",1);PlayerPrefs.DeleteKey("RBS_Run_Endless");PlayerPrefs.DeleteKey("RBS_Run_Adventure");PlayerPrefs.DeleteKey("RBS_RewardLevel_2");PlayerPrefs.DeleteKey("RBS_RewardRun_gdd-validation");PlayerPrefs.Save();
             SessionState.SetBool(Active,true);EditorApplication.isPlaying=true;return;
@@ -147,7 +149,8 @@ public static class GddPlayValidation
                 int before=ResourceManager.instance.GetResource("Coins").GetValue();
                 RunRewards.Grant(EGameMode.Endless,"gdd-validation",0,1000);RunRewards.Grant(EGameMode.Endless,"gdd-validation",0,1000);
                 Check(ResourceManager.instance.GetResource("Coins").GetValue()==before+70,"Reward duplicated");
-                Finish(errors.Count==0?"PASS: Play Mode placement, full resume, restored combo, last-move mixed win, move-limit failure and reward idempotence.":"FAIL: runtime logs\n"+string.Join("\n",errors));break;
+                Wait();break;
+            default: RunInteractions();break;
         }
     }
     static void Finish(string message)

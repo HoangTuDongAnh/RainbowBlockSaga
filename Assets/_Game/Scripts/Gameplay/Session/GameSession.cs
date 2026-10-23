@@ -107,7 +107,7 @@ namespace RainbowBlockSaga.Gameplay.Session
         /// </summary>
         public GameSessionPlacementOutcome ResolveExternalPlacement(
             BlockShapeData shape,
-            IReadOnlyList<BoardCoord> placedCoords)
+            IReadOnlyList<BoardCoord> placedCoords, bool consumeFromTray = true)
         {
             if (!IsStarted ||
                 IsEnded ||
@@ -119,14 +119,14 @@ namespace RainbowBlockSaga.Gameplay.Session
                 true,
                 new List<BoardCoord>(placedCoords));
 
-            return ResolvePlacement(shape, placement);
+            return ResolvePlacement(shape, placement, consumeFromTray);
         }
 
         GameSessionPlacementOutcome ResolvePlacement(
             BlockShapeData shape,
-            PlacementResult placement)
+            PlacementResult placement, bool consumeFromTray = true)
         {
-            Queue.Consume(shape);
+            if (consumeFromTray) Queue.Consume(shape);
 
             var resolve = Resolver.Resolve(Board);
             int gain = Score.Apply(placement, resolve);

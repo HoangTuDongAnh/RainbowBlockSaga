@@ -506,8 +506,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 6801505687612838475}
-        m_TargetAssemblyTypeName: BlockPuzzleGameToolkit.Scripts.Map.ScrollableMap.LevelPin,
-          CandySmith.BlockPuzzle.Main
+        m_TargetAssemblyTypeName: RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap.LevelPin,
+          RainbowBlockSaga.Presentation
         m_MethodName: MouseDown
         m_Mode: 1
         m_Arguments:

@@ -49,7 +49,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public int CurrentCombo => levelManager.comboCounter;
         public int CurrentMisses => levelManager.RunMisses;
         public int HighestCombo => levelManager.HighestCombo;
-        public bool CanAcceptPlacement => !levelManager.OutOfMoves;
+        public bool CanAcceptPlacement => !levelManager.OutOfMoves &&
+            (EventManager.GameStatus == EGameState.Playing || EventManager.GameStatus == EGameState.Tutorial) &&
+            !RainbowBlockSaga.Presentation.Scripts.Popups.MenuManager.instance.IsAnyPopupOpened();
 
         public bool IsEndlessScoring => GameDataManager.GetGameMode() == EGameMode.Endless;
         public EndlessScoringSettings EndlessScoring => GameManager.instance.GameSettings.endlessScoring;

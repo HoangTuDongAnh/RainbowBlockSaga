@@ -24,6 +24,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             }
         }
 
+        public override void CloseInstant()
+        {
+            _panel?.gameObject.SetActive(false);
+            base.CloseInstant();
+        }
+
         protected void ShowCoinsSpendFX(Vector3 position)
         {
             SoundBase.instance.PlaySound(SoundBase.instance.coinsSpend);

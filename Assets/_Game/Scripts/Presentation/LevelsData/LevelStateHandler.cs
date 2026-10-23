@@ -35,6 +35,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.LevelsData
         
         private protected virtual void HandlePrepareGame(LevelManager levelManager)
         {
+            if (levelManager.gameMode == EGameMode.Adventure && !GameManager.instance.IsTutorialMode())
+            {
+                MenuManager.instance.ShowPopup<AdventureObjectivesPopup>().Configure(levelManager);
+                return;
+            }
             var level = levelManager.GetCurrentLevel();
             var prePlayPopup = level.levelType.prePlayPopup;
 

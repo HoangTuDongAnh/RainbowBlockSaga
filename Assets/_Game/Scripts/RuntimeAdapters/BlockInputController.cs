@@ -115,14 +115,15 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                     HandleDrag(touch.position.ReadValue());
 
                     var phase = touch.phase.ReadValue();
-                    if (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
-                        phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+                    if (phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+                        CancelDragWithReturn();
+                    else if (phase == UnityEngine.InputSystem.TouchPhase.Ended)
                         EndDrag();
                     break;
                 }
 
                 if (!found)
-                    EndDrag();
+                    CancelDragWithReturn();
 
                 return;
             }
@@ -167,11 +168,16 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             }
 
             if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging)
+            {
+                HandleDrag(position);
                 EndDrag();
+            }
         }
 
         void BeginDrag()
         {
+            canvas = GetComponentInParent<Canvas>();
+            eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             var context = BlockRuntimeContext.Current;
             boardRuntime = BoardRuntime.Current;
 
@@ -315,11 +321,14 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             // Resolve and score before publishing the presentation ShapePlaced event.
             // Queue/Spawn then observes the post-resolve BoardModel.
             var resolveRuntime = ResolveScoreRuntime.Current;
+            bool isSupport = shape.BeforeSupportPlacement != null;
+            shape.BeforeSupportPlacement?.Invoke();
             bool resolved = resolveRuntime != null &&
                             resolveRuntime.TryResolvePlacement(
                                 blockView.Data,
                                 shape,
-                                currentCoords);
+                                currentCoords,
+                                !isSupport);
 
             if (resolved)
                 EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Invoke(shape);
@@ -363,10 +372,13 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         Cell GetCellUnderItem(Item item)
         {
-            var hit = Physics2D.Raycast(item.transform.position, Vector2.zero, 1f);
-            return hit.collider != null && hit.collider.CompareTag("Cell")
-                ? hit.collider.GetComponent<Cell>()
-                : null;
+            var boardCanvas = fieldPresentation.GetComponentInParent<Canvas>();
+            var boardCamera = boardCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : boardCanvas.worldCamera;
+            var point = RectTransformUtility.WorldToScreenPoint(boardCamera, item.transform.position);
+            foreach (var cell in fieldPresentation.cells)
+                if (RectTransformUtility.RectangleContainsScreenPoint((RectTransform)cell.transform, point, boardCamera))
+                    return cell;
+            return null;
         }
     }
 }

@@ -156,7 +156,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 }
             }
 
-            if (fader != null && popupStack.Count == 0 && fader.IsFaded())
+            if (fader != null && popupStack.Count == 0)
             {
                 fader.FadeOut();
             }
@@ -202,12 +202,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void CloseAllPopups()
         {
-            for (var i = 0; i < popupStack.Count; i++)
-            {
-                var popup = popupStack[i];
-                popup.Close();
-            }
-
+            foreach (var popup in popupStack.ToArray()) popup.Dismiss();
             popupStack.Clear();
         }
 

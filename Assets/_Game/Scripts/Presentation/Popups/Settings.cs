@@ -8,38 +8,27 @@ using UnityEngine.UI;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
-    public class Settings : PopupWithCurrencyLabel
+    public class Settings : Popup
     {
         [SerializeField]
         private CustomButton back;
-
-        // privacypolicy button
-        [SerializeField]
-        private CustomButton privacypolicy;
-
-        //shop button
-        [SerializeField]
-        private CustomButton shop;
-        [SerializeField]
-        private CustomButton store;
 
         [SerializeField]
         private CustomButton retryButton;
 
         [SerializeField]
-        private Button restorePurchase;
-
-        [SerializeField]
         private Slider vibrationSlider;
 
-        private MenuManager menuManager;
 
         private const string VibrationPrefKey = "VibrationLevel";
 
         private void OnEnable()
         {
             back.onClick.AddListener(BackToMain);
-          //  store.onClick.AddListener(Store);
+            bool inGame = StateManager.instance.CurrentState == EScreenStates.Game;
+            back.gameObject.SetActive(inGame);
+            retryButton.gameObject.SetActive(inGame);
+            closeButton.GetComponentInChildren<TMPro.TMP_Text>().text = inGame ? "RESUME" : "DONE";
             retryButton.onClick.AddListener(Retry);
 
             // Load the saved vibration level
@@ -47,12 +36,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
             // Register the OnValueChanged event
             vibrationSlider.onValueChanged.AddListener(SaveVibrationLevel);
-            menuManager = GetComponentInParent<MenuManager>();
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(BackToGame);
-            privacypolicy?.gameObject.SetActive(false);
-            restorePurchase?.gameObject.SetActive(false);
-            shop?.gameObject.SetActive(false);
+
         }
 
 

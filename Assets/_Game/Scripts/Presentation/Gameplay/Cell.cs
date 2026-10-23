@@ -230,6 +230,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void DestroyCell()
         {
+            isDestroying = true;
             saveTemplate = null;
             busy = false;
             item.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() =>

@@ -198,6 +198,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             }
         }
 
+        public void Dismiss()
+        {
+            OnCloseAction = null;
+            OnShowAction = null;
+            CloseInstant();
+        }
+
         public virtual void CloseInstant()
         {
             if (this == null || closed) return;

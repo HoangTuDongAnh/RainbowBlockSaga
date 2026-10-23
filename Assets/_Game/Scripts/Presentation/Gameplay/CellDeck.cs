@@ -43,7 +43,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 var scale = shape.transform.localScale;
                 shape.transform.localScale = Vector3.zero;
                 PoolObject.GetObject(prefabFX, shape.transform.position);
-                shape.transform.DOScale(scale, 0.5f).SetEase(Ease.OutBack).OnComplete(() => { shape.transform.localScale = scale; });
+                shape.transform.DOScale(scale, 0.5f).SetEase(Ease.OutBack);
             }
         }
 
@@ -59,6 +59,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             if (shape != null)
             {
+                shape.transform.DOKill();
                 PoolObject.Return(shape.gameObject);
                 shape = null;
             }
@@ -68,6 +69,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         {
             if (shape != null)
             {
+                shape.transform.DOKill();
                 Destroy(shape.gameObject);
                 shape = null;
             }
