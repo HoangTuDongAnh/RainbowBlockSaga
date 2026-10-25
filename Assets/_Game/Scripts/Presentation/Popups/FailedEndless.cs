@@ -18,15 +18,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             base.OnEnable();
             modeHandler = FindObjectOfType<BaseModeHandler>(false);
-            var score = modeHandler.score;
+            var level = FindObjectOfType<LevelManager>();
+            var score = level.RunScore;
             var bestScore = modeHandler.bestScore;
             scoreText[0].text = score.ToString();
             scoreText[1].text = score.ToString();
             bestScoreText.text = Mathf.Max(score, bestScore).ToString();
-            var level = FindObjectOfType<LevelManager>();
             if (level.IsEndlessMode)
                 runSummaryText.text = $"HIGHEST COMBO  {level.HighestCombo}\n{level.RewardSummary}";
-            if (score > bestScore)
+            if (modeHandler is EndlessModeHandler endless && endless.NewBestThisRun)
             {
                 bestScoreStuff.SetActive(true);
                 failedStuff.SetActive(false);

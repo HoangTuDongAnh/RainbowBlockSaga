@@ -42,9 +42,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             title.rectTransform.anchoredPosition = new Vector2(0, height / 2 - 105);
             ((RectTransform)content.Find("Subtitle")).anchoredPosition = new Vector2(0, height / 2 - 180);
             ((RectTransform)content.Find("Objectives")).anchoredPosition = new Vector2(0, 10);
-            limits.rectTransform.anchoredPosition = new Vector2(0, -height / 2 + 265);
-            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 160);
-            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 55);
+            limits.rectTransform.anchoredPosition = new Vector2(0, -height / 2 + 300);
+            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 180);
+            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 65);
             for (int i = 0; i < objectives.Length; i++)
             {
                 bool visible = i < targets.Count;

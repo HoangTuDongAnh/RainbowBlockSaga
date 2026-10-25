@@ -198,7 +198,19 @@ public static partial class GddPlayValidation
                 System.IO.File.AppendAllText(Dir+"levels-result.txt","PASS level "+liveLevels[liveLevelIndex].Number+": load / objectives / play / legal placement / score\n");
                 liveLevelIndex++;
                 if(liveLevelIndex<liveLevels.Length){step=31;next=EditorApplication.timeSinceStartup+0.3;break;}
-                Finish(errors.Count==0?"PASS: score/resume, Adventure last move/time limit/objective gate, booster buy/invalid-drop/valid-drag/cancel/tray restore/save, pause, free/paid spin, single claim, tutorial/fresh run, Settings restart/resume/home, and all 20 Adventure levels load/start/place/score.":"FAIL runtime logs\n"+string.Join("\n",errors));break;
+                SceneLoader.instance.StartGameSceneEndless();Wait(3);break;
+            case 35:
+                MenuManager.instance.CloseAllPopups();EventManager.GameStatus=EGameState.Playing;
+                var endlessLevel=Find<LevelManager>();
+                var endlessHandler=Find<EndlessModeHandler>();
+                Check(endlessLevel!=null&&endlessHandler!=null,"Endless best-score fixture missing");
+                ResourceManager.instance.GetResource("Score").Set(100);
+                endlessHandler.score=100;
+                typeof(LevelManager).GetField("<RunScore>k__BackingField",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(endlessLevel,130);
+                endlessHandler.OnLose();
+                Check(ResourceManager.instance.GetResource("Score").GetValue()==130&&PlayerPrefs.GetInt("Score")==130,"Best score omitted final 30 points");
+                Check(endlessHandler.NewBestThisRun&&endlessHandler.bestScore==130&&endlessHandler.scoreText.text=="130"&&endlessHandler.bestScoreText.text=="130","Best-score HUD disagrees with saved result");
+                Finish(errors.Count==0?"PASS: score/resume, Adventure last move/time limit/objective gate, booster buy/invalid-drop/valid-drag/cancel/tray restore/save, pause, free/paid spin, single claim, tutorial/fresh run, Settings restart/resume/home, all 20 Adventure levels load/start/place/score, and final-turn best-score persistence.":"FAIL runtime logs\n"+string.Join("\n",errors));break;
         }
     }
 }

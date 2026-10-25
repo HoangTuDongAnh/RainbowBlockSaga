@@ -98,9 +98,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
             popupStack.Add(popup);
 
-            if (fader != null && popupStack.Count > 0 && popup.fade)
+            if (fader != null && popup.fade)
             {
-                fader.FadeIn(.997f, popup.FadeInDuration);
+                fader.FadeIn(.72f, popup.FadeInDuration);
             }
 
             // Initialize the delayed show
@@ -118,7 +118,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             // Call fade in before starting coroutine
             if (fader != null  && popupPrefab.fade)
             {
-                fader.FadeIn(.997f, popupPrefab.FadeInDuration);
+                fader.FadeIn(.72f, popupPrefab.FadeInDuration);
             }
 
             // Start coroutine to delay instantiation
@@ -178,9 +178,9 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                     if (popupStack is { Count: > 0 })
                     {
                         var closeButton = popupStack.Last().closeButton;
-                        if (closeButton != null)
+                        if (closeButton != null && closeButton.isActiveAndEnabled)
                         {
-                            closeButton.onClick?.Invoke();
+                            closeButton.Pressed();
                         }
                     }
                 }

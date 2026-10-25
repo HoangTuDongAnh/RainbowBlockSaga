@@ -32,7 +32,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public int comboCounter;
         private int missCounter;
-        private EndlessClearFeedback endlessFeedback;
+        [SerializeField] private EndlessClearFeedback endlessFeedback;
 
         [SerializeField]
         private RectTransform gameCanvas;
@@ -406,7 +406,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
             if (feedback.IsEndless)
             {
-                if (!endlessFeedback) endlessFeedback = gameObject.AddComponent<EndlessClearFeedback>();
                 var font = scorePrefab.GetComponentInChildren<TMP_Text>(true)?.font;
                 yield return endlessFeedback.Play(gameCanvas, center, font, feedback, GameManager.instance.GameSettings.endlessScoring);
                 completed?.Invoke();

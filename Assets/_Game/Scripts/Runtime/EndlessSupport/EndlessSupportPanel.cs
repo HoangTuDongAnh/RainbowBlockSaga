@@ -123,7 +123,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
                 counts[item] = 1;
                 Save(item);
                 RefreshViews();
-                hintLabel.text = "ADDED 1 " + config.displayName + " - TAP TO USE";
+                hintLabel.text = "+1 " + config.displayName + " - TAP TO USE";
                 if (SoundBase.instance != null) SoundBase.instance.PlaySound(SoundBase.instance.coinsSpend);
                 return;
             }
@@ -140,7 +140,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
                     RefreshViews();
                 });
                 RefreshViews();
-                hintLabel.text = tray.HasSupportShape ? "DRAG THE SINGLE BLOCK - TAP AGAIN TO CANCEL" : "";
+                hintLabel.text = tray.HasSupportShape ? "DRAG BLOCK - TAP AGAIN TO CANCEL" : "";
                 return;
             }
             tray.CancelSupportShape();
@@ -157,7 +157,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             }
 
             pendingTarget = pendingTarget == item ? null : item;
-            hintLabel.text = pendingTarget.HasValue ? "TAP THE BOARD - CLEAR A 3 x 3 AREA" : "";
+            hintLabel.text = pendingTarget.HasValue ? "TAP A CELL TO BLAST 3 x 3" : "";
             RefreshViews();
         }
 

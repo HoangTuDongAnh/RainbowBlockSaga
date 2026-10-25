@@ -88,21 +88,33 @@ namespace RainbowBlockSaga.Runtime
             // Visible tray is presentation truth immediately before consumption.
             sessionRuntime.SynchronizeQueueFromVisualDecks();
 
-            var outcome =
-                session.ResolveExternalPlacement(
+            // Resolving can end the session before its visual feedback begins.
+            // Mark presentation active first so the end flow waits for this turn.
+            IsPresenting = true;
+            GameSessionPlacementOutcome outcome;
+            try
+            {
+                outcome = session.ResolveExternalPlacement(
                     shapeData,
                     placedCoords, consumeFromTray);
+            }
+            catch
+            {
+                IsPresenting = false;
+                throw;
+            }
 
             if (outcome == null)
+            {
+                IsPresenting = false;
                 return false;
+            }
 
             var presentationLines =
                 BuildPresentationLines(outcome.Resolve);
 
             if (outcome.Resolve.ClearedLines > 0)
                 boardRuntime.SuspendPresentationSync();
-
-            IsPresenting = true;
 
             resolvePresentation.PresentResolve(
                 presentationShapeHandle,

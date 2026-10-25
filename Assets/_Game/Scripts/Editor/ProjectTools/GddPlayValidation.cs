@@ -64,12 +64,19 @@ public static partial class GddPlayValidation
     static void Tick()
     {
         if(EditorApplication.isCompiling||EditorApplication.isUpdating||busy)return;
+        if (File.Exists(Dir+"restore.request"))
+        {
+            File.Delete(Dir+"restore.request");
+            RestorePrefs();
+            return;
+        }
         if(!SessionState.GetBool(Active,false))
         {
             if(!File.Exists(Dir+"play.request")||EditorApplication.isPlayingOrWillChangePlaymode)return;
             if(EditorSceneManager.GetActiveScene().path!="Assets/_Game/Scenes/Gameplay.unity"||EditorSceneManager.GetActiveScene().isDirty)
             { File.WriteAllText(Dir+"play-result.txt","BLOCKED: Gameplay scene must be open and saved before automated Play tests.");File.Delete(Dir+"play.request");return; }
-            File.Delete(Dir+"play.request");
+            try { File.Delete(Dir+"play.request"); }
+            catch (IOException) { return; }
             string[] ints={"Music","Sound","tutorial","GameMode","Level","Coins","Score","RewardStreak","RBS_RewardLevel_2","RBS_RewardRun_gdd-validation","RBS_EndlessSupport_RainbowCell","RBS_EndlessSupport_Bomb3x3","RBS_EndlessSupport_ShuffleTray"};
             ints=ints.Concat(ArcadeLevelCatalog.LoadAll().Select(l=>"RBS_RewardLevel_"+l.Number)).Distinct().ToArray();
             string[] strings={"RBS_Run_Endless","RBS_Run_Adventure","GameState_Endless","GameState_Timed","LastPlayedMode","DailyBonusDay","LastFreeSpinTime"};

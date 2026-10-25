@@ -437,8 +437,6 @@ MonoBehaviour:
   openedObj: {fileID: 6801505688722478495}
   currentObj: {fileID: 7652873159430637083}
   numberLabel: {fileID: 6801505689082050273}
-  normalTextColor: {r: 0.5019608, g: 0.31764707, b: 0.6117647, a: 1}
-  currentTextColor: {r: 0.52156866, g: 0.26666668, b: 0.54901963, a: 1}
 --- !u!95 &105794096486839212
 Animator:
   serializedVersion: 7

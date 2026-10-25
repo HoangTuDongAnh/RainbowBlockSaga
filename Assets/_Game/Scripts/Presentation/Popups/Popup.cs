@@ -86,6 +86,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
             if (canvasGroup != null)
             {
+                canvasGroup.DOKill();
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
             }
@@ -166,6 +167,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             if (canvasGroup != null)
             {
+                canvasGroup.DOKill();
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
             }

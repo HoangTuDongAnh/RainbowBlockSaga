@@ -20351,6 +20351,7 @@ GameObject:
   - component: {fileID: 2220609634332694927}
   - component: {fileID: 1826642596541657741}
   - component: {fileID: 4273813570808871589}
+  - component: {fileID: 8940194887302161002}
   - component: {fileID: 6352578698917650282}
   - component: {fileID: 9131477178871514640}
   - component: {fileID: 9131477178871514641}
@@ -21155,6 +21156,7 @@ MonoBehaviour:
   gameCanvas: {fileID: 5975784297327356092}
   shakeCanvas: {fileID: 6220992156710050639}
   scorePrefab: {fileID: 9090677211101329247, guid: 2ce09125bbf0e4fadac9a857e837ebc1, type: 3}
+  endlessFeedback: {fileID: 8940194887302161002}
   words:
   - {fileID: 4761555832108727064, guid: 5e37898743da74e59ba95eef7b69bb68, type: 3}
   - {fileID: 5539768684802216864, guid: 76e69181ca01241249ed40893120dc2e, type: 3}
@@ -21194,6 +21196,18 @@ MonoBehaviour:
         m_CallState: 2
   cellDeck: {fileID: 0}
   timerManager: {fileID: 0}
+--- !u!114 &8940194887302161002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2021583143456060800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e29fd1ebf753d8044aea25d776073d9c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
 --- !u!224 &4305518931790834356 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3074711364979978687, guid: 2151ed22119754e0fa6dffda24e6a955, type: 3}

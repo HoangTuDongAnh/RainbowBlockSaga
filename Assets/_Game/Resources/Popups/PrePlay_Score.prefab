@@ -913,7 +913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b7c53c55edd43e887228e39e3e0ddb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fade: 0
+  fade: 1
   closeButton: {fileID: 0}
   scoreText: {fileID: 3106441636283157203}
 --- !u!1 &7225864357131510224

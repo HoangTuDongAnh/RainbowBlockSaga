@@ -14,7 +14,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             var safe = Screen.safeArea;
             float width = parent.rect.width * safe.width / Mathf.Max(1, Screen.width);
             float height = parent.rect.height * safe.height / Mathf.Max(1, Screen.height);
-            content.localScale = Vector3.one * Mathf.Min(width * .9f / designSize.x, height * .88f / designSize.y);
+            content.localScale = Vector3.one * Mathf.Min(width * .92f / designSize.x, height * .86f / designSize.y);
+            // Safe areas can be offset by a notch or navigation bar.
+            var safeCenter = safe.center - new Vector2(Screen.width, Screen.height) * .5f;
+            content.anchoredPosition = new Vector2(
+                safeCenter.x * parent.rect.width / Mathf.Max(1, Screen.width),
+                safeCenter.y * parent.rect.height / Mathf.Max(1, Screen.height));
         }
     }
 }

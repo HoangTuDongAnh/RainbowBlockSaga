@@ -9,12 +9,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
     public class EndlessModeHandler : BaseModeHandler
     {
         public Image rhombusImage;
+        public bool NewBestThisRun { get; private set; }
 
         protected override void LoadScores()
         {
             // Load best score from resources
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
             bestScoreText.text = bestScore.ToString();
+            NewBestThisRun = false;
 
             score = _levelManager.RunScore;
             scoreText.text = score.ToString();
@@ -30,11 +32,22 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public override void OnLose()
         {
             if (GameDataManager.isTestPlay) return;
+            score = _levelManager.RunScore;
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
-            if (score > bestScore)
+            NewBestThisRun = score > bestScore;
+            if (NewBestThisRun)
             {
                 ResourceManager.instance.GetResource("Score").Set(score);
+                bestScore = score;
             }
+            if (_counterCoroutine != null)
+            {
+                StopCoroutine(_counterCoroutine);
+                _counterCoroutine = null;
+            }
+            _displayedScore = score;
+            scoreText.text = score.ToString();
+            bestScoreText.text = bestScore.ToString();
 
             base.OnLose();
         }

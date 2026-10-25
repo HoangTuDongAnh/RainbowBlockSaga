@@ -18,11 +18,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
 
         [SerializeField]
         private TextMeshProUGUI numberLabel;
-        [SerializeField] 
-        private Color normalTextColor = Color.white;
-        [SerializeField]
-        private Color currentTextColor = Color.yellow;
         private bool isLocked;
+        private static readonly Color PassedFill = new(.38f, .89f, .77f);
+        private static readonly Color LockedFill = new(.52f, .49f, .65f);
+        private static readonly Color CurrentFill = new(1f, .73f, .30f);
+        private static readonly Color PassedText = new(.12f, .37f, .43f);
+        private static readonly Color LockedText = new(.36f, .28f, .47f);
+        private static readonly Color CurrentText = new(.36f, .17f, .39f);
 
         private void OnValidate()
         {
@@ -39,20 +41,25 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
         public void Lock()
         {
             isLocked = true;
-            numberLabel.color = normalTextColor;
+            numberLabel.gameObject.SetActive(true);
+            numberLabel.color = LockedText;
+            numberLabel.fontSizeMin = 38;
             lockObj.SetActive(true);
             openedObj.SetActive(false);
             currentObj.SetActive(false);
+            lockObj.GetComponent<Image>().color = LockedFill;
         }
         
         public void UnLock()
         {
             isLocked = false;
-            numberLabel.color = normalTextColor;
+            numberLabel.color = PassedText;
+            numberLabel.fontSizeMin = 38;
             numberLabel.gameObject.SetActive(true);
             lockObj.SetActive(false);
             openedObj.SetActive(true);
             currentObj.SetActive(false);
+            openedObj.GetComponent<Image>().color = PassedFill;
         }
         
         public void SetCurrent(bool isCurrent)
@@ -61,7 +68,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
                 return;
                 
             currentObj.SetActive(isCurrent);
-            numberLabel.color = isCurrent ? currentTextColor : normalTextColor;
+            numberLabel.color = isCurrent ? CurrentText : PassedText;
+            currentObj.GetComponent<Image>().color = CurrentFill;
         }
 
         public void MouseDown()
