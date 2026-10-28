@@ -26,16 +26,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         private void OnEnable()
         {
             Popup.OnClosePopup += ClosePopup;
-            Popup.OnBeforeCloseAction += OnBeforeCloseAction;
             SceneManager.activeSceneChanged += OnSceneLoaded;
-        }
-
-        private void OnBeforeCloseAction(Popup popup)
-        {
-            if (fader != null && popupStack.Count == 0)
-            {
-                fader.FadeOut();
-            }
         }
 
         private void OnSceneLoaded(Scene scene, Scene scene1)
@@ -55,7 +46,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             Popup.OnClosePopup -= ClosePopup;
             SceneManager.activeSceneChanged -= OnSceneLoaded;
-            Popup.OnBeforeCloseAction -= OnBeforeCloseAction;
         }
 
         public T ShowPopup<T>(Action onShow = null, Action<EPopupResult> onClose = null) where T : Popup
@@ -90,6 +80,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         public Popup ShowPopup(Popup popupPrefab, Action onShow = null, Action<EPopupResult> onClose = null)
         {
             var popup = Instantiate(popupPrefab, transform);
+            popup.transform.SetAsLastSibling();
           
             if (popupStack.Count > 0)
             {
@@ -98,10 +89,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
             popupStack.Add(popup);
 
-            if (fader != null && popup.fade)
-            {
-                fader.FadeIn(.72f, popup.FadeInDuration);
-            }
+            RefreshBackdrop(popup.FadeInDuration);
 
             // Initialize the delayed show
             popup.InitDelayedShow(onShow, onClose);
@@ -116,10 +104,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             float delay = popupPrefab.appearanceDelay;
 
             // Call fade in before starting coroutine
-            if (fader != null  && popupPrefab.fade)
-            {
-                fader.FadeIn(.72f, popupPrefab.FadeInDuration);
-            }
+            if (popupPrefab.fade) fader.FadeIn(.62f, popupPrefab.FadeInDuration);
 
             // Start coroutine to delay instantiation
             StartCoroutine(ShowPopupDelayed(popupPrefab, delay, onShow, onClose));
@@ -132,6 +117,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             yield return new WaitForSeconds(delay);
 
             var popup = Instantiate(popupPrefab, transform);
+            popup.transform.SetAsLastSibling();
 
             if (popupStack.Count > 0)
             {
@@ -139,6 +125,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             }
 
             popupStack.Add(popup);
+            RefreshBackdrop(popup.FadeInDuration);
             
             // Initialize the delayed show
             popup.InitDelayedShow(onShow, onClose);
@@ -156,10 +143,15 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 }
             }
 
-            if (fader != null && popupStack.Count == 0)
-            {
+            RefreshBackdrop();
+        }
+
+        private void RefreshBackdrop(float duration = .1f)
+        {
+            if (popupStack.Count > 0 && popupStack[popupStack.Count - 1].fade)
+                fader.FadeIn(.62f, duration);
+            else
                 fader.FadeOut();
-            }
         }
 
         public void ShowPurchased(GameObject imagePrefab, string boostName)
@@ -204,6 +196,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             foreach (var popup in popupStack.ToArray()) popup.Dismiss();
             popupStack.Clear();
+            RefreshBackdrop();
         }
 
         public bool IsAnyPopupOpened()

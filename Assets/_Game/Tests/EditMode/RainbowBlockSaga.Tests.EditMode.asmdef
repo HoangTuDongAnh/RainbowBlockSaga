@@ -1,0 +1,14 @@
+{
+    "name": "RainbowBlockSaga.Tests.EditMode",
+    "rootNamespace": "RainbowBlockSaga.Tests",
+    "references": [
+        "RainbowBlockSaga.Presentation",
+        "RainbowBlockSaga.Presentation.Contracts"
+    ],
+    "includePlatforms": ["Editor"],
+    "optionalUnityReferences": ["TestAssemblies"],
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

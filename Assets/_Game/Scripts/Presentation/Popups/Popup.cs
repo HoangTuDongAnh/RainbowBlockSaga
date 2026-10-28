@@ -89,6 +89,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 canvasGroup.DOKill();
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
             }
 
             OnOpenPopup?.Invoke(this);
@@ -140,6 +141,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
             }
             OnBeforeCloseAction?.Invoke(this);
             if (animator != null)
@@ -152,6 +154,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             if (closed) return;
             closed = true;
+            canvasGroup.alpha = 0;
+            canvasGroup.blocksRaycasts = false;
             OnClosePopup?.Invoke(this);
             OnCloseAction?.Invoke(result);
             Destroy(gameObject, .5f);
@@ -170,6 +174,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 canvasGroup.DOKill();
                 canvasGroup.alpha = 1;
                 canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
             }
         }
 
@@ -177,8 +182,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             if (canvasGroup != null)
             {
+                canvasGroup.DOKill();
+                canvasGroup.alpha = 0;
                 canvasGroup.interactable = false;
-                canvasGroup.DOFade(0, 0.5f);
+                canvasGroup.blocksRaycasts = false;
             }
         }
 
@@ -188,6 +195,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
                 canvasGroup.DOFade(0, 0.5f);
             }
         }
@@ -223,6 +231,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
                 canvasGroup.alpha = 0;
             }
 
