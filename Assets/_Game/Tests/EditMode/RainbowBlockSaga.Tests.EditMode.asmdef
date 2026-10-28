@@ -1,14 +1,26 @@
 {
     "name": "RainbowBlockSaga.Tests.EditMode",
-    "rootNamespace": "RainbowBlockSaga.Tests",
+    "rootNamespace": "RainbowBlockSaga.Tests.EditMode",
     "references": [
-        "RainbowBlockSaga.Presentation",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "RainbowBlockSaga.Gameplay",
+        "RainbowBlockSaga.Foundation",
         "RainbowBlockSaga.Presentation.Contracts"
     ],
-    "includePlatforms": ["Editor"],
-    "optionalUnityReferences": ["TestAssemblies"],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": ["nunit.framework.dll"],
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
     "autoReferenced": false,
-    "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
