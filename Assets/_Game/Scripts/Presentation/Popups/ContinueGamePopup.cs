@@ -1,5 +1,6 @@
 using RainbowBlockSaga.Presentation.Scripts.GUI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
@@ -10,6 +11,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
     {
         [SerializeField] CustomButton continueButton;
         [SerializeField] CustomButton newGameButton;
+        [SerializeField] Button backButton;
 
         protected override void Awake()
         {
@@ -17,6 +19,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
             continueButton.onClick.AddListener(ContinueGame);
             newGameButton.onClick.AddListener(NewGame);
+            backButton.onClick.AddListener(Close);
         }
 
         void ContinueGame()
@@ -29,6 +32,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             result = EPopupResult.Restart;
             Close();
+        }
+
+        public override void Close()
+        {
+            // Back/Escape leaves the saved run untouched on the main menu.
+            if (result != EPopupResult.Continue && result != EPopupResult.Restart)
+                result = EPopupResult.Cancel;
+            base.Close();
         }
     }
 }

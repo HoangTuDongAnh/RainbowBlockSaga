@@ -622,7 +622,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 return;
             timerManager?.StopTimer();
             if (gameMode == EGameMode.Endless)
+            {
+                var best = ResourceManager.instance.GetResource("Score");
+                if (RunScore > best.GetValue()) best.Set(RunScore);
                 GameState.Delete(EGameMode.Endless);
+            }
             else if (gameMode == EGameMode.Timed)
                 GameState.Delete(EGameMode.Timed);
             OnLose?.Invoke();

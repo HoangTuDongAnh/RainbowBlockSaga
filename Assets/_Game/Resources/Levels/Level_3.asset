@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4a5c42505bd4683b56b6baff710ae0a, type: 3}
   m_Name: Level_3
   m_EditorClassIdentifier: 
-  rows: 9
-  columns: 9
+  rows: 8
+  columns: 8
   levelRows:
   - cells:
     - {fileID: 0}
@@ -24,8 +24,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   - cells:
@@ -37,8 +36,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   - cells:
@@ -50,8 +48,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000010001000000
+    bonusItems: 0000000100010000
     disabled: 
     highlighted: 
   - cells:
@@ -63,8 +60,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   - cells:
@@ -76,8 +72,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   - cells:
@@ -89,8 +84,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   - cells:
@@ -102,8 +96,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000010001000000
+    bonusItems: 0000000100010000
     disabled: 
     highlighted: 
   - cells:
@@ -115,21 +108,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 11400000, guid: 099709edcd4e3495eadd56804dc72e71, type: 2}
     - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
-    disabled: 
-    highlighted: 
-  - cells:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    bonusItems: 000000000000000000
+    bonusItems: 0000000000000000
     disabled: 
     highlighted: 
   levelType: {fileID: 11400000, guid: 094ecb60bbb264d369f89462b75805fb, type: 2}

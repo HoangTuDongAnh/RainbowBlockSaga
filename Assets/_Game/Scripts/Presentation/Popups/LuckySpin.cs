@@ -75,22 +75,12 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             rewardedAdButton?.gameObject.SetActive(false);
         }
 
-        private bool CanUseFreeSpinToday()
-        {
-            if (!PlayerPrefs.HasKey(LastFreeSpinTimeKey))
-            {
-                return true;
-            }
-
-            var lastFreeSpinTimeStr = PlayerPrefs.GetString(LastFreeSpinTimeKey);
-            var lastFreeSpinTime = DateTime.Parse(lastFreeSpinTimeStr);
-            return DateTime.Now.Date > lastFreeSpinTime.Date;
-        }
+        private bool CanUseFreeSpinToday() => RewardClock.CanClaimToday(LastFreeSpinTimeKey);
 
         private void FreeSpin()
         {
             if (isSpinning || !CanUseFreeSpinToday()) return;
-            PlayerPrefs.SetString(LastFreeSpinTimeKey, DateTime.Now.ToString("o"));
+            RewardClock.MarkClaimedToday(LastFreeSpinTimeKey);
             Spin();
         }
 

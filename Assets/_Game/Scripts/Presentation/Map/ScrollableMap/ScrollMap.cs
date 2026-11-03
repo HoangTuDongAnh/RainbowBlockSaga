@@ -12,7 +12,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             Canvas.ForceUpdateCanvases();
             scrollRect.StopMovement();
             var avatar = (Vector2)viewport.InverseTransformPoint(position);
-            var targetY = viewport.rect.yMin + viewport.rect.height * .2f;
+            var targetY = viewport.rect.yMin + viewport.rect.height * .28f;
             scrollRect.content.anchoredPosition += new Vector2(0, targetY - avatar.y);
         }
     }

@@ -57,17 +57,13 @@ namespace RainbowBlockSaga.Tests.EditMode
             for (int i = 0; i < Iterations; i++)
                 foreach (var shape in strategy.CreateBatch(board, profile, 1))
                     Assert.AreSame(allowed, shape);
+
+            CreateBatch_IncludesShapeOnceLevelRequirementMet(board, profile, lockedUntilLevel5);
         }
 
-        [Test]
-        public void CreateBatch_IncludesShapeOnceLevelRequirementMet()
+        void CreateBatch_IncludesShapeOnceLevelRequirementMet(
+            BoardModel board, SpawnProfileData profile, BlockShapeData unlocked)
         {
-            var board = NewBoard();
-            var basic = Single();
-            var unlocked = Square2();
-            unlocked.MinAdventureLevel = 5;
-            var profile = Profile(basic, unlocked);
-
             for (int i = 0; i < Iterations; i++)
                 CollectionAssert.Contains(strategy.CreateBatch(board, profile, 5), unlocked);
         }
@@ -120,10 +116,11 @@ namespace RainbowBlockSaga.Tests.EditMode
             Assert.IsFalse(queue.IsEmpty);
             Assert.IsTrue(queue.Consume(a));
             Assert.IsTrue(queue.IsEmpty);
+
+            BlockQueue_ConsumeShapeNotInQueue_ReturnsFalse();
         }
 
-        [Test]
-        public void BlockQueue_ConsumeShapeNotInQueue_ReturnsFalse()
+        void BlockQueue_ConsumeShapeNotInQueue_ReturnsFalse()
         {
             var queue = new BlockQueue();
             queue.SetBatch(new[] { Single() });

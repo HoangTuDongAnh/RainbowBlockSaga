@@ -274,42 +274,38 @@ namespace RainbowBlockSaga.Tests.EditMode
             return feedback.Total;
         }
 
-        //        endless, block, cleared, lines, combo, fullClear
-        [TestCase(true, 1, 8, 1, 1, false)]
-        [TestCase(true, 1, 8, 1, 2, false)]
-        [TestCase(true, 1, 8, 1, 5, false)]
-        [TestCase(true, 1, 8, 1, 6, false)]
-        [TestCase(true, 4, 16, 2, 1, false)]
-        [TestCase(true, 1, 15, 2, 3, false)]
-        [TestCase(true, 2, 24, 3, 2, false)]
-        [TestCase(true, 1, 40, 5, 4, false)]
-        [TestCase(true, 1, 8, 1, 1, true)]
-        [TestCase(true, 1, 8, 1, 5, true)]
-        [TestCase(false, 1, 8, 1, 1, false)]
-        [TestCase(false, 1, 15, 2, 2, false)]
-        [TestCase(false, 4, 24, 3, 3, false)]
-        [TestCase(false, 1, 8, 1, 1, true)]
-        [TestCase(true, 4, 0, 0, 0, false)]
-        [TestCase(false, 4, 0, 0, 0, false)]
-        public void ScoreSystem_MatchesLegacyLevelManagerFormula(
-            bool endless, int blockCells, int clearedCells, int lines, int combo, bool fullClear)
+        [Test]
+        public void ScoreSystem_MatchesLegacyLevelManagerFormula()
         {
-            var rule = Rule(endless);
-            var score = new ScoreSystem(rule);
-            if (lines > 0) score.Restore(0, combo - 1, 0, combo - 1); // Apply sẽ tăng lên đúng 'combo'
+            var cases = new (bool endless, int blockCells, int clearedCells, int lines, int combo, bool fullClear)[]
+            {
+                (true, 1, 8, 1, 1, false), (true, 1, 8, 1, 2, false),
+                (true, 1, 8, 1, 5, false), (true, 1, 8, 1, 6, false),
+                (true, 4, 16, 2, 1, false), (true, 1, 15, 2, 3, false),
+                (true, 2, 24, 3, 2, false), (true, 1, 40, 5, 4, false),
+                (true, 1, 8, 1, 1, true), (true, 1, 8, 1, 5, true),
+                (false, 1, 8, 1, 1, false), (false, 1, 15, 2, 2, false),
+                (false, 4, 24, 3, 3, false), (false, 1, 8, 1, 1, true),
+                (true, 4, 0, 0, 0, false), (false, 4, 0, 0, 0, false)
+            };
+            foreach (var testCase in cases)
+            {
+                var (endless, blockCells, clearedCells, lines, combo, fullClear) = testCase;
+                var rule = Rule(endless);
+                var score = new ScoreSystem(rule);
+                if (lines > 0) score.Restore(0, combo - 1, 0, combo - 1);
 
-            var blockCoords = new List<BoardCoord>();
-            for (int i = 0; i < blockCells; i++) blockCoords.Add(new BoardCoord(i, 0));
-            var cleared = new HashSet<BoardCoord>();
-            for (int i = 0; i < clearedCells; i++) cleared.Add(new BoardCoord(i, 1));
+                var blockCoords = new List<BoardCoord>();
+                for (int i = 0; i < blockCells; i++) blockCoords.Add(new BoardCoord(i, 0));
+                var cleared = new HashSet<BoardCoord>();
+                for (int i = 0; i < clearedCells; i++) cleared.Add(new BoardCoord(i, 1));
 
-            var placed = new PlacementResult(true, blockCoords);
-            var resolved = new BoardResolveResult(lines, cleared, new List<int>(), new List<int>(), fullClear);
-
-            int fromScoreSystem = score.Apply(placed, resolved);
-            int fromLegacy = LegacyTotal(endless, blockCells, clearedCells, lines, combo, fullClear, rule.Endless);
-
-            Assert.AreEqual(fromLegacy, fromScoreSystem);
+                var placed = new PlacementResult(true, blockCoords);
+                var resolved = new BoardResolveResult(lines, cleared, new List<int>(), new List<int>(), fullClear);
+                int fromScoreSystem = score.Apply(placed, resolved);
+                int fromLegacy = LegacyTotal(endless, blockCells, clearedCells, lines, combo, fullClear, rule.Endless);
+                Assert.AreEqual(fromLegacy, fromScoreSystem, testCase.ToString());
+            }
         }
     }
 }

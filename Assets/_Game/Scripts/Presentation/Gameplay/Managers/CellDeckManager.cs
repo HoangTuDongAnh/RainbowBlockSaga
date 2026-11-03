@@ -32,6 +32,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         public void ShowSupportShape(ShapeTemplate template, Action placed)
         {
+            if (supportShape != null || suspendedShapes != null) return;
             suspendedShapes = cellDecks.Select(d => d.shape).ToArray();
             foreach (var deck in cellDecks)
             {
@@ -175,6 +176,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             CancelSupportShape();
             foreach (var cellDeck in cellDecks)
                 cellDeck.ClearCell();
+        }
+
+        public void ReplaceWithFreshBatch()
+        {
+            ClearCellDecks();
+            BatchPresented?.Invoke(Array.Empty<UnityEngine.Object>());
+            FillCellDecks();
         }
 
         public Shape[] GetShapes()

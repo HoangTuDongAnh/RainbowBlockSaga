@@ -5,6 +5,7 @@ using RainbowBlockSaga.Presentation.Scripts.GUI;
 using RainbowBlockSaga.Presentation.Scripts.System;
 using UnityEngine;
 using UnityEngine.UI;
+using RainbowBlockSaga.Presentation.Scripts.System.Haptic;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
@@ -58,6 +59,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             PlayerPrefs.SetFloat(VibrationPrefKey, value);
             PlayerPrefs.Save();
+            if (value > 0f) HapticFeedback.TriggerHapticFeedback(HapticFeedback.HapticForce.Light);
         }
 
         private void LoadVibrationLevel()

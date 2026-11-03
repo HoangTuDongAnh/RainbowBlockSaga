@@ -25,6 +25,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         {
             fader.DOKill();
             fader.gameObject.SetActive(true);
+            fader.raycastTarget = true;
             fader.DOFade(fadeAlpha, duration).OnComplete(() => action?.Invoke());
         }
 
@@ -36,7 +37,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         public void FadeOut(float duration)
         {
             fader.DOKill();
-            fader.DOFade(0, duration).OnComplete(() => fader.gameObject.SetActive(false));
+            fader.DOFade(0, duration).OnComplete(() =>
+            {
+                fader.raycastTarget = false;
+                fader.gameObject.SetActive(false);
+            });
         }
 
         public void FadeAfterLoadingScene()

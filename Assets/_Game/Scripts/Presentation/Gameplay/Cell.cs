@@ -283,6 +283,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         public void DisableCell()
         {
             _boxCollider2D.enabled = false;
+            image.color = new Color(.55f, .68f, .95f, 1f);
+            if (busy) group.alpha = 1f;
         }
 
         public bool IsDisabled()

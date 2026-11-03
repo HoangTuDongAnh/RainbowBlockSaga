@@ -141,7 +141,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
-                canvasGroup.blocksRaycasts = false;
+                // Keep the modal layer blocking the game until the hide animation ends.
+                canvasGroup.blocksRaycasts = true;
             }
             OnBeforeCloseAction?.Invoke(this);
             if (animator != null)
@@ -195,7 +196,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
-                canvasGroup.blocksRaycasts = false;
+                canvasGroup.blocksRaycasts = true;
                 canvasGroup.DOFade(0, 0.5f);
             }
         }

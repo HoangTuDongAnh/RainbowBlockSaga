@@ -35,17 +35,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             GameDataManager.LevelNum = PlayerPrefs.GetInt("Level", 1);
             luckySpin.gameObject.SetActive(GameManager.instance.GameSettings.enableLuckySpin);
         }
-        private bool CanUseFreeSpinToday()
-        {
-            if (!PlayerPrefs.HasKey(LastFreeSpinTimeKey))
-            {
-                return true;
-            }
 
-            var lastFreeSpinTimeStr = PlayerPrefs.GetString(LastFreeSpinTimeKey);
-            var lastFreeSpinTime = DateTime.Parse(lastFreeSpinTimeStr);
-            return DateTime.Now.Date > lastFreeSpinTime.Date;
-        }
+        private bool CanUseFreeSpinToday() => RewardClock.CanClaimToday(LastFreeSpinTimeKey);
 
         private void UpdateFreeSpinMarker()
         {
@@ -67,6 +58,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             {
                 MenuManager.instance.ShowPopup<ContinueGamePopup>(null, result =>
                 {
+                    if (result == EPopupResult.Cancel) return;
                     if (result == EPopupResult.Restart)
                     {
                         RunSnapshot.Delete(EGameMode.Adventure);
@@ -93,6 +85,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 null,
                 result =>
                 {
+                    if (result == EPopupResult.Cancel) return;
                     if (result == EPopupResult.Restart)
                     {
                         GameState.Delete(mode);

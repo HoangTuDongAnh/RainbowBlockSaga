@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.System;
+using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
@@ -148,8 +149,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void RefreshBackdrop(float duration = .1f)
         {
-            if (popupStack.Count > 0 && popupStack[popupStack.Count - 1].fade)
-                fader.FadeIn(.62f, duration);
+            if (popupStack.Count > 0)
+                fader.FadeIn(popupStack[popupStack.Count - 1].fade ? .62f : 0f, duration);
             else
                 fader.FadeOut();
         }
@@ -169,12 +170,25 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 {
                     if (popupStack is { Count: > 0 })
                     {
-                        var closeButton = popupStack.Last().closeButton;
+                        var top = popupStack.Last();
+                        if (top is MainMenu)
+                        {
+                            ShowPopup<Quit>();
+                            return;
+                        }
+                        if (top is ContinueGamePopup)
+                        {
+                            top.Close();
+                            return;
+                        }
+                        var closeButton = top.closeButton;
                         if (closeButton != null && closeButton.isActiveAndEnabled)
                         {
                             closeButton.Pressed();
                         }
                     }
+                    else if (StateManager.instance.CurrentState == EScreenStates.MainMenu)
+                        ShowPopup<Quit>();
                 }
             }
         }

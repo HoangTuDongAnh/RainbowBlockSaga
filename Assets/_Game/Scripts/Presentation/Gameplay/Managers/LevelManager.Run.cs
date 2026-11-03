@@ -132,18 +132,26 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 else targetManager.UpdateTargetCount(target);
             }
             cellDeck.StopAllCoroutines();
-            cellDeck.FillCellDecksWithShapes(saved.tray.Select(s => s == null || string.IsNullOrEmpty(s.shape) ? null : shapes[s.shape]).ToArray(), false);
-            for (int i=0;i<saved.tray.Length;i++)
+            bool completeTray = saved.tray.All(s => s != null && !string.IsNullOrEmpty(s.shape));
+            if (completeTray)
             {
-                var shape = cellDeck.cellDecks[i].shape;
-                if (shape == null) continue;
-                var active = shape.GetActiveItems();
-                for(int j=0;j<active.Count;j++)
+                cellDeck.FillCellDecksWithShapes(saved.tray.Select(s => shapes[s.shape]).ToArray(), false);
+                for (int i=0;i<saved.tray.Length;i++)
                 {
-                    var item = saved.tray[i].items[j];
-                    active[j].UpdateColor(items[item.item]);
-                    if (!string.IsNullOrEmpty(item.bonus)) active[j].SetBonus(bonuses[item.bonus]);
+                    var active = cellDeck.cellDecks[i].shape.GetActiveItems();
+                    for(int j=0;j<active.Count;j++)
+                    {
+                        var item = saved.tray[i].items[j];
+                        active[j].UpdateColor(items[item.item]);
+                        if (!string.IsNullOrEmpty(item.bonus)) active[j].SetBonus(bonuses[item.bonus]);
+                    }
                 }
+            }
+            else
+            {
+                // A saved tray can have one or two spent slots. Resume with a
+                // fresh complete batch so neither the UI nor the queue is partial.
+                cellDeck.ReplaceWithFreshBatch();
             }
             if (_levelData.enableTimer) timerManager.InitializeTimer(saved.remainingTime);
             UpdateMovesLabel();

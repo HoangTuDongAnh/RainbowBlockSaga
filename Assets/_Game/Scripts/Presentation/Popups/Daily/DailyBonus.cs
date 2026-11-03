@@ -4,6 +4,7 @@ using RainbowBlockSaga.Presentation.Scripts.Data;
 using RainbowBlockSaga.Presentation.Scripts.GUI.Labels;
 using RainbowBlockSaga.Presentation.Scripts.Settings;
 using UnityEngine;
+using RainbowBlockSaga.Presentation.Scripts.System;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
 {
@@ -46,14 +47,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
         // to determine and update the reward streak
         public int UpdateRewardStreak()
         {
-            var today = DateTime.Today;
-            var lastRewardDate = DateTime.Parse(PlayerPrefs.GetString("DailyBonusDay", today.Subtract(TimeSpan.FromDays(1)).ToString()));
-
-            if (today > lastRewardDate)
+            if (RewardClock.CanClaimToday("DailyBonusDay"))
             {
                 var rewardStreak = GetRewardStreak() + 1;
-                PlayerPrefs.SetString("DailyBonusDay", today.ToString());
-                PlayerPrefs.SetInt("RewardStreak", rewardStreak = (int)Mathf.Repeat(rewardStreak, dayHandles.Length));
+                RewardClock.MarkClaimedToday("DailyBonusDay");
+                PlayerPrefs.SetInt("RewardStreak", rewardStreak = (int)Mathf.Repeat(rewardStreak, days));
                 return rewardStreak;
             }
 

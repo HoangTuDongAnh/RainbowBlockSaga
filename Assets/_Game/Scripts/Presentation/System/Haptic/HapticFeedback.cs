@@ -32,7 +32,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System.Haptic
             #endif
         }
 
-        private static bool TryHapticFeedback(HapticForce force)
+        private static bool TryHapticFeedback(HapticForce force, float level)
         {
             if (!IsSystemSupported())
                 return false;
@@ -40,16 +40,17 @@ namespace RainbowBlockSaga.Presentation.Scripts.System.Haptic
             try
             {
                 #if UNITY_IOS
-                _TriggerHapticFeedback((int)force);
+                int strength = level < .34f ? 0 : level < .67f ? 1 : 2;
+                _TriggerHapticFeedback(strength);
                 #elif UNITY_ANDROID
-                long[] pattern = force switch
+                long duration = force switch
                 {
-                    HapticForce.Light => new long[] { 0, 50 },
-                    HapticForce.Medium => new long[] { 0, 100 },
-                    HapticForce.Heavy => new long[] { 0, 200 },
-                    _ => new long[] { 0, 50 }
+                    HapticForce.Light => 50,
+                    HapticForce.Medium => 100,
+                    HapticForce.Heavy => 200,
+                    _ => 50
                 };
-                Vibration.Vibrate(pattern, -1);
+                Vibration.Vibrate(duration, Mathf.Clamp(Mathf.RoundToInt(255f * level), 1, 255));
                 #endif
                 return true;
             }
@@ -62,23 +63,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.System.Haptic
 
         public static void TriggerHapticFeedback(HapticForce force)
         {
-            if (!IsVibrationEnabled())
+            float level = PlayerPrefs.GetFloat(VibrationPrefKey, 1f);
+            if (level <= 0f)
                 return;
 
             #if UNITY_EDITOR
             return;
             #endif
 
-            if (!TryHapticFeedback(force))
+            if (!TryHapticFeedback(force, level))
             {
                 // Fallback - could implement audio feedback or other alternatives here
                 Debug.Log("Haptic feedback not available - system unsupported or permission denied");
             }
         }
 
-        private static bool IsVibrationEnabled()
-        {
-            return PlayerPrefs.HasKey(VibrationPrefKey) && PlayerPrefs.GetFloat(VibrationPrefKey) > 0;
-        }
     }
 }

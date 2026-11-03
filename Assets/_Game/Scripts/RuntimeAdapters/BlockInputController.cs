@@ -37,6 +37,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
         Vector2 originalPosition;
         Vector3 originalScale;
         bool isDragging;
+        public static bool AnyDragging { get; private set; }
         int activeTouchId = -1;
         bool hasValidPlacement;
 
@@ -193,6 +194,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                 return;
 
             isDragging = true;
+            AnyDragging = true;
             originalPosition = rectTransform.anchoredPosition;
             originalScale = transform.localScale;
             transform.SetAsLastSibling();
@@ -210,14 +212,10 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     rectTransform.parent as RectTransform, pointerPosition, eventCamera, out var localPoint))
             {
-                var canvasRect = (RectTransform)canvas.transform;
-                float canvasWidth = canvasRect.rect.width;
-                float normalizedX = localPoint.x / canvasWidth;
-                float scaleY = rectTransform.rect.height / canvasRect.rect.height * 2.5f;
-
-                rectTransform.anchoredPosition = new Vector2(
-                    normalizedX * canvasWidth,
-                    localPoint.y / scaleY + VerticalOffset + scaleY);
+                // The pointer and the block must use the same parent-canvas space.
+                // Scaling localPoint by screen height made the offset grow toward
+                // the top of tall phones.
+                rectTransform.anchoredPosition = localPoint + Vector2.up * VerticalOffset;
             }
 
             UpdatePreview();
@@ -286,6 +284,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             }
 
             isDragging = false;
+            AnyDragging = false;
             activeTouchId = -1;
 
             // Re-evaluate at the final pointer position before committing.
@@ -345,6 +344,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
         void CancelDragWithReturn()
         {
             isDragging = false;
+            AnyDragging = false;
             activeTouchId = -1;
             ReturnToDeck();
         }

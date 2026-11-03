@@ -10,6 +10,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
 using RainbowBlockSaga.Presentation.Scripts.LevelsData;
+using System.Collections;
+using RainbowBlockSaga.Presentation.RuntimeAdapters;
+using UnityEngine.EventSystems;
 
 namespace RainbowBlockSaga.Presentation.Gameplay
 {
@@ -41,7 +44,10 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         };
 
         readonly Dictionary<EndlessSupportItem, int> counts = new();
+        readonly Dictionary<Cell, Color> previewColors = new();
         EndlessSupportItem? pendingTarget;
+        int previewRow = -1, previewColumn = -1;
+        Coroutine hintTimeout;
 
         const string CountPrefix = "RBS_EndlessSupport_";
 
@@ -56,6 +62,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
 
         void OnEnable()
         {
+            EventManager.GetEvent(EGameEvent.RestartLevel).Subscribe(ResetInteraction);
             hintLabel.text = "";
             foreach (var config in configs)
                 counts[config.item] = PlayerPrefs.GetInt(Key(config.item), 0);
@@ -70,13 +77,24 @@ namespace RainbowBlockSaga.Presentation.Gameplay
 
         void OnDisable()
         {
+            EventManager.GetEvent(EGameEvent.RestartLevel).Unsubscribe(ResetInteraction);
+            ResetInteraction();
             foreach (var view in buttons)
             {
                 if (view != null && view.Button != null)
                     view.Button.onClick.RemoveAllListeners();
             }
+        }
+
+        void ResetInteraction()
+        {
+            ClearPreview();
+            if (hintTimeout != null) StopCoroutine(hintTimeout);
+            hintTimeout = null;
+            hintLabel.text = "";
             pendingTarget = null;
             tray.CancelSupportShape();
+            RefreshViews();
         }
 
         void Update()
@@ -89,6 +107,11 @@ namespace RainbowBlockSaga.Presentation.Gameplay
                 position = Mouse.current.position.ReadValue();
             else return;
 
+            // A popup's full-screen raycast layer must win over the board.
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = position }, hits);
+            if (hits.Count == 0 || !hits[0].gameObject.transform.IsChildOf(field.transform)) return;
+
             // Match the board's UI camera, including screen-space overlay canvases.
             var canvas = field.GetComponentInParent<Canvas>();
             var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
@@ -97,9 +120,17 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             {
                 var cell = field.cells[row, column];
                 if (!RectTransformUtility.RectangleContainsScreenPoint((RectTransform)cell.transform, position, camera)) continue;
+                if (previewRow != row || previewColumn != column)
+                {
+                    PreviewArea(row, column);
+                    SetHint("TAP AGAIN TO BLAST");
+                    return;
+                }
                 if (UseAt(pendingTarget.Value, row, column))
                 {
                     pendingTarget = null;
+                    ClearPreview();
+                    SetHint("");
                     RefreshViews();
                 }
                 return;
@@ -110,7 +141,46 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             !GameManager.instance.IsTutorialMode() &&
             EventManager.GameStatus == EGameState.Playing && field.IsReady &&
             sessionRuntime.CanAcceptPlacement &&
+            !BlockInputController.AnyDragging &&
             !ResolveScoreRuntime.Current.IsPresenting;
+
+        void SetHint(string message, float timeout = 0f)
+        {
+            if (hintTimeout != null) StopCoroutine(hintTimeout);
+            hintLabel.text = message;
+            hintTimeout = timeout > 0f ? StartCoroutine(HideHintAfter(timeout)) : null;
+        }
+
+        IEnumerator HideHintAfter(float seconds)
+        {
+            yield return new WaitForSecondsRealtime(seconds);
+            hintLabel.text = "";
+            hintTimeout = null;
+        }
+
+        void PreviewArea(int row, int column)
+        {
+            ClearPreview();
+            previewRow = row;
+            previewColumn = column;
+            for (int r = row - 1; r <= row + 1; r++)
+            for (int c = column - 1; c <= column + 1; c++)
+            {
+                if (r < 0 || c < 0 || r >= field.RowCount || c >= field.ColumnCount) continue;
+                var cell = field.cells[r, c];
+                if (cell.IsDisabled()) continue;
+                previewColors[cell] = cell.image.color;
+                cell.image.color = Color.Lerp(cell.image.color, new Color(1f, .45f, .35f), .65f);
+            }
+        }
+
+        void ClearPreview()
+        {
+            foreach (var pair in previewColors)
+                if (pair.Key != null) pair.Key.image.color = pair.Value;
+            previewColors.Clear();
+            previewRow = previewColumn = -1;
+        }
 
         void SelectOrBuy(EndlessSupportItem item)
         {
@@ -119,31 +189,33 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             if (count == 0)
             {
                 var config = GetConfig(item);
-                if (!ResourceManager.instance.Consume("Coins", config.price)) { hintLabel.text = "NOT ENOUGH COINS"; return; }
+                if (!ResourceManager.instance.Consume("Coins", config.price)) { SetHint("NOT ENOUGH COINS", 2.5f); return; }
                 counts[item] = 1;
                 Save(item);
                 RefreshViews();
-                hintLabel.text = "+1 " + config.displayName + " - TAP TO USE";
+                SetHint("READY: " + config.displayName, 2f);
                 if (SoundBase.instance != null) SoundBase.instance.PlaySound(SoundBase.instance.coinsSpend);
                 return;
             }
 
             if (item == EndlessSupportItem.RainbowCell)
             {
+                ClearPreview();
                 pendingTarget = null;
                 if (tray.HasSupportShape) tray.CancelSupportShape();
                 else tray.ShowSupportShape(rainbowShape, () =>
                 {
                     counts[item]--;
                     Save(item);
-                    hintLabel.text = "";
+                    SetHint("");
                     RefreshViews();
                 });
                 RefreshViews();
-                hintLabel.text = tray.HasSupportShape ? "DRAG BLOCK - TAP AGAIN TO CANCEL" : "";
+                SetHint(tray.HasSupportShape ? "DRAG THE RAINBOW BLOCK" : "");
                 return;
             }
             tray.CancelSupportShape();
+            ClearPreview();
             if (item == EndlessSupportItem.ShuffleTray)
             {
                 if (UseShuffle())
@@ -157,7 +229,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             }
 
             pendingTarget = pendingTarget == item ? null : item;
-            hintLabel.text = pendingTarget.HasValue ? "TAP A CELL TO BLAST 3 x 3" : "";
+            SetHint(pendingTarget.HasValue ? "TAP A CELL" : "");
             RefreshViews();
         }
 
@@ -205,14 +277,17 @@ namespace RainbowBlockSaga.Presentation.Gameplay
 
         void RefreshViews()
         {
+            bool hasSelection = pendingTarget.HasValue || tray.HasSupportShape;
             foreach (var view in buttons)
             {
                 if (view == null) continue;
                 var config = GetConfig(view.Item);
                 view.Configure(config.icon, config.displayName, config.price);
                 view.SetCount(counts[view.Item]);
-                view.SetSelected(pendingTarget == view.Item || (view.Item == EndlessSupportItem.RainbowCell && tray.HasSupportShape));
-                view.SetInteractable(true);
+                bool selected = pendingTarget == view.Item ||
+                    (view.Item == EndlessSupportItem.RainbowCell && tray.HasSupportShape);
+                view.SetSelected(selected);
+                view.SetInteractable(!hasSelection || selected);
             }
         }
 

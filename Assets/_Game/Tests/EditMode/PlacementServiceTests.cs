@@ -43,17 +43,18 @@ namespace RainbowBlockSaga.Tests.EditMode
             Assert.AreEqual(new BoardCoord(2, 1), cells[1]);
         }
 
-        [TestCase(0, 0)]
-        [TestCase(7, 0)]
-        [TestCase(0, 7)]
-        [TestCase(7, 7)]
-        public void Place_AtBoardCorners_Succeeds(int x, int y)
+        [Test]
+        public void Place_AtBoardCorners_Succeeds()
         {
-            var board = NewBoard();
-            var result = service.Place(board, Single(), new BoardCoord(x, y));
+            foreach (var corner in new[] { new BoardCoord(0, 0), new BoardCoord(7, 0),
+                         new BoardCoord(0, 7), new BoardCoord(7, 7) })
+            {
+                var board = NewBoard();
+                var result = service.Place(board, Single(), corner);
 
-            Assert.IsTrue(result.Success);
-            Assert.IsTrue(board.IsOccupied(new BoardCoord(x, y)));
+                Assert.IsTrue(result.Success, corner.ToString());
+                Assert.IsTrue(board.IsOccupied(corner), corner.ToString());
+            }
         }
 
         [Test]
@@ -65,15 +66,23 @@ namespace RainbowBlockSaga.Tests.EditMode
             Assert.IsFalse(service.CanPlace(board, Square2(), new BoardCoord(3, 3)));
         }
 
-        [TestCase(6, 0, true)]   // vừa khít mép phải: ô (6,0),(7,0)
-        [TestCase(7, 0, false)]  // ô (8,0) nằm ngoài bàn
-        [TestCase(-1, 0, false)] // ô (-1,0) nằm ngoài bàn
-        [TestCase(0, 7, true)]   // sát hàng dưới cùng
-        [TestCase(0, 8, false)]  // cả khối nằm ngoài bàn
-        public void CanPlace_HorizontalDomino_BoundaryPositions(int x, int y, bool expected)
+        [Test]
+        public void CanPlace_HorizontalDomino_BoundaryPositions()
         {
             var board = NewBoard();
-            Assert.AreEqual(expected, service.CanPlace(board, DominoH(), new BoardCoord(x, y)));
+            var shape = DominoH();
+            var cases = new[]
+            {
+                (x: 6, y: 0, expected: true),
+                (x: 7, y: 0, expected: false),
+                (x: -1, y: 0, expected: false),
+                (x: 0, y: 7, expected: true),
+                (x: 0, y: 8, expected: false)
+            };
+            foreach (var testCase in cases)
+                Assert.AreEqual(testCase.expected,
+                    service.CanPlace(board, shape, new BoardCoord(testCase.x, testCase.y)),
+                    $"Anchor ({testCase.x},{testCase.y})");
         }
 
         [Test]

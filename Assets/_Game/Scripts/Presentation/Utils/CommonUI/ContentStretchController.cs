@@ -11,16 +11,14 @@ public class ContentStretchController : MonoBehaviour
 
     public void HandleLastLevelPositionUpdate(Vector2 lastLevelPos)
     {
-        rectTransform.anchorMin = new Vector2(0.5f, 0f);
-        rectTransform.anchorMax = new Vector2(0.5f, 0f);
-        rectTransform.pivot = new Vector2(0.5f, 0f);
-        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, 0f);
-
-        Vector2 localPos = rectTransform.InverseTransformPoint(lastLevelPos);
-
-        float requiredHeight = localPos.y + 200f;
-        requiredHeight = Mathf.Max(0f, requiredHeight);
-
-        rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, requiredHeight);
+        // Keep the original bottom edge fixed while extending the scrollable
+        // content upward to include level pins instantiated after level 11.
+        float oldHeight = rectTransform.rect.height;
+        float bottomOffset = rectTransform.anchoredPosition.y - oldHeight;
+        float lastPinY = rectTransform.InverseTransformPoint(lastLevelPos).y;
+        float requiredHeight = Mathf.Max(oldHeight, oldHeight + lastPinY + 220f);
+        rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, requiredHeight);
+        rectTransform.anchoredPosition = new Vector2(
+            rectTransform.anchoredPosition.x, requiredHeight + bottomOffset);
     }
 }

@@ -34,12 +34,16 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         {
             icon.transform.localScale = Vector3.one * (selected ? 1.08f : 1f);
             nameLabel.gameObject.SetActive(selected);
-            nameLabel.text = Item == EndlessSupportItem.RainbowCell ? "DRAG BLOCK" : "TAP A CELL";
+            nameLabel.text = Item == EndlessSupportItem.RainbowCell ? "DRAG" : "TAP CELL";
+            if (selected) priceLabel.text = "CANCEL";
         }
 
         public void SetInteractable(bool value)
         {
             button.interactable = value;
+            icon.color = value ? Color.white : new Color(1f, 1f, 1f, .38f);
+            countLabel.alpha = value ? 1f : .45f;
+            priceLabel.alpha = value ? 1f : .45f;
         }
     }
 }

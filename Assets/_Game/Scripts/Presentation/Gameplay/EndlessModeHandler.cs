@@ -10,11 +10,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
     {
         public Image rhombusImage;
         public bool NewBestThisRun { get; private set; }
+        private int bestAtRunStart;
 
         protected override void LoadScores()
         {
             // Load best score from resources
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
+            bestAtRunStart = bestScore;
             bestScoreText.text = bestScore.ToString();
             NewBestThisRun = false;
 
@@ -34,7 +36,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             if (GameDataManager.isTestPlay) return;
             score = _levelManager.RunScore;
             bestScore = ResourceManager.instance.GetResource("Score").GetValue();
-            NewBestThisRun = score > bestScore;
+            NewBestThisRun = score > bestAtRunStart;
             if (NewBestThisRun)
             {
                 ResourceManager.instance.GetResource("Score").Set(score);

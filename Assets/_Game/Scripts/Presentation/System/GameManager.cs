@@ -95,9 +95,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
 
         private bool CheckDailyBonusConditions()
         {
-            var today = DateTime.Today;
-            var lastRewardDate = DateTime.Parse(PlayerPrefs.GetString("DailyBonusDay", today.Subtract(TimeSpan.FromDays(1)).ToString(CultureInfo.CurrentCulture)));
-            return today.Date > lastRewardDate.Date && dailyBonusSettings.dailyBonusEnabled;
+            return dailyBonusSettings.dailyBonusEnabled && RewardClock.CanClaimToday("DailyBonusDay");
         }
 
         public void RestartLevel()

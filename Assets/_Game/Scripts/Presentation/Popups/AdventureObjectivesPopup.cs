@@ -32,7 +32,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             title.text = "LEVEL " + manager.currentLevel;
             var targets = Object.FindFirstObjectByType<TargetManager>().GetTargets();
             var content = (RectTransform)title.transform.parent;
-            float height = 700 + Mathf.Max(1, targets.Count) * 90;
+            float height = 900 + Mathf.Max(1, targets.Count) * 70;
             GetComponent<PopupContentFit>().SetDesignSize(new Vector2(1000, height));
             foreach (string name in new[] { "Card", "Rim", "Shadow" })
             {
@@ -40,11 +40,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 frame.sizeDelta = new Vector2(frame.sizeDelta.x, height - (name == "Card" ? 35 : 0));
             }
             title.rectTransform.anchoredPosition = new Vector2(0, height / 2 - 105);
-            ((RectTransform)content.Find("Subtitle")).anchoredPosition = new Vector2(0, height / 2 - 180);
-            ((RectTransform)content.Find("Objectives")).anchoredPosition = new Vector2(0, 10);
-            limits.rectTransform.anchoredPosition = new Vector2(0, -height / 2 + 300);
-            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 180);
-            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 65);
+            content.Find("Subtitle").gameObject.SetActive(false);
+            ((RectTransform)content.Find("Objectives")).anchoredPosition = new Vector2(0, 90);
+            limits.rectTransform.anchoredPosition = new Vector2(0, -height / 2 + 365);
+            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 245);
+            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 90);
             for (int i = 0; i < objectives.Length; i++)
             {
                 bool visible = i < targets.Count;
@@ -64,7 +64,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             }
             if (level.enableTimer)
                 limits.text += (limits.text.Length > 0 ? "  •  " : "") + manager.timerManager.RemainingTime + " SECONDS";
-            if (limits.text.Length == 0) limits.text = "Take your time. Make every block count!";
         }
 
         public override void AfterHideAnimation()
