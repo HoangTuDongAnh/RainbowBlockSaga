@@ -30,6 +30,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         Canvas canvas;
         Camera eventCamera;
+        Camera boardCamera;
         BoardRuntime boardRuntime;
         FieldManager fieldPresentation;
         HighlightManager highlightManager;
@@ -79,7 +80,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void Update()
         {
-            if (!GameSessionRuntime.Current.CanAcceptPlacement)
+            if (GameSessionRuntime.Current == null || !GameSessionRuntime.Current.CanAcceptPlacement)
             {
                 CancelDragIfActive();
                 return;
@@ -91,7 +92,10 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             }
             if (EventManager.GameStatus != EGameState.Playing &&
                 EventManager.GameStatus != EGameState.Tutorial)
+            {
+                CancelDragIfActive();
                 return;
+            }
 
             HandleTouchInput();
             if (activeTouchId == -1)
@@ -109,7 +113,8 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                 for (int i = 0; i < Touchscreen.current.touches.Count; i++)
                 {
                     var touch = Touchscreen.current.touches[i];
-                    if (touch.touchId.ReadValue() != activeTouchId)
+                    if (touch.touchId.ReadValue() != activeTouchId ||
+                        touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.None)
                         continue;
 
                     found = true;
@@ -142,8 +147,8 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                 if (!RectTransformUtility.RectangleContainsScreenPoint(rectTransform, position, eventCamera))
                     continue;
 
-                activeTouchId = touch.touchId.ReadValue();
                 BeginDrag();
+                if (isDragging) activeTouchId = touch.touchId.ReadValue();
                 break;
             }
         }
@@ -177,6 +182,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void BeginDrag()
         {
+            if (AnyDragging) return;
             canvas = GetComponentInParent<Canvas>();
             eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             var context = BlockRuntimeContext.Current;
@@ -193,6 +199,8 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             if (highlightManager == null || fieldPresentation == null)
                 return;
 
+            var boardCanvas = fieldPresentation.GetComponentInParent<Canvas>();
+            boardCamera = boardCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : boardCanvas.worldCamera;
             isDragging = true;
             AnyDragging = true;
             originalPosition = rectTransform.anchoredPosition;
@@ -205,8 +213,11 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
 
         void HandleDrag(Vector2 pointerPosition)
         {
-            float cellSize = fieldPresentation.GetCellSize();
-            float scale = cellSize / PresentationCellSize;
+            var cell = fieldPresentation.cells[0, 0].transform;
+            float boardWidth = ScreenWidth(cell, fieldPresentation.GetCellSize(), boardCamera);
+            float trayWidth = ScreenWidth(rectTransform.parent, PresentationCellSize, eventCamera);
+            if (trayWidth < .001f) return;
+            float scale = boardWidth / trayWidth;
             transform.localScale = new Vector3(scale, scale, 1f);
 
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
@@ -215,7 +226,7 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
                 // The pointer and the block must use the same parent-canvas space.
                 // Scaling localPoint by screen height made the offset grow toward
                 // the top of tall phones.
-                rectTransform.anchoredPosition = localPoint + Vector2.up * VerticalOffset;
+                rectTransform.localPosition = localPoint + Vector2.up * VerticalOffset;
             }
 
             UpdatePreview();
@@ -370,11 +381,16 @@ namespace RainbowBlockSaga.Presentation.RuntimeAdapters
             currentCoords.Clear();
         }
 
+        static float ScreenWidth(Transform space, float width, Camera camera)
+        {
+            var start = RectTransformUtility.WorldToScreenPoint(camera, space.position);
+            var end = RectTransformUtility.WorldToScreenPoint(camera, space.TransformPoint(Vector3.right * width));
+            return Vector2.Distance(start, end);
+        }
+
         Cell GetCellUnderItem(Item item)
         {
-            var boardCanvas = fieldPresentation.GetComponentInParent<Canvas>();
-            var boardCamera = boardCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : boardCanvas.worldCamera;
-            var point = RectTransformUtility.WorldToScreenPoint(boardCamera, item.transform.position);
+            var point = RectTransformUtility.WorldToScreenPoint(eventCamera, item.transform.position);
             foreach (var cell in fieldPresentation.cells)
                 if (RectTransformUtility.RectangleContainsScreenPoint((RectTransform)cell.transform, point, boardCamera))
                     return cell;

@@ -51,6 +51,8 @@ namespace RainbowBlockSaga.Presentation.Gameplay
 
         const string CountPrefix = "RBS_EndlessSupport_";
 
+        [SerializeField] GameObject hintBacking;
+
         void Awake()
         {
             if (buttons == null || buttons.Length == 0)
@@ -64,6 +66,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         {
             EventManager.GetEvent(EGameEvent.RestartLevel).Subscribe(ResetInteraction);
             hintLabel.text = "";
+            hintBacking.SetActive(false);
             foreach (var config in configs)
                 counts[config.item] = PlayerPrefs.GetInt(Key(config.item), 0);
             foreach (var view in buttons)
@@ -92,6 +95,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
             if (hintTimeout != null) StopCoroutine(hintTimeout);
             hintTimeout = null;
             hintLabel.text = "";
+            hintBacking.SetActive(false);
             pendingTarget = null;
             tray.CancelSupportShape();
             RefreshViews();
@@ -148,6 +152,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         {
             if (hintTimeout != null) StopCoroutine(hintTimeout);
             hintLabel.text = message;
+            hintBacking.SetActive(!string.IsNullOrEmpty(message));
             hintTimeout = timeout > 0f ? StartCoroutine(HideHintAfter(timeout)) : null;
         }
 
@@ -155,6 +160,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         {
             yield return new WaitForSecondsRealtime(seconds);
             hintLabel.text = "";
+            hintBacking.SetActive(false);
             hintTimeout = null;
         }
 

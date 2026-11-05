@@ -89,6 +89,8 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         void Restore()
         {
             if (!applied) return;
+            applied = false;
+            if (!board || !tray || !boardOrientation || !trayOrientation) return;
             // Restore the original preset for the current orientation, not a stale snapshot.
             if (Screen.width > Screen.height)
             {
@@ -100,7 +102,6 @@ namespace RainbowBlockSaga.Presentation.Gameplay
                 boardOrientation.PreviewPortraitConfiguration();
                 trayOrientation.PreviewPortraitConfiguration();
             }
-            applied = false;
         }
     }
 }

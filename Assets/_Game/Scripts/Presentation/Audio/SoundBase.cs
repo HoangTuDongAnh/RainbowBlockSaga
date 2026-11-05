@@ -40,7 +40,10 @@ namespace RainbowBlockSaga.Presentation.Scripts.Audio
         private void Start()
         {
             if (mixer != null)
-                mixer.SetFloat(soundParameter, PlayerPrefs.GetInt("Sound", 1) == 0 ? -80 : 0);
+            {
+                float volume = PlayerPrefs.GetFloat("SoundVolume", PlayerPrefs.GetInt("Sound", 1));
+                mixer.SetFloat(soundParameter, volume <= 0f ? -80f : Mathf.Log10(volume) * 20f);
+            }
             audioSource.playOnAwake = false;
             audioSource.volume = 1f;
             audioSource.ignoreListenerPause = true;

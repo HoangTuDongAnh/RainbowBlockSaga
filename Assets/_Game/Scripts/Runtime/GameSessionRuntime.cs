@@ -186,10 +186,8 @@ namespace RainbowBlockSaga.Runtime
 
         void OnGameStateChanged(GameplaySessionState state)
         {
-            // Preparation runs after the board, tray and saved run statistics are restored.
-            // A reused board can otherwise leave the previous session's combo alive.
-            if (state == GameplaySessionState.Prepare)
-                ResetSession();
+            // Board replacement owns session reset. Prepare can synchronously
+            // dispatch Playing, so resetting here can cancel the new session.
             ApplyPresentationGameState(state);
         }
 

@@ -1,5 +1,7 @@
 using RainbowBlockSaga.Presentation.Scripts.Data;
-using RainbowBlockSaga.Presentation.Scripts.GUI.Labels;
+using System.Collections;
+using RainbowBlockSaga.Presentation.Scripts.Audio;
+using UnityEngine.UI;
 using RainbowBlockSaga.Presentation.Scripts.Settings;
 using TMPro;
 using UnityEngine;
@@ -30,11 +32,43 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Reward
             claiming = true;
             StopInteration();
 
-            LabelAnim.AnimateForResource(_resource, iconPos.position, "+" + _count, _resource.sound, () =>
+            _resource.Add(_count);
+            var menu = FindAnyObjectByType<MainMenu>();
+            if (menu == null || menu.HomeCoin == null)
             {
-                rewardVisual.resource.Add(rewardVisual.count);
                 base.Close();
-            });
+                return;
+            }
+            StartCoroutine(FlyCoin(menu.HomeCoin));
+        }
+
+        private IEnumerator FlyCoin(RectTransform destination)
+        {
+            var coin = iconPos.GetComponentInChildren<Image>().rectTransform;
+            var root = (RectTransform)transform;
+            var canvas = GetComponentInParent<Canvas>().rootCanvas;
+            var hud = destination.GetComponentInParent<Canvas>().rootCanvas;
+            var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            var hudCamera = hud.renderMode == RenderMode.ScreenSpaceOverlay ? null : hud.worldCamera;
+            coin.SetParent(root, true);
+            coin.SetAsLastSibling();
+            Vector3 start = coin.position;
+            Vector3 scale = coin.localScale;
+            for (float elapsed = 0; elapsed < .55f; elapsed += Time.unscaledDeltaTime)
+            {
+                float t = Mathf.SmoothStep(0f, 1f, elapsed / .55f);
+                var screen = RectTransformUtility.WorldToScreenPoint(hudCamera, destination.TransformPoint(destination.rect.center));
+                if (RectTransformUtility.ScreenPointToWorldPointInRectangle(root, screen, camera, out var end))
+                    coin.position = Vector3.Lerp(start, end, t);
+                coin.localScale = scale * Mathf.Lerp(1f, .28f, t);
+                yield return null;
+            }
+            var finalScreen = RectTransformUtility.WorldToScreenPoint(hudCamera, destination.TransformPoint(destination.rect.center));
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(root, finalScreen, camera, out var finalPosition))
+                coin.position = finalPosition;
+            coin.localScale = scale * .28f;
+            if (_resource.sound != null) SoundBase.instance.PlaySound(_resource.sound);
+            base.Close();
         }
     }
 }

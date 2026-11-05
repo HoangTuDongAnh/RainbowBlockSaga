@@ -87,10 +87,20 @@ namespace RainbowBlockSaga.Presentation.Scripts.Map.ScrollableMap
             LevelPin[] allLevels = levelsGrid.GetComponentsInChildren<LevelPin>().OrderBy(x => x.transform.position.y).ToArray();
             debugPath = allLevels.Select(l => l.transform.position).ToArray();
 
+            var road = new GameObject("Candy Road", typeof(RectTransform), typeof(CanvasRenderer), typeof(CandyMapRoad)).GetComponent<CandyMapRoad>();
+            road.gameObject.layer = levelsGrid.gameObject.layer;
+            road.transform.SetParent(levelsGrid, false);
+            road.transform.SetAsFirstSibling();
+            road.rectTransform.anchorMin = Vector2.zero;
+            road.rectTransform.anchorMax = Vector2.one;
+            road.rectTransform.sizeDelta = Vector2.zero;
+            road.raycastTarget = false;
+
             contentStretchController.HandleLastLevelPositionUpdate((Vector2)debugPath[debugPath.Length - 1]);
             Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(levelsGrid.GetComponent<RectTransform>());
                     
+            road.Connect(allLevels);
             scrollMap.ScrollToAvatar(GetPositionOpenedLevel());
 
             if (openedLevels.Count > 0)

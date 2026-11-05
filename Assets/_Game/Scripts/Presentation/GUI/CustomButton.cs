@@ -17,8 +17,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
         public new ButtonClickedEvent onClick;
         private new Animator animator;
 
-        private static bool blockInput;
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -32,7 +30,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         public override void OnPointerClick(PointerEventData eventData)
         {
-            if (blockInput || isClicked || !IsActive() || !IsInteractable())
+            if (eventData.button != PointerEventData.InputButton.Left ||
+                !eventData.eligibleForClick || eventData.dragging)
+                return;
+
+            if (isClicked || !IsActive() || !IsInteractable())
             {
                 return;
             }
@@ -56,7 +58,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
 
         public void Pressed()
         {
-            if (blockInput || !IsActive() || !IsInteractable())
+            if (!IsActive() || !IsInteractable())
             {
                 return;
             }
@@ -77,9 +79,5 @@ namespace RainbowBlockSaga.Presentation.Scripts.GUI
             return stateInfo.loop || stateInfo.normalizedTime < 1;
         }
 
-        public static void BlockInput(bool block)
-        {
-            blockInput = block;
-        }
     }
 }

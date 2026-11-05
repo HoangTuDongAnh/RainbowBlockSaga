@@ -33,8 +33,7 @@ namespace RainbowBlockSaga.Presentation.Gameplay
         public void SetSelected(bool selected)
         {
             icon.transform.localScale = Vector3.one * (selected ? 1.08f : 1f);
-            nameLabel.gameObject.SetActive(selected);
-            nameLabel.text = Item == EndlessSupportItem.RainbowCell ? "DRAG" : "TAP CELL";
+            nameLabel.gameObject.SetActive(false);
             if (selected) priceLabel.text = "CANCEL";
         }
 

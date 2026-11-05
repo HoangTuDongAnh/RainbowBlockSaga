@@ -1,4 +1,3 @@
-using RainbowBlockSaga.Presentation.Scripts.Audio;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -24,45 +23,35 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         private void Start()
         {
-            musicButton.onValueChanged.AddListener(ToggleMusic);
-            soundButton.onValueChanged.AddListener(ToggleSound);
-            OnEnable();
+            musicButton.SetValueWithoutNotify(PlayerPrefs.GetFloat("MusicVolume", PlayerPrefs.GetInt("Music", 1)));
+            soundButton.SetValueWithoutNotify(PlayerPrefs.GetFloat("SoundVolume", PlayerPrefs.GetInt("Sound", 1)));
+            musicButton.onValueChanged.AddListener(SetMusicVolume);
+            soundButton.onValueChanged.AddListener(SetSoundVolume);
+            ApplyVolume(musicParameter, musicButton.value);
+            ApplyVolume(soundParameter, soundButton.value);
         }
 
-        private void OnEnable()
+        private void OnDestroy()
         {
-            UpdateButtonState("Music", musicParameter);
-            UpdateButtonState("Sound", soundParameter);
+            musicButton.onValueChanged.RemoveListener(SetMusicVolume);
+            soundButton.onValueChanged.RemoveListener(SetSoundVolume);
         }
 
-        private void UpdateButtonState(string playerPrefKey, string volumeParameter)
+        private void SetMusicVolume(float value)
         {
-            var enabledState = PlayerPrefs.GetInt(playerPrefKey, 1) != 0f;
-            float volumeValue = enabledState ? 0 : -80;
-
-            mixer.SetFloat(volumeParameter, volumeValue);
-            if (playerPrefKey == "Sound")
-            {
-                soundButton.value = enabledState ? 1 : 0;
-            }
-            else
-            {
-                musicButton.value = enabledState ? 1 : 0;
-            }
+            PlayerPrefs.SetFloat("MusicVolume", value);
+            ApplyVolume(musicParameter, value);
         }
 
-        private void ToggleMusic(float arg0)
+        private void SetSoundVolume(float value)
         {
-            SoundBase.instance.PlaySound(SoundBase.instance.click);
-            PlayerPrefs.SetInt("Music", (int)arg0);
-            OnEnable();
+            PlayerPrefs.SetFloat("SoundVolume", value);
+            ApplyVolume(soundParameter, value);
         }
 
-        private void ToggleSound(float arg0)
+        private void ApplyVolume(string parameter, float value)
         {
-            SoundBase.instance.PlaySound(SoundBase.instance.click);
-            PlayerPrefs.SetInt("Sound", (int)arg0);
-            OnEnable();
+            mixer.SetFloat(parameter, value <= 0f ? -80f : Mathf.Log10(value) * 20f);
         }
     }
 }

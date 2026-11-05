@@ -10,9 +10,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public override void AfterShowAnimation()
         {
+            ShowCurrencyPanel();
+            base.AfterShowAnimation();
+        }
+
+        protected void ShowCurrencyPanel()
+        {
             _panel = FindObjectOfType<UIPanel>(true);
             _panel?.gameObject.SetActive(true);
-            base.AfterShowAnimation();
         }
 
         public override void Close()

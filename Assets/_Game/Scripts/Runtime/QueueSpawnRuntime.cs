@@ -68,7 +68,7 @@ namespace RainbowBlockSaga.Runtime
                 return null;
 
             if (session.IsEnded)
-                return new UnityEngine.Object[tray.SlotCount];
+                return System.Array.Empty<UnityEngine.Object>();
 
             sessionRuntime.RefreshSpawnProfile();
             session.EnsureBatch();

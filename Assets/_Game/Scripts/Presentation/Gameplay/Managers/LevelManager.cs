@@ -18,6 +18,7 @@ using UnityEngine.Events;
 using UnityEngine.Pool;
 using Random = UnityEngine.Random;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using RainbowBlockSaga.Presentation.Contracts;
 
 namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
@@ -39,6 +40,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         [SerializeField]
         private RectTransform shakeCanvas;
+
+        [SerializeField] private Image gameplayBackground;
+        [SerializeField] private Sprite[] endlessBackgrounds;
+        private Sprite defaultGameplayBackground;
+        private int lastEndlessBackgroundIndex = -1;
 
         [SerializeField]
         private GameObject scorePrefab;
@@ -83,7 +89,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
 
         private void OnEnable()
         {
-            StateManager.instance.CurrentState = EScreenStates.Game;
+            StartCoroutine(InitializeGameplay());
+        }
+
+        private IEnumerator InitializeGameplay()
+        {
+            // StateManager enables the logic, UI and background roots separately.
+            // Wait until all roots and their providers have finished OnEnable.
+            yield return null;
             EventManager.GetEvent(EGameEvent.RestartLevel).Subscribe(RestartLevel);
             EventManager.GetEvent<Shape>(EGameEvent.ShapePlaced).Subscribe(CheckLines);
             EventManager.OnGameStateChanged += HandleGameStateChange;
@@ -125,7 +138,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                 obj => obj.SetActive(false),
                 Destroy
             );
-            RestartLevel();
+            // Notify both the visual tray and its batch provider before loading a new board.
+            EventManager.GetEvent(EGameEvent.RestartLevel).Invoke();
             RestoreRun();
         }
 
@@ -183,6 +197,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
         private void Load()
         {
             gameMode = GameDataManager.GetGameMode();
+            UpdateGameplayBackground();
             if (GameManager.instance.IsTutorialMode())
             {
                 _levelData = tutorialManager.GetLevelForPhase();
@@ -236,14 +251,50 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
             }
         }
 
+        private void UpdateGameplayBackground()
+        {
+            if (gameplayBackground == null) return;
+            defaultGameplayBackground ??= gameplayBackground.sprite;
+            if (gameMode != EGameMode.Endless || GameManager.instance.IsTutorialMode())
+            {
+                gameplayBackground.sprite = defaultGameplayBackground;
+                return;
+            }
+
+            if (endlessBackgrounds == null || endlessBackgrounds.Length == 0) return;
+            int count = endlessBackgrounds.Length;
+            int index = lastEndlessBackgroundIndex < 0 || count == 1
+                ? Random.Range(0, count)
+                : (lastEndlessBackgroundIndex + Random.Range(1, count)) % count;
+            lastEndlessBackgroundIndex = index;
+            gameplayBackground.sprite = endlessBackgrounds[index];
+        }
+
         private void StartGame()
         {
             runReady = true;
-            cellDeck.FillCellDecks();
-            SaveRun();
+            if (!GameManager.instance.IsTutorialMode())
+            {
+                cellDeck.FillCellDecks();
+                if (cellDeck.GetShapes().Length > 0) SaveRun();
+                else StartCoroutine(WaitForInitialTray());
+            }
             EventManager.GameStatus = EGameState.PrepareGame;
             endlessModeHandler = FindObjectOfType<EndlessModeHandler>();
             if (gameMode == EGameMode.Endless && endlessModeHandler != null) endlessModeHandler.UpdateScore(RunScore);
+        }
+
+        private IEnumerator WaitForInitialTray()
+        {
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                yield return new WaitForSeconds(0.15f);
+                cellDeck.FillCellDecks();
+                if (cellDeck.GetShapes().Length == 0) continue;
+                SaveRun();
+                yield break;
+            }
+            Debug.LogError("The initial block tray could not be generated.");
         }
 
         private void LoadLevel(Level levelData)

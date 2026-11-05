@@ -120,7 +120,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.System
             }
             else if (StateManager.instance.CurrentState == EScreenStates.Game && GameDataManager.GetGameMode() == EGameMode.Adventure)
             {
-                SceneLoader.instance.StartMapScene();
+                SceneLoader.instance.GoMain();
             }
             else if (StateManager.instance.CurrentState == EScreenStates.Map)
             {

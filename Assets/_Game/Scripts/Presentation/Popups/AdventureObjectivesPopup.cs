@@ -40,11 +40,14 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 frame.sizeDelta = new Vector2(frame.sizeDelta.x, height - (name == "Card" ? 35 : 0));
             }
             title.rectTransform.anchoredPosition = new Vector2(0, height / 2 - 105);
+            var ribbon = (RectTransform)content.Find("TitleRibbon");
+            if (ribbon != null)
+                ribbon.anchoredPosition = title.rectTransform.anchoredPosition - Vector2.up * 8f;
             content.Find("Subtitle").gameObject.SetActive(false);
             ((RectTransform)content.Find("Objectives")).anchoredPosition = new Vector2(0, 90);
             limits.rectTransform.anchoredPosition = new Vector2(0, -height / 2 + 365);
-            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 245);
-            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 90);
+            ((RectTransform)playButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 294);
+            ((RectTransform)mapButton.transform).anchoredPosition = new Vector2(0, -height / 2 + 138);
             for (int i = 0; i < objectives.Length; i++)
             {
                 bool visible = i < targets.Count;

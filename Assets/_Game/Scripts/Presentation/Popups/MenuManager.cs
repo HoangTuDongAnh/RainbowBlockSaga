@@ -4,7 +4,6 @@ using System.Linq;
 using RainbowBlockSaga.Presentation.Scripts.System;
 using RainbowBlockSaga.Presentation.Scripts.Gameplay;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using System.Collections;
 
@@ -15,9 +14,6 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         public Fader fader;
         public List<Popup> popupStack = new();
 
-        [SerializeField]
-        private Canvas canvas;
-
         public override void Awake()
         {
             base.Awake();
@@ -27,26 +23,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
         private void OnEnable()
         {
             Popup.OnClosePopup += ClosePopup;
-            SceneManager.activeSceneChanged += OnSceneLoaded;
-        }
-
-        private void OnSceneLoaded(Scene scene, Scene scene1)
-        {
-            //fader.FadeAfterLoadingScene();
-            // Check if the canvas is null
-            if (canvas == null && this != null)
-            {
-                // Find the canvas in the scene
-                canvas = GetComponent<Canvas>();
-            }
-
-            canvas.worldCamera = Camera.main;
         }
 
         private void OnDisable()
         {
             Popup.OnClosePopup -= ClosePopup;
-            SceneManager.activeSceneChanged -= OnSceneLoaded;
         }
 
         public T ShowPopup<T>(Action onShow = null, Action<EPopupResult> onClose = null) where T : Popup

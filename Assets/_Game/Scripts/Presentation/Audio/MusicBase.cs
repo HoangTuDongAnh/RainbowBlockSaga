@@ -15,7 +15,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Audio
 
         private void Start()
         {
-            mixer.SetFloat(musicParameter, PlayerPrefs.GetInt("Music", 1) == 0 ? -80 : 0);
+            float volume = PlayerPrefs.GetFloat("MusicVolume", PlayerPrefs.GetInt("Music", 1));
+            mixer.SetFloat(musicParameter, volume <= 0f ? -80f : Mathf.Log10(volume) * 20f);
         }
     }
 }

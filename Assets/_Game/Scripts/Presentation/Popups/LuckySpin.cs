@@ -16,6 +16,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 {
     public class LuckySpin : PopupWithCurrencyLabel
     {
+        public static event Action FreeSpinUsed;
+
         public float velocity;
         public float stoptime;
 
@@ -68,19 +70,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             rewardedAdButton?.gameObject.SetActive(false);
         }
 
-        private void SetButtonsVisibility(bool visible)
-        {
-            freeSpinButton.gameObject.SetActive(visible);
-            buySpinButton.gameObject.SetActive(visible);
-            rewardedAdButton?.gameObject.SetActive(false);
-        }
-
         private bool CanUseFreeSpinToday() => RewardClock.CanClaimToday(LastFreeSpinTimeKey);
 
         private void FreeSpin()
         {
             if (isSpinning || !CanUseFreeSpinToday()) return;
             RewardClock.MarkClaimedToday(LastFreeSpinTimeKey);
+            FreeSpinUsed?.Invoke();
             Spin();
         }
 
@@ -110,6 +106,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 var obj = Instantiate(reward.rewardVisualPrefab, spin.transform);
                 //rotate to 360/number of rewards
                 obj.transform.RotateAround(spin.transform.position, Vector3.forward, 360f / spinRewards.Length * obj.transform.GetSiblingIndex());
+                obj.transform.localRotation = Quaternion.identity;
                 obj.SetCount(reward.count);
                 rewards.Add(obj);
             }
@@ -154,9 +151,11 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
                 yield return new WaitForFixedUpdate();
             }
 
-            rb.angularDamping *= 100;
+            float rollingDamping = rb.angularDamping;
+            rb.angularDamping = Mathf.Max(1f, rollingDamping * 100f);
             yield return new WaitWhile(() => Mathf.Abs(rb.angularVelocity) > .1f);
             rb.angularVelocity = 0;
+            rb.angularDamping = rollingDamping;
             isSpinning = false;
             CheckReward(GetWinReward());
         }
@@ -166,6 +165,13 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
             var baseMultiplier = Random.Range(minVelocityMultiplier, maxVelocityMultiplier);
             var additionalRandomness = Random.Range(-additionalRandomFactor, additionalRandomFactor);
             return velocity * (baseMultiplier + additionalRandomness);
+        }
+
+        private void LateUpdate()
+        {
+            // The prize orbits with its sector while its amount stays readable.
+            foreach (var reward in rewards)
+                reward.transform.rotation = spin.transform.parent.rotation;
         }
 
         private void Update()
@@ -208,15 +214,27 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups
 
         public void CheckReward(int rewardIndex)
         {
-            Close();
-
             var rewardSettingSpin = spinRewards[rewardIndex];
-            Popup popup = MenuManager.instance.ShowPopup(rewardSettingSpin.rewardPopupPrefab);
+            Popup popup = MenuManager.instance.ShowPopup(rewardSettingSpin.rewardPopupPrefab,
+                onClose: _ => RestoreSpinAfterClaim());
             var rewardPopup = popup as RewardPopup;
             if (rewardPopup != null)
             {
                 rewardPopup.SetReward(rewardSettingSpin);
+                spin.transform.parent.gameObject.SetActive(false);
+                closeButton.gameObject.SetActive(false);
             }
+        }
+
+        private void RestoreSpinAfterClaim()
+        {
+            spin.transform.parent.gameObject.SetActive(true);
+            closeButton.gameObject.SetActive(true);
+            ShowCurrencyPanel();
+            UpdateButtonVisibility();
+            closeButton.interactable = true;
+            freeSpinButton.interactable = true;
+            buySpinButton.interactable = true;
         }
     }
 }

@@ -15,6 +15,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
         [SerializeField]
         private GameObject sparklePrefab;
 
+        [SerializeField] private GameObject claimedCheck;
+
         public EDailyStatus DailyStatus { get; private set; }
 
         public RewardSetting RewardData { get; set; }
@@ -29,6 +31,7 @@ namespace RainbowBlockSaga.Presentation.Scripts.Popups.Daily
         public void SetStatus(EDailyStatus eDailyStatus)
         {
             DailyStatus = eDailyStatus;
+            claimedCheck.SetActive(eDailyStatus == EDailyStatus.passed);
 
             var list = GetComponentsInChildren<DayToggle>();
             foreach (var dayToggle in list)

@@ -101,7 +101,8 @@ namespace RainbowBlockSaga.Presentation.Scripts.Gameplay
                     "CellDeckManager requires QueueSpawnRuntime to provide a batch.");
 
             var handles = BatchProvider.Invoke();
-            if (handles == null || handles.Length == 0)
+            if (handles == null || handles.Length != cellDecks.Length ||
+                handles.Any(handle => handle is not ShapeTemplate))
                 return;
 
             var batch = new ShapeTemplate[handles.Length];
